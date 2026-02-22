@@ -5,7 +5,7 @@ app = FastAPI(title="Checkly Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Local host
+    allow_origins=["*"],  # add origin later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
