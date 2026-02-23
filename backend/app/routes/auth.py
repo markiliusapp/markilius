@@ -3,7 +3,13 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.user import UserCreate, UserResponse, UserLogin, Token
 from app.models.user import User
-from app.utils.auth import hash_password, verify_password, create_access_token
+from app.utils.auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user,
+)
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -53,6 +59,11 @@ def login(user_input: UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect email or password",
         )
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserResponse)
+def get_current_user_info(current_user: User = Depends(get_current_user)):
+    return current_user
