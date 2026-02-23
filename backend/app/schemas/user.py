@@ -20,3 +20,13 @@ class UserResponse(BaseModel):
         from_attributes = True  # Allows SQLAlchemy model conversion
         # by default, pydantic only reads from dictionary.
         # from_attributes = True allows it to read from class attributes too.
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
