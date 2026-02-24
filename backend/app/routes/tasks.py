@@ -121,3 +121,40 @@ def update_task(
     db.refresh(task)
 
     return task
+
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Deletes a task given a task_id
+    """
+    task = db.query(Task).filter(Task.id == task_id).first()
+    print("printing queried task: ", task)
+
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        )
+
+    # Check if task is locked
+    if task.is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Task is locked - Can't delete a task past its deadline",
+        )
+
+    # Verify owernship
+    if task.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this task",
+        )
+
+    db.delete(task)
+    db.commit()
+
+    return None
