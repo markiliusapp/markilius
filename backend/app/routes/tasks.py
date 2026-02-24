@@ -1,6 +1,6 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.task import TaskResponse, TaskCreate
+from app.schemas.task import TaskResponse, TaskCreate, TaskUpdate
 from app.models.user import User
 from app.utils.auth import get_current_user
 from app.database import get_db
@@ -39,9 +39,7 @@ def create_task(
     return new_task
 
 
-@router.get(
-    "/", response_model=list[TaskResponse], status_code=status.HTTP_200_OK
-)
+@router.get("/", response_model=list[TaskResponse])
 def get_task(
     status: Optional[bool] = None,
     due_date: Optional[date] = None,
@@ -69,3 +67,57 @@ def get_task(
     # Order by due_date (most recent first), then created_at
     tasks = query.order_by(Task.due_date.desc(), Task.created_at.desc()).all()
     return tasks
+
+
+@router.put("/{task_id}", response_model=TaskResponse)
+def update_task(
+    task_id: int,
+    task_data: TaskUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Update an existing task (only if it belongs to current user and not locked)
+
+    """
+
+    task = db.query(Task).filter(Task.id == task_id).first()
+
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        )
+
+    # Verify owernship
+    if current_user.id != task.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this task",
+        )
+
+    # Check if the task is locked (can't update locked tasks)
+
+    if task.is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Cannot update locked task - Past Deadline",
+        )
+
+    # Update only provided fields
+    if task_data.title is not None:
+        task.title = task_data.title
+    if task_data.description is not None:
+        task.description = task_data.description
+    if task_data.frequency is not None:
+        task.frequency = task_data.frequency.value
+    if task_data.priority is not None:
+        task.priority = task_data.priority
+    if task_data.duration is not None:
+        task.duration = task_data.duration
+    if task_data.due_date is not None:
+        task.due_date = task_data.due_date
+
+    db.commit()
+    db.refresh(task)
+
+    return task

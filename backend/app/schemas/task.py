@@ -38,3 +38,12 @@ class TaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    frequency: Optional[FrequencyType] = None
+    priority: Optional[bool] = None
+    duration: Optional[int] = None
+    due_date: Optional[date] = None
