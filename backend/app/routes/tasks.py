@@ -158,3 +158,43 @@ def delete_task(
     db.commit()
 
     return None
+
+
+@router.patch("/{task_id}", response_model=TaskResponse)
+def toggle_task_completion(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Toggles a task's completion status
+    Only allowed before task's due date and if the task is not locked
+    """
+    task = db.query(Task).filter(Task.id == task_id).first()
+
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        )
+
+    # Verify ownership
+    if task.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this task",
+        )
+
+    # Check if the task is locked/past its deadline
+    if task.is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Cannot modify locked task",
+        )
+
+    # Toggle completion status
+    task.is_completed = not task.is_completed
+
+    db.commit()
+    db.refresh(task)
+
+    return task
