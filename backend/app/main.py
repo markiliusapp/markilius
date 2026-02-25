@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, tasks
+from app.routes import auth, tasks, productivity
 
 app = FastAPI(title="Checkly Backend")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 app.include_router(auth.router)
 # includes the auth.router routes to your app route tables.
 app.include_router(tasks.router)
+app.include_router(productivity.router)
 
 
 @app.get("/")
