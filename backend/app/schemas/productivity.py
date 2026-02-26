@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional
+from app.schemas.task import TaskResponse
 
 
 class DailyProductivityResponse(BaseModel):
@@ -43,3 +44,31 @@ class MonthlyProductivityResponse(BaseModel):
     summary: MonthlySummary
     most_productive_day: Optional[DailyBreakdown] = None
     daily_breakdown: list[DailyBreakdown]
+
+
+class DailyBreakDownWithTasks(BaseModel):
+    date: date
+    total_tasks: int
+    completed_tasks: int
+    completion_percentage: float
+    total_duration: float
+    completed: list[TaskResponse]
+    incomplete: list[TaskResponse]
+
+
+class WeeklySummary(BaseModel):
+    total_tasks: int
+    completed_tasks: int
+    completion_percentage: float
+    total_duration_minutes: float
+    average_tasks_per_day: float
+    average_duration_per_day: float
+    days_with_tasks: int
+
+
+class WeeklyProductivityResponse(BaseModel):
+    start_date: date  # Monday
+    end_date: date  # Sunday
+    summary: WeeklySummary
+    most_productive_day: Optional[DailyBreakdown]
+    daily_breakdown: list[DailyBreakDownWithTasks]

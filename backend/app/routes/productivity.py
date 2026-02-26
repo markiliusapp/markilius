@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.productivity import (
     DailyProductivityResponse,
     MonthlyProductivityResponse,
+    WeeklyProductivityResponse,
 )
-from datetime import date
+from datetime import date, timedelta
 from app.models.user import User
 from app.utils.auth import get_current_user, get_db
 from sqlalchemy.orm import Session
@@ -172,6 +173,140 @@ def get_daily_productivity(
         )
 
 
+@router.get("/week", response_model=WeeklyProductivityResponse)
+def get_weekly_productivity(
+    start_date: date,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get productivity metrics for the entire week
+    Returns daily breakdown and tasks per day + aggregate stats
+    """
+    end_date = start_date + timedelta(days=6)
+
+    # Get all tasks for this week
+    tasks = (
+        db.query(Task)
+        .filter(
+            Task.user_id == current_user.id,
+            Task.due_date <= end_date,
+            Task.due_date >= start_date,
+        )
+        .all()
+    )
+
+    # Initialize 7 days hash table
+    daily_data = {}
+    for day in range(7):
+        current_date = start_date + timedelta(days=day)
+        daily_data[str(current_date)] = {
+            "date": current_date,
+            "total_tasks": 0,
+            "completed_tasks": 0,
+            "completion_percentage": 0,
+            "total_duration": 0,
+            "completed": [],
+            "incomplete": [],
+        }
+
+    # Group tasks by date
+    for task in tasks:
+        date_key = str(task.due_date)
+        if date_key in daily_data:
+            daily_data[date_key]["total_tasks"] += 1
+
+            if task.is_completed:
+                daily_data[date_key]["completed_tasks"] += 1
+                daily_data[date_key]["completed"].append(task)
+
+                if task.duration:
+                    daily_data[date_key]["total_duration"] = daily_data[
+                        date_key
+                    ]["total_duration"] + round(task.duration / 60, 2)
+
+            else:
+                daily_data[date_key]["incomplete"].append(task)
+
+    # Calculate daily completion percentages
+    for date_key in daily_data:
+        total = daily_data[date_key]["total_tasks"]
+        completed = daily_data[date_key]["completed_tasks"]
+        if total > 0:
+            daily_data[date_key]["completion_percentage"] = round(
+                (completed / total) * 100, 1
+            )
+
+    # Calculate weekly totals
+    week_total_tasks = sum(day["total_tasks"] for day in daily_data.values())
+    week_completed_tasks = sum(
+        day["completed_tasks"] for day in daily_data.values()
+    )
+    week_total_duration = sum(
+        day["total_duration"] for day in daily_data.values()
+    )
+
+    week_completion_percentage = 0
+    if week_total_tasks > 0:
+        week_completion_percentage = round(
+            (week_completed_tasks / week_total_tasks) * 100, 1
+        )
+
+    # Calculate averages (only count days with tasks)
+    days_with_tasks = sum(
+        1 for day in daily_data.values() if day["total_tasks"] > 0
+    )
+    avg_tasks_per_day = 0
+    avg_duration_per_day = 0
+    if days_with_tasks > 0:
+        avg_tasks_per_day = round(week_total_tasks / days_with_tasks, 1)
+        avg_duration_per_day = round(week_total_duration / days_with_tasks, 1)
+
+    # Find most productive day
+    days_with_data = [
+        day for day in daily_data.values() if day["total_tasks"] > 0
+    ]
+    most_productive_day = None
+    if days_with_data:
+        best_day = days_with_data[0]
+        for day in days_with_data[1:]:
+            if (
+                day["completion_percentage"]
+                > best_day["completion_percentage"]
+            ):
+                best_day = day
+            elif (
+                day["completion_percentage"]
+                == best_day["completion_percentage"]
+            ):
+                if day["total_duration"] > best_day["total_duration"]:
+                    best_day = day
+
+        most_productive_day = {
+            "date": best_day["date"],
+            "total_tasks": best_day["total_tasks"],
+            "completed_tasks": best_day["completed_tasks"],
+            "completion_percentage": best_day["completion_percentage"],
+            "total_duration": best_day["total_duration"],
+        }
+
+    return {
+        "start_date": start_date,
+        "end_date": end_date,
+        "summary": {
+            "total_tasks": week_total_tasks,
+            "completed_tasks": week_completed_tasks,
+            "completion_percentage": week_completion_percentage,
+            "total_duration_minutes": week_total_duration,
+            "average_tasks_per_day": avg_tasks_per_day,
+            "average_duration_per_day": avg_duration_per_day,
+            "days_with_tasks": days_with_tasks,
+        },
+        "most_productive_day": most_productive_day,
+        "daily_breakdown": list(daily_data.values()),
+    }
+
+
 @router.get("/month", response_model=MonthlyProductivityResponse)
 def get_monthly_productivity(
     year: int,
@@ -292,7 +427,13 @@ def get_monthly_productivity(
                 if day["total_duration"] > best_day["total_duration"]:
                     best_day = day
 
-        most_productive_day = best_day
+        most_productive_day = {
+            "date": best_day["date"],
+            "total_tasks": best_day["total_tasks"],
+            "completed_tasks": best_day["completed_tasks"],
+            "completion_percentage": best_day["completion_percentage"],
+            "total_duration": best_day["total_duration"],
+        }
 
     return {
         "year": year,
