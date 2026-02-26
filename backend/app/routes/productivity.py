@@ -3,6 +3,7 @@ from app.schemas.productivity import (
     DailyProductivityResponse,
     MonthlyProductivityResponse,
     WeeklyProductivityResponse,
+    YearlyProductivityResponse,
 )
 from datetime import date, timedelta
 from app.models.user import User
@@ -282,13 +283,7 @@ def get_weekly_productivity(
                 if day["total_duration"] > best_day["total_duration"]:
                     best_day = day
 
-        most_productive_day = {
-            "date": best_day["date"],
-            "total_tasks": best_day["total_tasks"],
-            "completed_tasks": best_day["completed_tasks"],
-            "completion_percentage": best_day["completion_percentage"],
-            "total_duration": best_day["total_duration"],
-        }
+        most_productive_day = best_day
 
     return {
         "start_date": start_date,
@@ -297,7 +292,7 @@ def get_weekly_productivity(
             "total_tasks": week_total_tasks,
             "completed_tasks": week_completed_tasks,
             "completion_percentage": week_completion_percentage,
-            "total_duration_minutes": week_total_duration,
+            "total_duration_hours": week_total_duration,
             "average_tasks_per_day": avg_tasks_per_day,
             "average_duration_per_day": avg_duration_per_day,
             "days_with_tasks": days_with_tasks,
@@ -427,18 +422,13 @@ def get_monthly_productivity(
                 if day["total_duration"] > best_day["total_duration"]:
                     best_day = day
 
-        most_productive_day = {
-            "date": best_day["date"],
-            "total_tasks": best_day["total_tasks"],
-            "completed_tasks": best_day["completed_tasks"],
-            "completion_percentage": best_day["completion_percentage"],
-            "total_duration": best_day["total_duration"],
-        }
+        most_productive_day = best_day
 
     return {
         "year": year,
         "month": month,
         "summary": {
+            "month": month,
             "total_tasks": month_total_tasks,
             "completed_tasks": month_completed_tasks,
             "completion_percentage": month_completion_percentage,
@@ -449,4 +439,183 @@ def get_monthly_productivity(
         },
         "most_productive_day": most_productive_day,
         "daily_breakdown": list(daily_data.values()),
+    }
+
+
+@router.get("/year", response_model=YearlyProductivityResponse)
+def get_yearly_productivity(
+    year: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get yearly productivity metrics
+    Returns daily breakdown for the heatmap + aggregate stats and monthly stats
+    """
+    first_day = date(year, 1, 1)
+    last_day = date(year, 12, 31)
+
+    # Get tasks for the current year
+    try:
+        tasks = (
+            db.query(Task)
+            .filter(
+                Task.user_id == current_user.id,
+                Task.due_date >= first_day,
+                Task.due_date <= last_day,
+            )
+            .all()
+        )
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching the data",
+        )
+
+    # Group tasks by date
+    daily_data = {}
+    num_days = (last_day - first_day).days + 1
+    # add one because subtracting gives the difference between the 2 dates.
+    for i in range(num_days):
+        current_date = first_day + timedelta(days=i)
+        daily_data[str(current_date)] = {
+            "date": current_date,
+            "total_tasks": 0,
+            "completed_tasks": 0,
+            "completion_percentage": 0.0,
+            "total_duration": 0,
+        }
+
+    # Count tasks for each day
+    for task in tasks:
+        date_key = str(task.due_date)
+        if date_key in daily_data:
+            daily_data[date_key]["total_tasks"] += 1
+
+            if task.is_completed:
+                daily_data[date_key]["completed_tasks"] += 1
+
+                if task.duration:
+                    daily_data[date_key]["total_duration"] = daily_data[
+                        date_key
+                    ]["total_duration"] + round(task.duration / 60, 2)
+
+    for day in daily_data.values():
+        if day["total_tasks"] > 0:
+            day["completion_percentage"] = round(
+                day["completed_tasks"] / day["total_tasks"] * 100, 1
+            )
+
+    # Count total tasks for the year
+    year_total_tasks = sum([day["total_tasks"] for day in daily_data.values()])
+
+    # Count completed tasks for the year
+    year_completed_tasks = sum(
+        [day["completed_tasks"] for day in daily_data.values()]
+    )
+
+    # Calculate completion percentage
+    year_completion_percentage = 0
+    if year_total_tasks > 0:
+        year_completion_percentage = round(
+            year_completed_tasks / year_total_tasks * 100, 2
+        )
+
+    # Find the best day of the year
+    days_with_task = [
+        day for day in daily_data.values() if day["total_tasks"] > 0
+    ]  # list of days with task
+    most_productive_day = None
+    if days_with_task:
+        best_day = days_with_task[0]
+        for day in days_with_task[1:]:
+            if (
+                day["completion_percentage"]
+                > best_day["completion_percentage"]
+            ):
+                best_day = day
+            # Use duration as tie breaker
+            elif (
+                day["completion_percentage"]
+                == best_day["completion_percentage"]
+            ):
+                if day["total_duration"] > best_day["total_duration"]:
+                    best_day = day
+
+        most_productive_day = best_day
+
+    # list of montly summary
+    monthly_data = {}
+    for i in range(1, 13):
+        monthly_data[i] = {
+            "month": i,
+            "total_tasks": 0,
+            "completed_tasks": 0,
+            "completion_percentage": 0,
+            "total_duration_hours": 0,
+            "average_tasks_per_day": 0,
+            "average_duration_per_day": 0,
+            "days_with_tasks": 0,
+        }
+
+    # Roll up daily data into monthly summaries
+    for day in daily_data.values():
+        m = day["date"].month
+        monthly_data[m]["total_tasks"] += day["total_tasks"]
+        monthly_data[m]["completed_tasks"] += day["completed_tasks"]
+        monthly_data[m]["total_duration_hours"] += day["total_duration"]
+        if day["total_tasks"] > 0:
+            monthly_data[m]["days_with_tasks"] += 1
+
+    # Calculate monthly percentages and averages
+    for m in monthly_data.values():
+        if m["total_tasks"] > 0:
+            m["completion_percentage"] = round(
+                m["completed_tasks"] / m["total_tasks"] * 100, 1
+            )
+        if m["days_with_tasks"] > 0:
+            m["average_tasks_per_day"] = round(
+                m["total_tasks"] / m["days_with_tasks"], 1
+            )
+            m["average_duration_per_day"] = round(
+                m["total_duration_hours"] / m["days_with_tasks"], 1
+            )
+
+    # Find the best month of the year
+    months_with_tasks = [
+        month for month in monthly_data.values() if month["total_tasks"] > 0
+    ]
+    most_productive_month = None
+
+    if months_with_tasks:
+        best_month = months_with_tasks[0]
+        for m in months_with_tasks[1:]:
+            if (
+                m["completion_percentage"]
+                > best_month["completion_percentage"]
+            ):
+                best_month = m
+            elif (
+                m["completion_percentage"]
+                == best_month["completion_percentage"]
+            ):
+                if (
+                    m["total_duration_hours"]
+                    > best_month["total_duration_hours"]
+                ):
+                    best_month = m
+
+        most_productive_month = best_month
+
+    return {
+        "year": year,
+        "summary": {
+            "total_tasks": year_total_tasks,
+            "completed_tasks": year_completed_tasks,
+            "completion_percentage": year_completion_percentage,
+        },
+        "daily_breakdown": list(daily_data.values()),
+        "best_day": most_productive_day,
+        "best_month": most_productive_month,
+        "months": list(monthly_data.values()),
     }

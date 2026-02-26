@@ -29,6 +29,7 @@ class DailyBreakdown(BaseModel):
 
 
 class MonthlySummary(BaseModel):
+    month: int
     total_tasks: int
     completed_tasks: int
     completion_percentage: float
@@ -60,7 +61,7 @@ class WeeklySummary(BaseModel):
     total_tasks: int
     completed_tasks: int
     completion_percentage: float
-    total_duration_minutes: float
+    total_duration_hours: float
     average_tasks_per_day: float
     average_duration_per_day: float
     days_with_tasks: int
@@ -72,3 +73,18 @@ class WeeklyProductivityResponse(BaseModel):
     summary: WeeklySummary
     most_productive_day: Optional[DailyBreakdown]
     daily_breakdown: list[DailyBreakDownWithTasks]
+
+
+class YearlySummary(BaseModel):
+    total_tasks: int
+    completed_tasks: int
+    completion_percentage: float
+
+
+class YearlyProductivityResponse(BaseModel):
+    year: int
+    summary: YearlySummary
+    daily_breakdown: list[DailyBreakdown]
+    best_day: DailyBreakdown
+    best_month: MonthlySummary
+    months: list[MonthlySummary]
