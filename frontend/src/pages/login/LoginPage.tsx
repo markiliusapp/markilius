@@ -2,6 +2,8 @@ import { useState } from "react";
 import { authAPI } from '../../services/auth'
 import type { LoginRequest } from "@/types";
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+
 import './Login.css'
 
 const Login = () => {
@@ -34,6 +36,19 @@ const Login = () => {
             setLoading(false)
         }
     }
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await authAPI.googleLogin(credentialResponse.credential);
+            localStorage.setItem("token", data.access_token);
+            navigate("/dashboard");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Google login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="login-page">
@@ -65,6 +80,19 @@ const Login = () => {
                             <p>{error}</p>
                         </div>
                     )}
+
+                    <div style={{ marginTop: '16px' }}>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => setError('Google login failed')}
+                            useOneTap
+                            text="signin_with"
+                            shape="rectangular"
+                            theme="outline"
+                            size="large"
+                            width="100%"
+                        />
+                    </div>
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="login-form">
