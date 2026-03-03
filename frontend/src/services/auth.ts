@@ -17,7 +17,7 @@ const handleResponse = async (response: Response) => {
 
 // Auth endpoints
 
-export const AuthAPI = {
+export const authAPI = {
     register: async (userDate: RegisterRequest)=> {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: "POST",
@@ -46,7 +46,7 @@ export const AuthAPI = {
 } 
 
 // Task endpoints
-export const TaskAPI = {
+export const taskAPI = {
     getAll: async(filters?: GetTaskFilter) => {
         const params = new URLSearchParams();
         if (filters?.status) params.append("status", filters.status.toString())
