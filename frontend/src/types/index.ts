@@ -122,3 +122,18 @@ export interface YearlyProductivityResponse {
     best_month: MonthlySummary | null;
     months: MonthlySummary[];
 }
+
+export interface User { 
+    id: string; 
+    first_name: string; 
+    last_name: string; 
+    email: string; 
+    createdAt: string;
+}
+
+export interface AuthContextType { 
+    user: User | null;
+    loading: boolean;
+    login: (token: string) => Promise<void>;
+    logout: () => void;
+}

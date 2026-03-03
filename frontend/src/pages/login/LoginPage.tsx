@@ -4,9 +4,12 @@ import type { LoginRequest } from "@/types";
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
+
 import './Login.css'
+import { useAuth } from "@/context/authContext";
 
 const Login = () => {
+    const { login } = useAuth()
     const [formData, setFormData] = useState<LoginRequest>({
         email: '',
         password: ''
@@ -28,7 +31,7 @@ const Login = () => {
         setError(null)
         try {
             const data = await authAPI.login(formData)
-            localStorage.setItem("token", data.access_token)
+            await login(data.access_token)
             navigate("/dashboard")
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed')
@@ -41,7 +44,7 @@ const Login = () => {
         setError(null);
         try {
             const data = await authAPI.googleLogin(credentialResponse.credential);
-            localStorage.setItem("token", data.access_token);
+            await login(data.access_token)
             navigate("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google login failed');

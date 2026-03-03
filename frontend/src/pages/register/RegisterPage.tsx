@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import type { RegisterRequest } from "@/types";
 import { GoogleLogin } from "@react-oauth/google";
 import '../login/Login.css'; // Reuse same CSS
+import { useAuth } from "@/context/authContext";
 
 
 const RegisterPage = () => {
+    const { login } = useAuth()
     const [formData, setFormData] = useState<RegisterRequest>({
         first_name: '',
         last_name: '',
@@ -38,8 +40,7 @@ const RegisterPage = () => {
                 email: formData.email,
                 password: formData.password
             });
-
-            localStorage.setItem("token", loginData.access_token);
+            await login(loginData.access_token)
             navigate("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registration failed');
@@ -52,7 +53,7 @@ const RegisterPage = () => {
         setError(null);
         try {
             const data = await authAPI.googleLogin(credentialResponse.credential);
-            localStorage.setItem("token", data.access_token);
+            await login(data.access_token)
             navigate("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google login failed');
