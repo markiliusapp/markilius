@@ -1,15 +1,16 @@
 import { authAPI } from "@/services/api";
 import type { AuthContextType } from "@/types";
-import {createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { User, } from "../types/index"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { User } from "../types/index"
 import { useNavigate } from "react-router-dom";
-
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [authState, setAuthState] = useState<{ user: User | null, loading: boolean }>({
+        user: null,
+        loading: true
+    })
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,27 +21,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            setLoading(false);
+            setAuthState({ user: null, loading: false })
             return;
         }
 
         try {
             const userData = await authAPI.getMe();
-            setUser(userData);
+            setAuthState({ user: userData, loading: false })
         } catch (err) {
-            // Token invalid or expired
             localStorage.removeItem('token');
-            setUser(null);
-        } finally {
-            setLoading(false);
+            setAuthState({ user: null, loading: false })
         }
-    };
+    }
 
     const login = async (token: string) => {
         localStorage.setItem("token", token)
         try {
-            const user = await authAPI.getMe()
-            setUser(user)
+            const userData = await authAPI.getMe()
+            setAuthState({ user: userData, loading: false })
             navigate("/dashboard")
         } catch (err) {
             localStorage.removeItem('token');
@@ -50,13 +48,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const logout = () => {
         localStorage.removeItem('token');
-        setUser(null);
+        setAuthState({ user: null, loading: false })
         navigate('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
-            {children}
+        <AuthContext.Provider value={{ user: authState.user, loading: authState.loading, login, logout }}>
+            {authState.loading ? null : children}
         </AuthContext.Provider>
     );
 };
