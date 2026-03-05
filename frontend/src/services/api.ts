@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-import type { RegisterRequest, LoginRequest, CreateTaskRequest, UpdateTaskRequest, GetTaskFilter } from "@/types";
+import type { RegisterUser, LoginUser, CreateTask, UpdateTask, GetTaskFilter } from "@/types";
 
 // Helper to get token from localStorage
 const getToken = (): string | null => {
@@ -18,7 +18,7 @@ const handleResponse = async (response: Response) => {
 // Auth endpoints
 
 export const authAPI = {
-    register: async (userDate: RegisterRequest)=> {
+    register: async (userDate: RegisterUser)=> {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -27,7 +27,7 @@ export const authAPI = {
 
         return handleResponse(response)
     },
-    login: async (credentials: LoginRequest) => {
+    login: async (credentials: LoginUser) => {
         const response = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -54,33 +54,34 @@ export const authAPI = {
     }
 } 
 
+
 // Task endpoints
 export const taskAPI = {
-    getAll: async(filters?: GetTaskFilter) => {
+    getAll: async (filters?: GetTaskFilter) => {
         const params = new URLSearchParams();
-        if (filters?.status) params.append("status", filters.status.toString())
+        if (filters?.status !== undefined) params.append("status", filters.status.toString())
         if (filters?.due_date) params.append("due_date", filters.due_date)
-        if (filters?.priority) params.append("priority", filters.priority.toString())
+        if (filters?.priority !== undefined) params.append("priority", filters.priority.toString())
 
         const url = `${API_URL}/tasks/?${params.toString()}`
         const response = await fetch(url, {
-            headers: {"Authorization": `Bearer ${getToken()}`}
+            headers: { "Authorization": `Bearer ${getToken()}` }
         })
 
         return handleResponse(response)
     },
-    create: async(taskDate: CreateTaskRequest) => {
-        const response = await fetch(`${API_URL}/tasks/`, {
+    create: async (taskDate: CreateTask) => {
+        const response = await fetch(`${API_URL}/tasks`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${getToken}`
+                "Authorization": `Bearer ${getToken()}`
             },
             body: JSON.stringify(taskDate)
         })
         return handleResponse(response)
     },
-    update: async(taskId: number, taskData: UpdateTaskRequest) => {
+    update: async (taskId: number, taskData: UpdateTask) => {
         const response = await fetch(`${API_URL}/tasks/${taskId}`, {
             method: 'PUT',
             headers: {
@@ -91,7 +92,7 @@ export const taskAPI = {
         });
         return handleResponse(response);
     },
-    toggleComplete: async(taskId: number) => {
+    toggleComplete: async (taskId: number) => {
         const response = await fetch(`${API_URL}/tasks/${taskId}`, {
             method: "PATCH",
             headers: {

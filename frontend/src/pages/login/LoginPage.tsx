@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { authAPI } from '../../services/auth'
-import type { LoginRequest } from "@/types";
+import { authAPI } from '../../services/api'
+import type { LoginUser } from "@/types";
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -10,7 +10,7 @@ import { useAuth } from "@/context/authContext";
 
 const Login = () => {
     const { login } = useAuth()
-    const [formData, setFormData] = useState<LoginRequest>({
+    const [formData, setFormData] = useState<LoginUser>({
         email: '',
         password: ''
     });

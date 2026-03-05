@@ -1,4 +1,4 @@
-import { authAPI } from "@/services/auth";
+import { authAPI } from "@/services/api";
 import type { AuthContextType } from "@/types";
 import {createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User, } from "../types/index"

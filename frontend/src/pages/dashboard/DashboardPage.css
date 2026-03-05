@@ -1,0 +1,311 @@
+.dashboard-today {
+    max-width: 1200px;
+    width: 100%;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* Date navigation */
+.date-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+
+.date-nav button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.date-nav button:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.date-nav input[type="date"] {
+    border: none;
+    background-color: transparent;
+    color: var(--color-text);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.date-nav input[type="date"]:focus {
+    outline: none;
+}
+
+.btn-add-task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-add-task:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.btn-add-task svg {
+    flex-shrink: 0;
+}
+
+/* Task panes - Desktop: side by side */
+.panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.activePane,
+.completedPane {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+
+.activePane h1,
+.completedPane h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    margin: 0;
+    background-color: var(--color-bg-subtle);
+}
+
+.task-list-container {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    background-color: var(--color-bg-subtle);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.empty-state-icon svg {
+    color: var(--color-text-muted);
+}
+
+.empty-state h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+}
+
+.btn-empty {
+    font-size: 13px;
+    color: var(--color-primary);
+    background-color: transparent;
+    border: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.btn-empty:hover {
+    background-color: rgba(249, 115, 22, 0.1);
+}
+
+/* Progress section */
+.progress-section {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.progress-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.progress-percentage {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background-color: var(--color-bg-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--color-primary);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+/* ================================
+   RESPONSIVE BREAKPOINTS
+================================ */
+
+/* Tablet and below (< 768px) - Stack panes vertically */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dashboard-header h1 {
+        font-size: 24px;
+    }
+
+    .date-nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .btn-add-task {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Stack panes vertically */
+    .panes {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .activePane,
+    .completedPane {
+        min-height: 300px;
+    }
+
+    .progress-section {
+        padding: 16px;
+    }
+
+    .progress-percentage {
+        font-size: 18px;
+    }
+}
+
+/* Small mobile (< 480px) */
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 22px;
+    }
+
+    .date-nav input[type="date"] {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .date-nav button {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .btn-add-task {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .activePane h1,
+    .completedPane h1 {
+        font-size: 15px;
+        padding: 14px 16px;
+    }
+
+    .task-list-container {
+        padding: 8px;
+    }
+
+    .empty-state {
+        padding: 40px 16px;
+    }
+
+    .empty-state-icon {
+        width: 56px;
+        height: 56px;
+    }
+
+    .progress-section {
+        padding: 14px;
+    }
+
+    .progress-label {
+        font-size: 13px;
+    }
+}

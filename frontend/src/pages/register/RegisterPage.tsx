@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { authAPI } from '../../services/auth';
+import { authAPI } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import type { RegisterRequest } from "@/types";
+import type { RegisterUser} from "@/types";
 import { GoogleLogin } from "@react-oauth/google";
 import '../login/Login.css'; // Reuse same CSS
 import { useAuth } from "@/context/authContext";
@@ -9,7 +9,7 @@ import { useAuth } from "@/context/authContext";
 
 const RegisterPage = () => {
     const { login } = useAuth()
-    const [formData, setFormData] = useState<RegisterRequest>({
+    const [formData, setFormData] = useState<RegisterUser>({
         first_name: '',
         last_name: '',
         email: '',

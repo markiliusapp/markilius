@@ -2,33 +2,33 @@
 // Outgoing requests Shapes
 // ================================
 
-export interface RegisterRequest {
+export interface RegisterUser {
     first_name: string;
     last_name: string;
     email: string;
     password: string;
 }
 
-export interface LoginRequest {
+export interface LoginUser {
     email: string;
     password: string;
 }
 
-export interface CreateTaskRequest {
+export interface CreateTask {
     title: string;
     description?: string;
-    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly';
+    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     priority: boolean;
     duration?: number;
     due_date: string;
 }
 
-export interface UpdateTaskRequest {
+export interface UpdateTask {
     title?: string;
-    description?: string;
-    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly';
+    description?: string | null;
+    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     priority?: boolean;
-    duration?: number;
+    duration?: number | null;
     due_date?: string;
 }
 export interface GetTaskFilter {
@@ -102,7 +102,7 @@ export interface MonthlySummary {
     days_with_tasks: number;
 }
 
-export interface MonthlyProductivityResponse {
+export interface MonthlyProductivity {
     year: number;
     month: number;
     summary: MonthlySummary;
@@ -110,7 +110,7 @@ export interface MonthlyProductivityResponse {
     daily_breakdown: DailyBreakdown[];
 }
 
-export interface YearlyProductivityResponse {
+export interface YearlyProductivity {
     year: number;
     summary: {
         total_tasks: number;
