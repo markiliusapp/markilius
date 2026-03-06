@@ -6,7 +6,7 @@
   --color-primary: #f97316;
   --color-primary-hover: #ea6c0a;
   --color-bg: #ffffff;
-  --color-bg-subtle: #f9fafb;
+  --color-bg-subtle: #f7f8f8;
   --color-border: #e5e7eb;
   --color-text: #111111;
   --color-text-secondary: #6b7280;
@@ -15,7 +15,7 @@
   --color-error-bg: #fef2f2;
   --color-error-border: #fee2e2;
 
-  /* Typography */
+  /* Typography I wrote*/
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Border radius */

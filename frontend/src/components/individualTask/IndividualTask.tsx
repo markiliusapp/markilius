@@ -1,180 +1,3 @@
-// import { useState } from "react"
-// import { taskAPI } from "@/services/api"
-// import type { TaskResponse, UpdateTask } from "@/types"
-// import './IndividualTask.css'
-
-// const InidividualTask = ({task, onToggle} : {task: TaskResponse, onToggle: () => void}) => {
-//     const [editMode, setEditMode] = useState(false)
-//     const [isCompleted, setIsCompleted] = useState<boolean>(task.is_completed)
-
-//     const [modifiedTask, setModifiedTask] = useState<UpdateTask>({
-//             title: task.title,
-//             description: task.description,
-//             priority: task.priority,
-//             frequency: task.frequency,
-//             due_date: task.due_date,
-//             duration: task.duration,
-//         })
-//     const [message, setMessage] = useState<string>("")
-//     const [loading, setLoading] = useState(false)
-
-//     const handleChange = (
-//         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-//     ) => {
-//         const { name, value } = e.target
-//         setModifiedTask(prev => ({
-//             ...prev,
-//             [name]: value === "" ? undefined : value,
-//         }))
-//     }
-
-//     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-//         e.preventDefault()
-//         setMessage("")
-//         setLoading(true)
-//         // Later: send to backend here
-//         try {
-//             console.log("Printing modified task: ", modifiedTask)
-//             const response = await taskAPI.update(task.id, modifiedTask)
-//             setMessage("Successfully updated")
-
-//         } catch (err) {
-//             console.log(err)
-//         } finally {
-//             setLoading(false)
-//         }
-//         // Optional: reset form
-//         // setTask({ ...initial values })
-//     }
-
-//     const handleCompleteToggle = async () => {
-//         try {
-//             await taskAPI.toggleComplete(task.id)
-//             setIsCompleted(prev => !prev)
-//             onToggle()
-//         } catch (err) {
-//             console.log(err)
-//         }
-//     }
-
-//     const handleDeletion = async() => {
-//         try {
-//             await taskAPI.delete(task.id)
-//             onToggle()
-//         } catch (err) {
-//             console.log(err)
-//         }
-
-//     }
-
-//     const handleEditMode = () => {
-//         if (!task.is_locked) {
-//             setEditMode(prev => !prev) 
-//         }
-//     }
-
-//     return (
-//         <div className="wrapper">
-//             <button onClick={handleEditMode} disabled={task.is_locked}>Edit Task</button>
-//             <button onClick={handleDeletion} disabled={task.is_locked}>Delete Task</button>
-//             {message && <p>{message}</p>}
-//             <form onSubmit={handleSubmit}>
-//                 <div>
-//                     <input
-//                         name="title"
-//                         type="text"
-//                         placeholder="Task title"
-//                         value={modifiedTask.title}
-//                         onChange={handleChange}
-//                         required
-//                         disabled={!editMode}
-//                     />
-//                 </div>
-
-//                 <div>
-//                     <textarea
-//                         name="description"
-//                         placeholder="Description"
-//                         value={modifiedTask.description ?? ""}
-//                         onChange={handleChange}
-//                         disabled={!editMode}
-//                     />
-//                 </div>
-
-//                 <div>
-//                     <label>Priority</label>
-//                     <select
-//                         name="priority"
-//                         value={modifiedTask.priority ? "high" : "low"}
-//                         onChange={(e) => {
-//                             setModifiedTask(prev => ({
-//                                 ...prev,
-//                                 priority: e.target.value === "high"
-//                             }));
-//                         }}
-//                         disabled={!editMode}
-//                     >
-//                         <option value="high">High</option>
-//                         <option value="low">Low</option>
-//                     </select>
-//                 </div>
-
-//                 <div>
-//                     <label>Frequency</label>
-//                     <select name="frequency" value={modifiedTask.frequency ?? "once"} onChange={handleChange} disabled={!editMode}>
-//                         <option value="once">Once</option>
-//                         <option value="daily">Daily</option>
-//                         <option value="saturday">Every Saturday</option>
-//                         <option value="sunday">Every Sunday</option>
-//                         <option value="weekend">Weekends</option>
-//                         <option value="monthly">Monthly</option>
-//                     </select>
-//                 </div>
-
-//                 <div>
-//                     <label>Due date</label>
-//                     <input
-//                         type="date"
-//                         name="due_date"
-//                         value={modifiedTask.due_date ?? ""}
-//                         onChange={handleChange}
-//                         disabled={!editMode}
-//                     />
-//                 </div>
-
-//                 <div>
-//                     <label>Estimated duration (minutes)</label>
-//                     <input
-//                         type="number"
-//                         name="duration"
-//                         placeholder="e.g. 30"
-//                         value={modifiedTask.duration ?? ""}
-//                         onChange={handleChange}
-//                         disabled={!editMode}
-//                     />
-//                 </div>
-//                 {editMode && <button type="submit" disabled={!loading}>
-//                     {loading ? "submitting" : "Submit Changes" }
-//                 </button>}
-//             </form>
-//             <div>
-//                 <label>Task Completion Status</label>
-//                 <input
-//                     type="checkbox"
-//                     checked={task.is_completed}
-//                     onChange={handleCompleteToggle}
-//                     disabled={task.is_locked}
-//                 />
-//             </div>
-
-//         </div>
-//     )
-// }
-
-// export default InidividualTask
-
-
-// ------------------------------------------------------------------------
 
 
 import { useState } from "react"
@@ -212,7 +35,7 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
         }))
     }
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         setError("")
         setLoading(true)
@@ -265,7 +88,7 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
     }
 
     return (
-        <div className={`individual-task ${task.is_locked ? 'task-locked' : ''}`}>
+        <div className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed': ''}`}>
             {/* Locked indicator */}
             {task.is_locked && (
                 <div className="task-locked-badge">

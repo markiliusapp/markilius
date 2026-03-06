@@ -1,169 +1,3 @@
-// // import DashboardLayout from '../../components/DashBoardLayout';
-// // import TaskInput from '@/components/taskinput/TaskInput';
-// // import './DashboardPage.css'
-// // import ActiveTasks from '@/components/activeTasks/ActiveTasks';
-// // import CompletedTasks from '@/components/completedTasks/CompletedTasks';
-// // import { useState } from 'react';
-
-// // const DashboardPage = () => {
-// //     const [refreshKey, setRefreshKey] = useState<number>(0)
-// //     const [selectedDate, setSelectedDate] = useState<string>(
-// //         new Date().toLocaleDateString('en-CA')
-// //     )
-
-// //     const handleTaskCreated = () => {
-// //         setRefreshKey( prev => prev + 1)
-// //     }
-
-// //     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-// //         setSelectedDate(e.target.value)
-// //         setRefreshKey(prev => prev + 1)
-// //     }
-
-// //     const handlePrevDay = () => {
-// //         const [year, month, day] = selectedDate.split('-').map(Number)
-// //         const date = new Date(year, month - 1, day)  // month is 0-indexed
-// //         date.setDate(date.getDate() - 1)
-// //         setSelectedDate(date.toLocaleDateString('en-CA'))
-// //         setRefreshKey(prev => prev + 1)
-// //     }
-
-// //     const handleNextDay = () => {
-// //         const [year, month, day] = selectedDate.split('-').map(Number)
-// //         const date = new Date(year, month - 1, day)
-// //         date.setDate(date.getDate() + 1)
-// //         setSelectedDate(date.toLocaleDateString('en-CA'))
-// //         setRefreshKey(prev => prev + 1)
-// //     }
-    
-// //     return (
-// //         <DashboardLayout>
-// //             <div>
-// //                 <h1>
-// //                     Today
-// //                 </h1>
-// //                 <div className="date-nav">
-// //                     <button onClick={handlePrevDay}>←</button>
-// //                     <input
-// //                         type="date"
-// //                         value={selectedDate}
-// //                         onChange={handleDateChange}
-// //                     />
-// //                     <button onClick={handleNextDay}>→</button>
-// //                 </div>
-// //                 <div>
-// //                     <TaskInput onTaskCreated={handleTaskCreated}/>
-// //                     <div className='panes'>
-// //                         <div className='activePane'>
-// //                             <h1>Active tasks</h1>
-// //                             <ActiveTasks refreshKey={refreshKey} onToggle={handleTaskCreated} selectedDate={selectedDate} />
-// //                         </div>
-// //                         <div className='completedPane'>
-// //                             <h1>completed tasks</h1>
-// //                             <CompletedTasks refreshKey={refreshKey} onToggle={handleTaskCreated} selectedDate={selectedDate} />
-// //                         </div>                        
-// //                     </div>
-
-// //                 </div>
-// //             </div>
-// //         </DashboardLayout>
-// //     );
-// // };
-
-// // export default DashboardPage;
-
-
-
-// import DashboardLayout from '../../components/DashBoardLayout';
-// import TaskInput from '@/components/taskinput/TaskInput';
-// import './DashboardPage.css'
-// import ActiveTasks from '@/components/activeTasks/ActiveTasks';
-// import CompletedTasks from '@/components/completedTasks/CompletedTasks';
-// import { useState } from 'react';
-
-// const DashboardPage = () => {
-//     const [refreshKey, setRefreshKey] = useState<number>(0)
-//     const [selectedDate, setSelectedDate] = useState<string>(
-//         new Date().toLocaleDateString('en-CA')
-//     )
-//     const [showTaskInput, setShowTaskInput] = useState(false) // Added
-
-//     const handleTaskCreated = () => {
-//         setRefreshKey(prev => prev + 1)
-//         setShowTaskInput(false) // Close modal after task created
-//     }
-
-//     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//         setSelectedDate(e.target.value)
-//         setRefreshKey(prev => prev + 1)
-//     }
-
-//     const handlePrevDay = () => {
-//         const [year, month, day] = selectedDate.split('-').map(Number)
-//         const date = new Date(year, month - 1, day)
-//         date.setDate(date.getDate() - 1)
-//         setSelectedDate(date.toLocaleDateString('en-CA'))
-//         setRefreshKey(prev => prev + 1)
-//     }
-
-//     const handleNextDay = () => {
-//         const [year, month, day] = selectedDate.split('-').map(Number)
-//         const date = new Date(year, month - 1, day)
-//         date.setDate(date.getDate() + 1)
-//         setSelectedDate(date.toLocaleDateString('en-CA'))
-//         setRefreshKey(prev => prev + 1)
-//     }
-
-//     return (
-//         <DashboardLayout>
-//             <div>
-//                 <h1>Today</h1>
-
-//                 <div className="date-nav">
-//                     <button onClick={handlePrevDay}>←</button>
-//                     <input
-//                         type="date"
-//                         value={selectedDate}
-//                         onChange={handleDateChange}
-//                     />
-//                     <button onClick={handleNextDay}>→</button>
-//                     <button onClick={() => setShowTaskInput(true)}>Add Task</button> {/* Added */}
-//                 </div>
-
-//                 {/* Show modal when button clicked */}
-//                 {showTaskInput && (
-//                     <TaskInput
-//                         onTaskCreated={handleTaskCreated}
-//                         onCancel={() => setShowTaskInput(false)} // Added
-//                     />
-//                 )}
-
-//                 <div className='panes'>
-//                     <div className='activePane'>
-//                         <h1>Active tasks</h1>
-//                         <ActiveTasks
-//                             refreshKey={refreshKey}
-//                             onToggle={handleTaskCreated}
-//                             selectedDate={selectedDate}
-//                         />
-//                     </div>
-//                     <div className='completedPane'>
-//                         <h1>Completed tasks</h1>
-//                         <CompletedTasks
-//                             refreshKey={refreshKey}
-//                             onToggle={handleTaskCreated}
-//                             selectedDate={selectedDate}
-//                         />
-//                     </div>
-//                 </div>
-//             </div>
-//         </DashboardLayout>
-//     );
-// };
-
-// export default DashboardPage;
-
-
 import DashboardLayout from '../../components/DashBoardLayout';
 import TaskInput from '@/components/taskinput/TaskInput';
 import './DashboardPage.css'
@@ -171,25 +5,32 @@ import ActiveTasks from '@/components/activeTasks/ActiveTasks';
 import CompletedTasks from '@/components/completedTasks/CompletedTasks';
 import { useState, useEffect } from 'react';
 import { productivityAPI } from '@/services/api';
+import type { DailyProductivityResponse } from '@/types';
+import { useSearchParams } from 'react-router-dom'
 
 const DashboardPage = () => {
+    const [searchParams] = useSearchParams()
     const [refreshKey, setRefreshKey] = useState<number>(0)
     const [selectedDate, setSelectedDate] = useState<string>(
-        new Date().toLocaleDateString('en-CA')
+        searchParams.get('date') || new Date().toLocaleDateString('en-CA')
     )
     const [showTaskInput, setShowTaskInput] = useState(false)
-    const [completionPercentage, setCompletionPercentage] = useState(0)
+    const [productivity, setProductivity] = useState<DailyProductivityResponse | null>(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         fetchProductivity();
     }, [selectedDate, refreshKey]);
 
     const fetchProductivity = async () => {
+        setLoading(true)
         try {
             const data = await productivityAPI.getDaily(selectedDate);
-            setCompletionPercentage(data.completion_percentage);
+            setProductivity(data);
         } catch (err) {
             console.error('Failed to fetch productivity:', err);
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -200,7 +41,6 @@ const DashboardPage = () => {
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(e.target.value)
-        setRefreshKey(prev => prev + 1)
     }
 
     const handlePrevDay = () => {
@@ -208,7 +48,6 @@ const DashboardPage = () => {
         const date = new Date(year, month - 1, day)
         date.setDate(date.getDate() - 1)
         setSelectedDate(date.toLocaleDateString('en-CA'))
-        setRefreshKey(prev => prev + 1)
     }
 
     const handleNextDay = () => {
@@ -216,7 +55,6 @@ const DashboardPage = () => {
         const date = new Date(year, month - 1, day)
         date.setDate(date.getDate() + 1)
         setSelectedDate(date.toLocaleDateString('en-CA'))
-        setRefreshKey(prev => prev + 1)
     }
 
     return (
@@ -263,6 +101,7 @@ const DashboardPage = () => {
                                 onToggle={handleTaskCreated}
                                 selectedDate={selectedDate}
                             />
+                            
                         </div>
                     </div>
 
@@ -278,16 +117,140 @@ const DashboardPage = () => {
                     </div>
                 </div>
 
-                {/* Progress Section */}
-                <div className="progress-section">
-                    <div className="progress-header">
-                        <span className="progress-label">Today's Progress</span>
-                        <span className="progress-percentage">{completionPercentage}%</span>
+                {/* Stats Section */}
+                {loading ? (
+                    <div className="tasks-loading">
+                        <div className="spinner-large" />
+                        <p>Loading</p>
                     </div>
-                    <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${completionPercentage}%` }}></div>
-                    </div>
-                </div>
+                ) : (
+                    productivity && (
+                        <div className="stats-section">
+                            <div className="stats-grid">
+                                {/* Progress side - 2/3 width */}
+                                <div className="progress-column">
+                                    {/* Overall Progress */}
+                                    <div className="progress-item">
+                                        <div className="progress-item-header">
+                                            <span className="progress-item-label">Overall Progress</span>
+                                            <div className="progress-item-meta">
+                                                <span className="progress-item-count">
+                                                    {productivity.completed_tasks}/{productivity.total_tasks}
+                                                </span>
+                                                <span className="progress-item-percentage">
+                                                    {productivity.completion_percentage}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill progress-fill-dark"
+                                                style={{ width: `${productivity.completion_percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* High Priority Progress */}
+                                    <div className="progress-item">
+                                        <div className="progress-item-header">
+                                            <span className="progress-item-label">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <line x1="12" y1="8" x2="12" y2="12" />
+                                                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                                                </svg>
+                                                High Priority
+                                            </span>
+                                            <div className="progress-item-meta">
+                                                <span className="progress-item-count">
+                                                    {productivity.high_priority_completed}/{productivity.high_priority_tasks}
+                                                </span>
+                                                <span className="progress-item-percentage">
+                                                    {productivity.high_priority_completion_percentage}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill progress-fill-medium"
+                                                style={{ width: `${productivity.high_priority_completion_percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Normal Priority Progress */}
+                                    <div className="progress-item">
+                                        <div className="progress-item-header">
+                                            <span className="progress-item-label">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                </svg>
+                                                Normal Priority
+                                            </span>
+                                            <div className="progress-item-meta">
+                                                <span className="progress-item-count">
+                                                    {productivity.low_priority_completed}/{productivity.low_priority_tasks}
+                                                </span>
+                                                <span className="progress-item-percentage">
+                                                    {productivity.low_priority_completion_percentage}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div
+                                                className="progress-fill progress-fill-light"
+                                                style={{ width: `${productivity.low_priority_completion_percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Time stats side - 1/3 width */}
+                                <div className="time-column">
+                                    <div className="time-stat-item">
+                                        <div className="time-stat-icon time-stat-icon-dark">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </div>
+                                        <div className="time-stat-content">
+                                            <span className="time-stat-value">{productivity.total_hours.toFixed(1)}h</span>
+                                            <span className="time-stat-label">Total</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="time-stat-item">
+                                        <div className="time-stat-icon time-stat-icon-medium">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </div>
+                                        <div className="time-stat-content">
+                                            <span className="time-stat-value">{productivity.high_priority_hours.toFixed(1)}h</span>
+                                            <span className="time-stat-label">High Priority</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="time-stat-item">
+                                        <div className="time-stat-icon time-stat-icon-light">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </div>
+                                        <div className="time-stat-content">
+                                            <span className="time-stat-value">{productivity.low_priority_hours.toFixed(1)}h</span>
+                                            <span className="time-stat-label">Normal Priority</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                )}
+
             </div>
         </DashboardLayout>
     );

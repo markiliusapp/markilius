@@ -68,6 +68,35 @@ export interface TaskResponse {
     is_locked: boolean;
 }
 
+export interface DailyBreakDownWithTasks {
+    date: string;
+    total_tasks: number;
+    completed_tasks: number;
+    completion_percentage: number;
+    total_duration: number;
+    completed: TaskResponse[]
+    incomplete: TaskResponse[]
+}
+
+export interface WeeklySummary {
+    total_tasks: number;
+    completed_tasks: number;
+    completion_percentage: number;
+    total_duration_hours: number;
+    average_tasks_per_day: number;
+    average_duration_per_day: number;
+    days_with_tasks: number;
+}
+
+export interface WeeklyProductivityResponse {
+    start_date: string;
+    end_date: string;
+    summary: WeeklySummary
+    most_productive_day: DailyBreakdown | null
+    daily_breakdown: DailyBreakDownWithTasks[] 
+}
+
+
 export interface DailyProductivityResponse {
     date: string;
     total_tasks: number;
