@@ -87,7 +87,6 @@ const MonthPage = () => {
             <div className="month-page">
                 {/* Header */}
                 <div className="month-header">
-                    <h1>Month View</h1>
                     <div className="month-nav">
                         <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
                         <span className="month-name">{getMonthName()}</span>

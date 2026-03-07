@@ -93,7 +93,6 @@ const WeekPage = () => {
             <div className="week-page">
                 {/* Header */}
                 <div className="week-header">
-                    <h1>Week View</h1>
                     <div className="week-nav">
                         <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
                         <span className="week-range">
@@ -104,83 +103,84 @@ const WeekPage = () => {
                 </div>
 
                 {/* 7 Day Columns */}
-                <div className="week-grid">
-                    {weekData.daily_breakdown.map((day) => (
-                        <div key={day.date} className="day-column">
-                            {/* Day Header */}
-                            <div className="day-header" onClick={() => navigate(`/dashboard?date=${day.date}`)}>
-                                <div className="day-header-top">
-                                    <span className="day-name">{getDayName(day.date)}</span>
-                                    <span className="day-number">{getDayNumber(day.date)}</span>
+                <div className="week-grid-wrapper">
+                    <div className="week-grid">
+                        {weekData.daily_breakdown.map((day) => (
+                            <div key={day.date} className="day-column">
+                                {/* Day Header */}
+                                <div className="day-header" onClick={() => navigate(`/dashboard?date=${day.date}`)}>
+                                    <div className="day-header-top">
+                                        <span className="day-name">{getDayName(day.date)}</span>
+                                        <span className="day-number">{getDayNumber(day.date)}</span>
+                                    </div>
+                                    <div className="day-stats-mini">
+                                        <span className="day-completion">{day.completion_percentage}%</span>
+                                        <span className="day-count">{day.completed_tasks}/{day.total_tasks}</span>
+                                    </div>
                                 </div>
-                                <div className="day-stats-mini">
-                                    <span className="day-completion">{day.completion_percentage}%</span>
-                                    <span className="day-count">{day.completed_tasks}/{day.total_tasks}</span>
+
+                                {/* Progress bar */}
+                                <div className="day-progress-bar">
+                                    <div
+                                        className="day-progress-fill"
+                                        style={{ width: `${day.completion_percentage}%` }}
+                                    />
+                                </div>
+
+                                {/* Tasks */}
+                                <div className="day-tasks">
+                                    {/* Incomplete tasks */}
+                                    {day.incomplete.length > 0 && (
+                                        <div className="day-tasks-section">
+                                            <div className="day-tasks-header">
+                                                <span className="day-tasks-label">Active</span>
+                                                <span className="day-tasks-count">{day.incomplete.length}</span>
+                                            </div>
+                                            <div className="day-tasks-list">
+                                                {day.incomplete.map(task => (
+                                                    <IndividualTask
+                                                        key={task.id}
+                                                        task={task}
+                                                        onToggle={handleToggle}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Completed tasks */}
+                                    {day.completed.length > 0 && (
+                                        <div className="day-tasks-section">
+                                            <div className="day-tasks-header">
+                                                <span className="day-tasks-label">Done</span>
+                                                <span className="day-tasks-count">{day.completed.length}</span>
+                                            </div>
+                                            <div className="day-tasks-list">
+                                                {day.completed.map(task => (
+                                                    <IndividualTask
+                                                        key={task.id}
+                                                        task={task}
+                                                        onToggle={handleToggle}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Empty state */}
+                                    {day.incomplete.length === 0 && day.completed.length === 0 && (
+                                        <div className="day-empty">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                <circle cx="12" cy="12" r="10" opacity="0.3" />
+                                            </svg>
+                                            <p>No tasks</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-
-                            {/* Progress bar */}
-                            <div className="day-progress-bar">
-                                <div
-                                    className="day-progress-fill"
-                                    style={{ width: `${day.completion_percentage}%` }}
-                                />
-                            </div>
-
-                            {/* Tasks */}
-                            <div className="day-tasks">
-                                {/* Incomplete tasks */}
-                                {day.incomplete.length > 0 && (
-                                    <div className="day-tasks-section">
-                                        <div className="day-tasks-header">
-                                            <span className="day-tasks-label">Active</span>
-                                            <span className="day-tasks-count">{day.incomplete.length}</span>
-                                        </div>
-                                        <div className="day-tasks-list">
-                                            {day.incomplete.map(task => (
-                                                <IndividualTask
-                                                    key={task.id}
-                                                    task={task}
-                                                    onToggle={handleToggle}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Completed tasks */}
-                                {day.completed.length > 0 && (
-                                    <div className="day-tasks-section">
-                                        <div className="day-tasks-header">
-                                            <span className="day-tasks-label">Done</span>
-                                            <span className="day-tasks-count">{day.completed.length}</span>
-                                        </div>
-                                        <div className="day-tasks-list">
-                                            {day.completed.map(task => (
-                                                <IndividualTask
-                                                    key={task.id}
-                                                    task={task}
-                                                    onToggle={handleToggle}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Empty state */}
-                                {day.incomplete.length === 0 && day.completed.length === 0 && (
-                                    <div className="day-empty">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                            <circle cx="12" cy="12" r="10" opacity="0.3" />
-                                        </svg>
-                                        <p>No tasks</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-
                 {/* Week Summary Stats */}
                 <div className="week-summary">
                     <h2>Week Summary</h2>

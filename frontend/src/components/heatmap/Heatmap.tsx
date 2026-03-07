@@ -71,8 +71,8 @@ const Heatmap = ({ year, month, data, completion, onDayClick }: HeatmapProps) =>
                                 style={{ backgroundColor: color }}
                                 onClick={() => onDayClick && onDayClick(dayData?.date || '')}
                             >
-                                {/* <span className="heatmap-cell-day">{day}</span>
-                                <span className="heatmap-cell-percentage">{Math.round(percentage)}%</span> */}
+                                <span className="heatmap-cell-day">{day}</span>
+                                <span className="heatmap-cell-percentage">{Math.round(percentage)}%</span>
                             </div>
                         );
                     })}

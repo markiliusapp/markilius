@@ -5,16 +5,11 @@
 /* Header */
 .month-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 24px;
 }
 
-.month-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text);
-}
 
 .month-nav {
     display: flex;
@@ -189,7 +184,7 @@
 @media (max-width: 768px) {
     .month-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 16px;
     }
 
