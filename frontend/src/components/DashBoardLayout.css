@@ -8,7 +8,7 @@
    SIDEBAR
 ================================ */
 .sidebar {
-    width: 260px;
+    width: 200px;
     background-color: var(--color-bg);
     border-right: 1px solid var(--color-border);
     display: flex;
@@ -163,7 +163,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 32px;
-    margin-left: 260px;
+    margin-left: 200px;
 }
 
 /* Mobile menu toggle button */

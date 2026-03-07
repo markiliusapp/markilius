@@ -1,0 +1,228 @@
+.year-page {
+    width: 100%;
+}
+
+/* Header */
+.year-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.year-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.year-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+
+.year-nav button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.year-nav button:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.year-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+    padding: 0 24px;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Year Overview */
+.year-overview {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.overview-card {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.overview-card-large {
+    justify-content: center;
+}
+
+.overview-card-highlight {
+    background-color: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.overview-card-icon {
+    width: 48px;
+    height: 48px;
+    background-color: var(--color-bg-subtle);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.overview-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.overview-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.overview-card-large .overview-card-value {
+    font-size: 48px;
+    color: var(--color-primary);
+}
+
+.overview-card-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+/* 12 Month Heatmaps Grid */
+.year-heatmaps {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: .5rem;
+    margin-bottom: 16px;
+}
+
+.month-heatmap-card {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 10px;
+}
+
+.heatmap-legend {
+    margin-bottom: 16px;
+}
+
+
+.month-tasks {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+/* Year Bar Chart */
+.year-chart-section {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.year-chart-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 20px;
+}
+
+.year-bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 250px;
+    padding: 20px 0;
+    border-bottom: 2px solid var(--color-border);
+}
+
+/* Loading/Error */
+.year-loading,
+.year-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.year-loading p,
+.year-error p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-top: 16px;
+}
+
+/* ================================
+   RESPONSIVE BREAKPOINTS
+================================ */
+
+@media (max-width: 1400px) {
+    .year-heatmaps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .year-overview {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .year-heatmaps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .year-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .year-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .year-heatmaps {
+        grid-template-columns: 1fr;
+    }
+
+    .year-bar-chart {
+        height: 200px;
+    }
+
+    .year-chart-section {
+        padding: 16px;
+    }
+}

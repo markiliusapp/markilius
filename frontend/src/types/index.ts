@@ -122,6 +122,7 @@ export interface DailyBreakdown {
 }
 
 export interface MonthlySummary {
+    month: number;
     total_tasks: number;
     completed_tasks: number;
     completion_percentage: number;
