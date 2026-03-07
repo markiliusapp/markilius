@@ -5,16 +5,11 @@
 /* Header */
 .year-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 24px;
 }
 
-.year-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text);
-}
 
 .year-nav {
     display: flex;
@@ -57,7 +52,7 @@
 /* Year Overview */
 .year-overview {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 16px;
     margin-bottom: 32px;
 }
@@ -115,10 +110,16 @@
     color: var(--color-text-secondary);
 }
 
+.overview-card-meta {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
 /* 12 Month Heatmaps Grid */
 .year-heatmaps {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: .5rem;
     margin-bottom: 16px;
 }
@@ -156,13 +157,11 @@
     margin-bottom: 20px;
 }
 
-.year-bar-chart {
+.year-area-chart {
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    height: 250px;
-    padding: 20px 0;
-    border-bottom: 2px solid var(--color-border);
+    padding-top: 20px;
 }
 
 /* Loading/Error */
@@ -186,40 +185,22 @@
    RESPONSIVE BREAKPOINTS
 ================================ */
 
-@media (max-width: 1400px) {
-    .year-heatmaps {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
     .year-overview {
         grid-template-columns: 1fr 1fr;
-    }
-
-    .year-heatmaps {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
     }
 }
 
 @media (max-width: 768px) {
     .year-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 16px;
     }
 
     .year-overview {
         grid-template-columns: 1fr;
-    }
-
-    .year-heatmaps {
-        grid-template-columns: 1fr;
-    }
-
-    .year-bar-chart {
-        height: 200px;
     }
 
     .year-chart-section {
