@@ -1,0 +1,156 @@
+.heatmap-container {
+    position: relative;
+    width: 100%;
+}
+
+.heatmap-month-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.heatmap-month-title {
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    letter-spacing: -0.3px;
+    text-align: center;
+}
+
+.month-completion {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-primary);
+    justify-self: start;
+}
+
+.heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.heatmap-day-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.heatmap-day-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.heatmap-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.heatmap-cell-clickable {
+    cursor: pointer;
+}
+
+.heatmap-cell-clickable:hover {
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.heatmap-cell-empty {
+    background-color: transparent !important;
+    cursor: default;
+}
+
+.heatmap-cell-empty:hover {
+    border-color: transparent;
+    transform: none;
+}
+
+.heatmap-cell-day,
+.heatmap-cell-percentage {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.heatmap-cell:hover .heatmap-cell-day,
+.heatmap-cell:hover .heatmap-cell-percentage {
+    opacity: 1;
+}
+
+.heatmap-cell-day {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.heatmap-cell-percentage {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+/* Heatmap Legend */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.heatmap-legend-label {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.heatmap-legend-colors {
+    display: flex;
+    gap: 4px;
+}
+
+.heatmap-legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+}
+
+
+/* ================================
+   RESPONSIVE BREAKPOINTS
+================================ */
+
+@media (max-width: 1024px) {
+    .heatmap-cell-day {
+        font-size: 11px;
+    }
+
+    .heatmap-cell-percentage {
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 768px) {
+    .heatmap-cell-day {
+        font-size: 10px;
+    }
+
+    .heatmap-cell-percentage {
+        display: none; /* Hide percentage on small screens */
+    }
+}
