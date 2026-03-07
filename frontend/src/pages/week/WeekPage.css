@@ -5,15 +5,9 @@
 /* Header */
 .week-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 24px;
-}
-
-.week-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text);
 }
 
 .week-nav {
@@ -54,12 +48,17 @@
     text-align: center;
 }
 
-/* 7 Day Grid */
+/* 7 Day Grid — horizontal scroll */
+.week-grid-wrapper {
+    overflow-x: auto;
+    margin-bottom: 32px;
+    padding-bottom: 8px;
+}
+
 .week-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(210px, 1fr));
     gap: 12px;
-    margin-bottom: 32px;
 }
 
 .day-column {
@@ -70,6 +69,7 @@
     display: flex;
     flex-direction: column;
     min-height: 500px;
+    min-width: 200px;
 }
 
 
@@ -216,6 +216,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 24px;
+    width: 100%;
 }
 
 .week-summary h2 {
@@ -295,17 +296,8 @@
    RESPONSIVE BREAKPOINTS
 ================================ */
 
-@media (max-width: 1400px) {
-    .week-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
 
 @media (max-width: 1024px) {
-    .week-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
     .summary-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -314,13 +306,12 @@
 @media (max-width: 768px) {
     .week-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 16px;
     }
 
     .week-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        grid-template-columns: repeat(7, minmax(300px, 1fr));
     }
 
     .day-column {
