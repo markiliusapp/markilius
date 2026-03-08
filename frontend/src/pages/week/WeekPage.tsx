@@ -106,7 +106,10 @@ const WeekPage = () => {
                 <div className="week-grid-wrapper">
                     <div className="week-grid">
                         {weekData.daily_breakdown.map((day) => (
-                            <div key={day.date} className="day-column">
+                            <div
+                                key={day.date}
+                                className={`day-column ${day.date === new Date().toLocaleDateString('en-CA') ? 'day-column-today' : ''}`}
+                            >
                                 {/* Day Header */}
                                 <div className="day-header" onClick={() => navigate(`/dashboard?date=${day.date}`)}>
                                     <div className="day-header-top">
