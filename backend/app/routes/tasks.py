@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models.task import Task
 from typing import Optional
 from datetime import date
+from app.services.locking_tasks import lock_overdue_tasks
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -66,6 +67,8 @@ def get_task(
 
     # Order by due_date (most recent first), then created_at
     tasks = query.order_by(Task.due_date.desc(), Task.created_at.desc()).all()
+    tasks = lock_overdue_tasks(tasks, db)
+
     return tasks
 
 

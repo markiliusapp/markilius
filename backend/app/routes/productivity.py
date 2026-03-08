@@ -13,8 +13,12 @@ from app.models.task import Task
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from calendar import monthrange
+from app.services.locking_tasks import lock_overdue_tasks
 
 router = APIRouter(prefix="/productivity", tags=["Productivity"])
+
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError
+from fastapi import HTTPException, status
 
 
 @router.get("/day", response_model=DailyProductivityResponse)
@@ -26,152 +30,103 @@ def get_daily_productivity(
     """
     Get productivity data for a specific date
     """
+    # Fetch ALL tasks for this date
     try:
-        # Count total number of tasks
-        total_tasks = (
-            db.query(func.count(Task.id))
+        tasks = (
+            db.query(Task)
             .filter(
                 Task.user_id == current_user.id, Task.due_date == target_date
             )
-            .scalar()
+            .all()
         )
+        # Lock overdue tasks
+        tasks = lock_overdue_tasks(tasks, db)
 
-        if total_tasks == 0:
-            return DailyProductivityResponse(
-                date=target_date,
-                total_tasks=0,
-                completed_tasks=0,
-                completion_percentage=0.0,
-                high_priority_tasks=0,
-                low_priority_tasks=0,
-                high_priority_completed=0,
-                low_priority_completed=0,
-                high_priority_completion_percentage=0.0,
-                low_priority_completion_percentage=0.0,
-                total_hours=0.0,
-                high_priority_hours=0.0,
-                low_priority_hours=0.0,
-            )
-
-        # Total number of completed tasks
-        completed_tasks = (
-            db.query(func.count(Task.id))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.is_completed == True,
-            )
-            .scalar()
+    except OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed",
         )
-
-        # Completion percentage of all tasks
-        completion_percentage = round(completed_tasks / total_tasks * 100, 2)
-
-        # Number of high priority tasks
-        high_priority_tasks = (
-            db.query(func.count(Task.id))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.priority == True,
-            )
-            .scalar()
-        )
-
-        # Number of low priority tasks
-        low_priority_tasks = total_tasks - high_priority_tasks
-
-        # Count the number of high priority tasks that have been completed
-        high_priority_completed = (
-            db.query(func.count(Task.id))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.priority == True,
-                Task.is_completed == True,
-            )
-            .scalar()
-        )
-
-        # Count the number of low priority tasks that have been completed
-        low_priority_completed = (
-            db.query(func.count(Task.id))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.priority == False,
-                Task.is_completed == True,
-            )
-            .scalar()
-        )
-
-        # High priority completion percentage
-        high_priority_completion_percentage = (
-            round(high_priority_completed / high_priority_tasks * 100, 2)
-            if high_priority_tasks > 0
-            else 0.0
-        )
-
-        # Low priority completion percentage
-        low_priority_completion_percentage = (
-            round(low_priority_completed / low_priority_tasks * 100, 2)
-            if low_priority_tasks > 0
-            else 0.0
-        )
-
-        # Total time spent in hours
-        total_duration = (
-            db.query(func.sum(Task.duration))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.is_completed == True,
-            )
-            .scalar()
-            or 0
-        )
-        total_duration_hours = round(total_duration / 60, 2)
-
-        # Time spent on high priority tasks
-        high_priority_duration = (
-            db.query(func.sum(Task.duration))
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date == target_date,
-                Task.is_completed == True,
-                Task.priority == True,
-            )
-            .scalar()
-            or 0
-        )
-        high_priority_duration_hours = round(high_priority_duration / 60, 2)
-
-        # Time spent on low priority tasks
-        low_priority_duration_hours = round(
-            total_duration_hours - high_priority_duration_hours, 2
-        )
-
-        return DailyProductivityResponse(
-            date=target_date,
-            total_tasks=total_tasks,
-            completed_tasks=completed_tasks,
-            completion_percentage=completion_percentage,
-            high_priority_tasks=high_priority_tasks,
-            low_priority_tasks=low_priority_tasks,
-            high_priority_completed=high_priority_completed,
-            low_priority_completed=low_priority_completed,
-            high_priority_completion_percentage=high_priority_completion_percentage,
-            low_priority_completion_percentage=low_priority_completion_percentage,
-            total_hours=total_duration_hours,
-            high_priority_hours=high_priority_duration_hours,
-            low_priority_hours=low_priority_duration_hours,
-        )
-
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while fetching daily data",
+            detail="Database error occurred",
         )
+
+    # If no tasks, return empty response
+    total_tasks = len(tasks)
+    if total_tasks == 0:
+        return DailyProductivityResponse(
+            date=target_date,
+            total_tasks=0,
+            completed_tasks=0,
+            completion_percentage=0.0,
+            high_priority_tasks=0,
+            low_priority_tasks=0,
+            high_priority_completed=0,
+            low_priority_completed=0,
+            high_priority_completion_percentage=0.0,
+            low_priority_completion_percentage=0.0,
+            total_hours=0.0,
+            high_priority_hours=0.0,
+            low_priority_hours=0.0,
+        )
+
+    # Calculate metrics from the task list (no try/except needed)
+    completed_tasks = sum(1 for t in tasks if t.is_completed)
+    high_priority_tasks = sum(1 for t in tasks if t.priority)
+    low_priority_tasks = total_tasks - high_priority_tasks
+
+    high_priority_completed = sum(
+        1 for t in tasks if t.priority and t.is_completed
+    )
+    low_priority_completed = sum(
+        1 for t in tasks if not t.priority and t.is_completed
+    )
+
+    # Completion percentages
+    completion_percentage = round(completed_tasks / total_tasks * 100, 2)
+
+    high_priority_completion_percentage = (
+        round(high_priority_completed / high_priority_tasks * 100, 2)
+        if high_priority_tasks > 0
+        else 0.0
+    )
+
+    low_priority_completion_percentage = (
+        round(low_priority_completed / low_priority_tasks * 100, 2)
+        if low_priority_tasks > 0
+        else 0.0
+    )
+
+    # Duration calculations (only completed tasks)
+    total_duration = sum(t.duration or 0 for t in tasks if t.is_completed)
+    total_duration_hours = round(total_duration / 60, 2)
+
+    high_priority_duration = sum(
+        t.duration or 0 for t in tasks if t.is_completed and t.priority
+    )
+    high_priority_duration_hours = round(high_priority_duration / 60, 2)
+
+    low_priority_duration_hours = round(
+        total_duration_hours - high_priority_duration_hours, 2
+    )
+
+    return DailyProductivityResponse(
+        date=target_date,
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+        completion_percentage=completion_percentage,
+        high_priority_tasks=high_priority_tasks,
+        low_priority_tasks=low_priority_tasks,
+        high_priority_completed=high_priority_completed,
+        low_priority_completed=low_priority_completed,
+        high_priority_completion_percentage=high_priority_completion_percentage,
+        low_priority_completion_percentage=low_priority_completion_percentage,
+        total_hours=total_duration_hours,
+        high_priority_hours=high_priority_duration_hours,
+        low_priority_hours=low_priority_duration_hours,
+    )
 
 
 @router.get("/week", response_model=WeeklyProductivityResponse)
@@ -187,15 +142,27 @@ def get_weekly_productivity(
     end_date = start_date + timedelta(days=6)
 
     # Get all tasks for this week
-    tasks = (
-        db.query(Task)
-        .filter(
-            Task.user_id == current_user.id,
-            Task.due_date <= end_date,
-            Task.due_date >= start_date,
+    try:
+        tasks = (
+            db.query(Task)
+            .filter(
+                Task.user_id == current_user.id,
+                Task.due_date <= end_date,
+                Task.due_date >= start_date,
+            )
+            .all()
         )
-        .all()
-    )
+        tasks = lock_overdue_tasks(tasks, db)
+    except OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed",
+        )
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error occurred",
+        )
 
     # Initialize 7 days hash table
     daily_data = {}
@@ -330,11 +297,17 @@ def get_monthly_productivity(
             )
             .all()
         )
+        tasks = lock_overdue_tasks(tasks, db)
 
-    except SQLAlchemyError:
+    except OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed",
+        )
+    except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while fetching monthly data",
+            detail="Database error occurred",
         )
 
     # Group tasks by date
@@ -466,10 +439,16 @@ def get_yearly_productivity(
             )
             .all()
         )
-    except SQLAlchemyError:
+        tasks = lock_overdue_tasks(tasks, db)
+    except OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed",
+        )
+    except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while fetching the data",
+            detail="Database error occurred",
         )
 
     # Group tasks by date
