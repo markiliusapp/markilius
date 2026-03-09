@@ -7,6 +7,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import WeekPage from './pages/week/WeekPage';
 import MonthPage from './pages/month/MonthPage';
 import YearPage from './pages/year/YearPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 
 
@@ -17,6 +19,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardPage />
