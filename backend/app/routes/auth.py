@@ -1,7 +1,14 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.user import UserCreate, UserResponse, UserLogin, Token
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    UserLogin,
+    Token,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+)
 from app.models.user import User
 from app.utils.auth import (
     hash_password,
@@ -9,11 +16,13 @@ from app.utils.auth import (
     create_access_token,
     get_current_user,
 )
-
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import os
 import secrets
+from datetime import datetime, timedelta, timezone
+from app.services.email import send_password_reset_email
+
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
@@ -115,3 +124,67 @@ def google_login(google_id_token: dict, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": str(user.id)})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest, db: Session = Depends(get_db)
+):
+    """
+    Send password reset email
+    """
+    user = db.query(User).filter(User.email == request.email).first()
+
+    # Don't reveal if email exists (security best practice)
+    if not user:
+        return {"message": "If that email exists, a reset link has been sent"}
+
+    # Generate reset token (32 random bytes)
+    reset_token = secrets.token_urlsafe(32)
+
+    # Token expires in 5 minutes
+    user.reset_token = reset_token
+    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(
+        minutes=5
+    )
+
+    db.commit()
+    try:
+        await send_password_reset_email(user.email, reset_token)
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+    return {"message": "If that email exists, a reset link has been sent"}
+
+
+@router.post("/reset-password")
+def reset_password(
+    request: ResetPasswordRequest, db: Session = Depends(get_db)
+):
+    """
+    Reset password using token
+    """
+    user = db.query(User).filter(User.reset_token == request.token).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        )
+
+    now = datetime.now(timezone.utc)
+    # Check if token has expired
+    if user.reset_token_expires < now:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset token has expired",
+        )
+
+    # Update password
+    user.hashed_password = hash_password(request.new_password)
+    user.reset_token = None  # Clear token
+    user.reset_token_expires = None
+
+    db.commit()
+
+    return {"message": "Password successfully reset"}

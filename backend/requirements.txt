@@ -2,6 +2,7 @@ aiohappyeyeballs==2.6.1
 aiohttp==3.13.2
 aiohttp-retry==2.9.1
 aiosignal==1.4.0
+aiosmtplib==5.1.0
 annotated-doc==0.0.3
 annotated-types==0.7.0
 anyio==4.11.0
@@ -11,6 +12,7 @@ bandit==1.8.0
 bcrypt==4.0.1
 beautifulsoup4==4.14.3
 black==25.11.0
+blinker==1.9.0
 certifi==2025.10.5
 cffi==2.0.0
 charset-normalizer==3.4.4
@@ -23,6 +25,7 @@ ecdsa==0.19.1
 email-validator==2.3.0
 exchange_calendars==4.11.3
 fastapi==0.120.4
+fastapi-mail==1.6.2
 flake8==7.1.1
 frozendict==2.4.7
 frozenlist==1.8.0
@@ -36,9 +39,11 @@ httplib2==0.31.2
 httpx==0.28.1
 idna==3.11
 iniconfig==2.3.0
+Jinja2==3.1.6
 korean-lunar-calendar==0.3.1
 lxml==6.0.2
 markdown-it-py==4.0.0
+MarkupSafe==3.0.3
 mccabe==0.7.0
 mdurl==0.1.2
 multidict==6.7.0
@@ -61,8 +66,9 @@ pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycodestyle==2.12.1
 pycparser==2.23
-pydantic==2.12.3
-pydantic_core==2.41.4
+pydantic==2.12.5
+pydantic-settings==2.13.1
+pydantic_core==2.41.5
 pyflakes==3.2.0
 Pygments==2.19.2
 PyJWT==2.10.1
@@ -78,6 +84,7 @@ python-multipart==0.0.22
 pytokens==0.3.0
 pytz==2025.2
 PyYAML==6.0.3
+regex==2025.11.3
 requests==2.32.5
 requests-oauthlib==2.0.0
 rich==14.2.0

@@ -71,7 +71,7 @@ class WeeklyProductivityResponse(BaseModel):
     start_date: date  # Monday
     end_date: date  # Sunday
     summary: WeeklySummary
-    most_productive_day: Optional[DailyBreakdown]
+    most_productive_day: Optional[DailyBreakdown] = None
     daily_breakdown: list[DailyBreakDownWithTasks]
 
 
@@ -85,6 +85,6 @@ class YearlyProductivityResponse(BaseModel):
     year: int
     summary: YearlySummary
     daily_breakdown: list[DailyBreakdown]
-    best_day: DailyBreakdown
-    best_month: MonthlySummary
+    best_day: Optional[DailyBreakdown] = None
+    best_month: Optional[MonthlySummary] = None
     months: list[MonthlySummary]

@@ -28,7 +28,9 @@ class Task(Base):
         Boolean, nullable=False, default=False
     )  # True = high, False = low
     duration = Column(Integer, nullable=True)  # estimated duration in minutes
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
+    )
     due_date = Column(Date, nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
     is_locked = Column(Boolean, default=False, nullable=False)
