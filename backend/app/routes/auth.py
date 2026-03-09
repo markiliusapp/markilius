@@ -81,16 +81,12 @@ def google_login(google_id_token: dict, db: Session = Depends(get_db)):
     """
     Verify Google ID token and login/register user
     """
-    print("Printing google id token: ", google_id_token)
     # Verify Google ID token
     idinfo = id_token.verify_oauth2_token(
         google_id_token["credential"],
         google_requests.Request(),
         GOOGLE_CLIENT_ID,
     )
-
-    print("Printing id infomration (idinfo): ", idinfo)
-    print("Printing google id token: ", google_id_token)
 
     # Get user info from token
     email = idinfo["email"]
@@ -110,9 +106,7 @@ def google_login(google_id_token: dict, db: Session = Depends(get_db)):
                 secrets.token_urlsafe(32)
             ),  # Random password
         )
-        print(
-            "Printing secrets.token_urlsafe(32): ", secrets.token_urlsafe(32)
-        )
+
         db.add(user)
         db.commit()
         db.refresh(user)

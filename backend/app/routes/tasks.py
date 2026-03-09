@@ -136,7 +136,6 @@ def delete_task(
     Deletes a task given a task_id
     """
     task = db.query(Task).filter(Task.id == task_id).first()
-    print("printing queried task: ", task)
 
     if not task:
         raise HTTPException(

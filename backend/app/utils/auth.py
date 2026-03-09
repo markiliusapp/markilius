@@ -60,7 +60,6 @@ def get_current_user(
             )
 
     except JWTError as e:
-        print("JWTError: ", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
