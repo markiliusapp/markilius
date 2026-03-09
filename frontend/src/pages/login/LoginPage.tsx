@@ -9,7 +9,6 @@ import './Login.css'
 import { useAuth } from "@/context/authContext";
 
 const Login = () => {
-    console.log("printing from the login page: ", new Date())
     const { login } = useAuth()
     const [formData, setFormData] = useState<LoginUser>({
         email: '',

@@ -9,8 +9,18 @@ const getToken = (): string | null => {
 // Helper to handle API responses
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
-        const error = await response.json().catch( () => ({ detail: "An error occurred"}))
-        throw new Error(error.detail || "Request failed")
+        let errorMessage = "An error occurred"
+        try {
+            const errorData = await response.json()
+            if (Array.isArray(errorData.detail)) {
+                errorMessage = errorMessage
+            } else {
+                errorMessage = errorData.detail || errorMessage
+            }
+        } catch {
+            errorMessage = response.statusText || `Error ${response.status}`;
+        }
+        throw new Error(errorMessage)
     }
     return response.json()
 }

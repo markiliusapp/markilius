@@ -47,7 +47,6 @@ interface ActiveTasksProps {
 }
 
 const ActiveTasks = ({ refreshKey, onToggle, selectedDate }: ActiveTasksProps) => {
-    console.log("Printing from Active Tasks: ", new Date())
     const [taskList, setTaskList] = useState<TaskResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -63,7 +62,6 @@ const ActiveTasks = ({ refreshKey, onToggle, selectedDate }: ActiveTasksProps) =
             setTaskList(response)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load tasks')
-            console.error(err)
         } finally {
             setLoading(false)
         }
