@@ -34,6 +34,7 @@ const Login = () => {
             await login(data.access_token)
             navigate("/dashboard")
         } catch (err) {
+            console.log("printing err from login page: ", err)
             setError(err instanceof Error ? err.message : 'Login failed')
         } finally {
             setLoading(false)
