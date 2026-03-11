@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 from datetime import date, datetime
+from app.schemas.arena import ArenaResponse
 
 
 class FrequencyType(str, Enum):
@@ -18,23 +19,23 @@ class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
     frequency: FrequencyType
-    priority: bool
     duration: Optional[int] = None
     due_date: date
+    arena_id: Optional[int] = None
 
 
 class TaskResponse(BaseModel):
     id: int
     user_id: int
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     frequency: str
-    priority: bool
-    duration: Optional[int]
+    duration: Optional[int] = None
     created_at: datetime
     due_date: date
     is_completed: bool
     is_locked: bool
+    arena: Optional[ArenaResponse] = None
 
     class Config:
         from_attributes = True
@@ -44,6 +45,6 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     frequency: Optional[FrequencyType] = None
-    priority: Optional[bool] = None
     duration: Optional[int] = None
     due_date: Optional[date] = None
+    arena_id: Optional[int] = None

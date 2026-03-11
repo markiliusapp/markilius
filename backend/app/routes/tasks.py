@@ -5,9 +5,12 @@ from app.models.user import User
 from app.utils.auth import get_current_user
 from app.database import get_db
 from app.models.task import Task
+from app.models.arena import Arena
 from typing import Optional
 from datetime import date
 from app.services.locking_tasks import lock_overdue_tasks
+from sqlalchemy.orm import joinedload
+
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -23,14 +26,26 @@ def create_task(
     """
     Creates a new task for the current user
     """
+    if task_data.arena_id:
+        arena = (
+            db.query(Arena)
+            .filter(
+                Arena.id == task_data.arena_id,
+                Arena.user_id == current_user.id,
+            )
+            .first()
+        )
+        if not arena:
+            raise HTTPException(status_code=404, detail="Arena not found")
+
     new_task = Task(
         user_id=current_user.id,
         title=task_data.title,
         description=task_data.description,
         frequency=task_data.frequency.value,
-        priority=task_data.priority,
         duration=task_data.duration,
         due_date=task_data.due_date,
+        arena_id=task_data.arena_id,
     )
 
     db.add(new_task)
@@ -44,12 +59,17 @@ def create_task(
 def get_task(
     status: Optional[bool] = None,
     due_date: Optional[date] = None,
-    priority: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Task).filter(Task.user_id == current_user.id)
-
+    print("printing status: ", status)
+    print("Printing due date: ", due_date)
+    query = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(Task.user_id == current_user.id)
+    )
+    print("Printing query: ", query)
     if status is not None:
         query = query.filter(Task.is_completed == status)
 
@@ -59,15 +79,11 @@ def get_task(
     if due_date:
         query = query.filter(Task.due_date == due_date)
 
-    if priority is not None:
-        query = query.filter(Task.priority == priority)
-
-    # priority = true means high priority task
-    # priority = false means low priority task
-
     # Order by due_date (most recent first), then created_at
     tasks = query.order_by(Task.due_date.desc(), Task.created_at.desc()).all()
+    print("Printing tasks: ", tasks)
     tasks = lock_overdue_tasks(tasks, db)
+    print("printing tasks: ", tasks)
 
     return tasks
 
@@ -84,7 +100,12 @@ def update_task(
 
     """
 
-    task = db.query(Task).filter(Task.id == task_id).first()
+    task = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(Task.id == task_id)
+        .first()
+    )
 
     if not task:
         raise HTTPException(
@@ -106,6 +127,22 @@ def update_task(
             detail="Cannot update locked task - Past Deadline",
         )
 
+    # Validate arena_id if provided
+    if task.arena_id is not None:
+        arena = (
+            db.query(Arena)
+            .filter(
+                Arena.id == task.arena_id,
+                Arena.user_id == current_user.id,
+            )
+            .first()
+        )
+
+        if not arena:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Arena not found"
+            )
+
     # Update only provided fields
     if task_data.title is not None:
         task.title = task_data.title
@@ -113,12 +150,12 @@ def update_task(
         task.description = task_data.description
     if task_data.frequency is not None:
         task.frequency = task_data.frequency.value
-    if task_data.priority is not None:
-        task.priority = task_data.priority
     if task_data.duration is not None:
         task.duration = task_data.duration
     if task_data.due_date is not None:
         task.due_date = task_data.due_date
+    if task_data.arena_id is not None:
+        task.arena_id = task_data.arena_id
 
     db.commit()
     db.refresh(task)

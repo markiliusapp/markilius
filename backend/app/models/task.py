@@ -10,6 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql import func
 from app.database import Base
+from sqlalchemy.orm import relationship
 
 
 class Task(Base):
@@ -21,12 +22,7 @@ class Task(Base):
     )
     title = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    frequency = Column(
-        String(20), nullable=True
-    )  # 'once', 'daily', 'weekly', 'monthly'
-    priority = Column(
-        Boolean, nullable=False, default=False
-    )  # True = high, False = low
+    frequency = Column(String(20), nullable=True)
     duration = Column(Integer, nullable=True)  # estimated duration in minutes
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
@@ -34,3 +30,8 @@ class Task(Base):
     due_date = Column(Date, nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
     is_locked = Column(Boolean, default=False, nullable=False)
+
+    arena_id = Column(
+        Integer, ForeignKey("arenas.id"), nullable=True, index=True
+    )
+    arena = relationship("Arena", back_populates="tasks")

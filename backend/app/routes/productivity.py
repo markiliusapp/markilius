@@ -4,20 +4,24 @@ from app.schemas.productivity import (
     MonthlyProductivityResponse,
     WeeklyProductivityResponse,
     YearlyProductivityResponse,
+    ArenaBreakdown,
+    DailyBreakDownWithTasks,
+    WeeklySummary,
+    MonthlySummary,
+    YearlySummary,
 )
 from datetime import date, timedelta
 from app.models.user import User
 from app.utils.auth import get_current_user, get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.task import Task
 from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
 from calendar import monthrange
 from app.services.locking_tasks import lock_overdue_tasks
 
 router = APIRouter(prefix="/productivity", tags=["Productivity"])
 
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError
+from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from fastapi import HTTPException, status
 
 
@@ -27,105 +31,62 @@ def get_daily_productivity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get productivity data for a specific date
-    """
-    # Fetch ALL tasks for this date
-    try:
-        tasks = (
-            db.query(Task)
-            .filter(
-                Task.user_id == current_user.id, Task.due_date == target_date
-            )
-            .all()
+    tasks = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(
+            Task.user_id == current_user.id,
+            Task.due_date == target_date,
         )
-        # Lock overdue tasks
-        tasks = lock_overdue_tasks(tasks, db)
+        .all()
+    )
 
-    except OperationalError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection failed",
-        )
-    except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred",
-        )
+    tasks = lock_overdue_tasks(tasks, db)
 
-    # If no tasks, return empty response
     total_tasks = len(tasks)
-    if total_tasks == 0:
-        return DailyProductivityResponse(
-            date=target_date,
-            total_tasks=0,
-            completed_tasks=0,
-            completion_percentage=0.0,
-            high_priority_tasks=0,
-            low_priority_tasks=0,
-            high_priority_completed=0,
-            low_priority_completed=0,
-            high_priority_completion_percentage=0.0,
-            low_priority_completion_percentage=0.0,
-            total_hours=0.0,
-            high_priority_hours=0.0,
-            low_priority_hours=0.0,
-        )
-
-    # Calculate metrics from the task list (no try/except needed)
     completed_tasks = sum(1 for t in tasks if t.is_completed)
-    high_priority_tasks = sum(1 for t in tasks if t.priority)
-    low_priority_tasks = total_tasks - high_priority_tasks
-
-    high_priority_completed = sum(
-        1 for t in tasks if t.priority and t.is_completed
+    completion_percentage = (
+        round((completed_tasks / total_tasks * 100), 2)
+        if total_tasks > 0
+        else 0
     )
-    low_priority_completed = sum(
-        1 for t in tasks if not t.priority and t.is_completed
-    )
+    total_hours = sum((t.duration or 0) for t in tasks if t.is_completed) / 60
 
-    # Completion percentages
-    completion_percentage = round(completed_tasks / total_tasks * 100, 2)
+    # Arena breakdown
+    arena_map = {}
+    for task in tasks:
+        if task.arena:
+            arena_id = task.arena.id
+            if arena_id not in arena_map:
+                arena_map[arena_id] = {
+                    "arena_id": arena_id,
+                    "arena_name": task.arena.name,
+                    "arena_color": task.arena.color,
+                    "total_tasks": 0,
+                    "completed_tasks": 0,
+                    "total_hours": 0.0,
+                }
+            arena_map[arena_id]["total_tasks"] += 1
+            if task.is_completed:
+                arena_map[arena_id]["completed_tasks"] += 1
+                arena_map[arena_id]["total_hours"] += (task.duration or 0) / 60
 
-    high_priority_completion_percentage = (
-        round(high_priority_completed / high_priority_tasks * 100, 2)
-        if high_priority_tasks > 0
-        else 0.0
-    )
-
-    low_priority_completion_percentage = (
-        round(low_priority_completed / low_priority_tasks * 100, 2)
-        if low_priority_tasks > 0
-        else 0.0
-    )
-
-    # Duration calculations (only completed tasks)
-    total_duration = sum(t.duration or 0 for t in tasks if t.is_completed)
-    total_duration_hours = round(total_duration / 60, 2)
-
-    high_priority_duration = sum(
-        t.duration or 0 for t in tasks if t.is_completed and t.priority
-    )
-    high_priority_duration_hours = round(high_priority_duration / 60, 2)
-
-    low_priority_duration_hours = round(
-        total_duration_hours - high_priority_duration_hours, 2
-    )
+    arenas = []
+    for arena_data in arena_map.values():
+        total = arena_data["total_tasks"]
+        completed = arena_data["completed_tasks"]
+        arena_data["completion_percentage"] = (
+            round((completed / total * 100), 2) if total > 0 else 0
+        )
+        arenas.append(ArenaBreakdown(**arena_data))
 
     return DailyProductivityResponse(
         date=target_date,
         total_tasks=total_tasks,
         completed_tasks=completed_tasks,
-        completion_percentage=completion_percentage,
-        high_priority_tasks=high_priority_tasks,
-        low_priority_tasks=low_priority_tasks,
-        high_priority_completed=high_priority_completed,
-        low_priority_completed=low_priority_completed,
-        high_priority_completion_percentage=high_priority_completion_percentage,
-        low_priority_completion_percentage=low_priority_completion_percentage,
-        total_hours=total_duration_hours,
-        high_priority_hours=high_priority_duration_hours,
-        low_priority_hours=low_priority_duration_hours,
+        completion_percentage=round(completion_percentage, 1),
+        total_hours=round(total_hours, 2),
+        arenas=arenas,
     )
 
 
@@ -135,138 +96,154 @@ def get_weekly_productivity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get productivity metrics for the entire week
-    Returns daily breakdown and tasks per day + aggregate stats
-    """
     end_date = start_date + timedelta(days=6)
 
-    # Get all tasks for this week
-    try:
-        tasks = (
-            db.query(Task)
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date <= end_date,
-                Task.due_date >= start_date,
-            )
-            .all()
+    tasks = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(
+            Task.user_id == current_user.id,
+            Task.due_date >= start_date,
+            Task.due_date <= end_date,
         )
-        tasks = lock_overdue_tasks(tasks, db)
-    except OperationalError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection failed",
-        )
-    except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred",
-        )
+        .all()
+    )
 
-    # Initialize 7 days hash table
-    daily_data = {}
-    for day in range(7):
-        current_date = start_date + timedelta(days=day)
-        daily_data[str(current_date)] = {
-            "date": current_date,
-            "total_tasks": 0,
-            "completed_tasks": 0,
-            "completion_percentage": 0,
-            "total_duration": 0,
-            "completed": [],
-            "incomplete": [],
-        }
+    tasks = lock_overdue_tasks(tasks, db)
 
     # Group tasks by date
+    tasks_by_date = {}
+    for single_date in (start_date + timedelta(days=i) for i in range(7)):
+        tasks_by_date[single_date] = []
     for task in tasks:
-        date_key = str(task.due_date)
-        if date_key in daily_data:
-            daily_data[date_key]["total_tasks"] += 1
+        if task.due_date in tasks_by_date:
+            tasks_by_date[task.due_date].append(task)
 
-            if task.is_completed:
-                daily_data[date_key]["completed_tasks"] += 1
-                daily_data[date_key]["completed"].append(task)
+    # Build daily breakdown
+    daily_breakdown = []
+    candidates = []
 
-                if task.duration:
-                    daily_data[date_key]["total_duration"] = daily_data[
-                        date_key
-                    ]["total_duration"] + round(task.duration / 60, 2)
-
-            else:
-                daily_data[date_key]["incomplete"].append(task)
-
-    # Calculate daily completion percentages
-    for date_key in daily_data:
-        total = daily_data[date_key]["total_tasks"]
-        completed = daily_data[date_key]["completed_tasks"]
-        if total > 0:
-            daily_data[date_key]["completion_percentage"] = round(
-                (completed / total) * 100, 1
-            )
-
-    # Calculate weekly totals
-    week_total_tasks = sum(day["total_tasks"] for day in daily_data.values())
-    week_completed_tasks = sum(
-        day["completed_tasks"] for day in daily_data.values()
-    )
-    week_total_duration = sum(
-        day["total_duration"] for day in daily_data.values()
-    )
-
-    week_completion_percentage = 0
-    if week_total_tasks > 0:
-        week_completion_percentage = round(
-            (week_completed_tasks / week_total_tasks) * 100, 1
+    for single_date, day_tasks in tasks_by_date.items():
+        total = len(day_tasks)
+        completed = sum(1 for t in day_tasks if t.is_completed)
+        completion_percentage = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        total_duration = round(
+            sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
-    # Calculate averages (only count days with tasks)
-    days_with_tasks = sum(
-        1 for day in daily_data.values() if day["total_tasks"] > 0
-    )
-    avg_tasks_per_day = 0
-    avg_duration_per_day = 0
-    if days_with_tasks > 0:
-        avg_tasks_per_day = round(week_total_tasks / days_with_tasks, 1)
-        avg_duration_per_day = round(week_total_duration / days_with_tasks, 1)
+        completed_tasks = [t for t in day_tasks if t.is_completed]
+        incomplete_tasks = [t for t in day_tasks if not t.is_completed]
 
-    # Find most productive day
-    days_with_data = [
-        day for day in daily_data.values() if day["total_tasks"] > 0
-    ]
+        daily_breakdown.append(
+            DailyBreakDownWithTasks(
+                date=single_date,
+                total_tasks=total,
+                completed_tasks=completed,
+                completion_percentage=completion_percentage,
+                total_duration=total_duration,
+                completed=completed_tasks,
+                incomplete=incomplete_tasks,
+            )
+        )
+
+        if total > 0:
+            candidates.append(
+                {
+                    "date": single_date,
+                    "total_tasks": total,
+                    "completed_tasks": completed,
+                    "completion_percentage": completion_percentage,
+                    "total_hours": total_duration,
+                }
+            )
+
+    # Most productive day with duration as tiebreaker
     most_productive_day = None
-    if days_with_data:
-        best_day = days_with_data[0]
-        for day in days_with_data[1:]:
+    if candidates:
+        best = candidates[0]
+        for candidate in candidates[1:]:
             if (
-                day["completion_percentage"]
-                > best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                > best["completion_percentage"]
             ):
-                best_day = day
+                best = candidate
             elif (
-                day["completion_percentage"]
-                == best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                == best["completion_percentage"]
             ):
-                if day["total_duration"] > best_day["total_duration"]:
-                    best_day = day
+                if candidate["total_hours"] > best["total_hours"]:
+                    best = candidate
+        most_productive_day = DailyProductivityResponse(**best, arenas=[])
 
-        most_productive_day = best_day
+    # Weekly summary stats
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for t in tasks if t.is_completed)
+    completion_percentage = round(
+        (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0, 2
+    )
+    total_duration_hours = round(
+        sum((t.duration or 0) for t in tasks if t.is_completed) / 60, 2
+    )
+    days_with_tasks = sum(
+        1 for day_tasks in tasks_by_date.values() if len(day_tasks) > 0
+    )
+    average_tasks_per_day = round(
+        total_tasks / days_with_tasks if days_with_tasks > 0 else 0, 2
+    )
+    average_duration_per_day = round(
+        total_duration_hours / days_with_tasks if days_with_tasks > 0 else 0, 2
+    )
 
-    return {
-        "start_date": start_date,
-        "end_date": end_date,
-        "summary": {
-            "total_tasks": week_total_tasks,
-            "completed_tasks": week_completed_tasks,
-            "completion_percentage": week_completion_percentage,
-            "total_duration_hours": week_total_duration,
-            "average_tasks_per_day": avg_tasks_per_day,
-            "average_duration_per_day": avg_duration_per_day,
-            "days_with_tasks": days_with_tasks,
-        },
-        "most_productive_day": most_productive_day,
-        "daily_breakdown": list(daily_data.values()),
-    }
+    # Arena breakdown for weekly summary
+    arena_map = {}
+    for task in tasks:
+        if task.arena:
+            arena_id = task.arena.id
+            if arena_id not in arena_map:
+                arena_map[arena_id] = {
+                    "arena_id": arena_id,
+                    "arena_name": task.arena.name,
+                    "arena_color": task.arena.color,
+                    "total_tasks": 0,
+                    "completed_tasks": 0,
+                    "total_hours": 0.0,
+                }
+            arena_map[arena_id]["total_tasks"] += 1
+            if task.is_completed:
+                arena_map[arena_id]["completed_tasks"] += 1
+                arena_map[arena_id]["total_hours"] += round(
+                    (task.duration or 0) / 60, 2
+                )
+
+    arenas = []
+    for arena_data in arena_map.values():
+        total = arena_data["total_tasks"]
+        completed = arena_data["completed_tasks"]
+        arena_data["completion_percentage"] = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        arenas.append(ArenaBreakdown(**arena_data))
+
+    summary = WeeklySummary(
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+        completion_percentage=completion_percentage,
+        total_duration_hours=total_duration_hours,
+        average_tasks_per_day=average_tasks_per_day,
+        average_duration_per_day=average_duration_per_day,
+        days_with_tasks=days_with_tasks,
+        arenas=arenas,
+    )
+
+    return WeeklyProductivityResponse(
+        start_date=start_date,
+        end_date=end_date,
+        summary=summary,
+        most_productive_day=most_productive_day,
+        daily_breakdown=daily_breakdown,
+    )
 
 
 @router.get("/month", response_model=MonthlyProductivityResponse)
@@ -276,143 +253,153 @@ def get_monthly_productivity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get productivity metrics for the entire month
-    Returns daily breakdown for heatmap + aggregate stats
-    """
-
-    # Get the first and last day of the month
     first_day = date(year, month, 1)
     last_day_number = monthrange(year, month)[1]
     last_day = date(year, month, last_day_number)
 
-    # Get all the tasks for the current month
-    try:
-        tasks = (
-            db.query(Task)
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date <= last_day,
-                Task.due_date >= first_day,
-            )
-            .all()
+    tasks = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(
+            Task.user_id == current_user.id,
+            Task.due_date >= first_day,
+            Task.due_date <= last_day,
         )
-        tasks = lock_overdue_tasks(tasks, db)
+        .all()
+    )
 
-    except OperationalError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection failed",
-        )
-    except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred",
-        )
+    tasks = lock_overdue_tasks(tasks, db)
 
     # Group tasks by date
-    daily_data = {}
-    for i in range(1, last_day_number + 1):
-        current_date = date(year, month, i)
-        daily_data[str(current_date)] = {
-            "date": current_date,
-            "total_tasks": 0,
-            "completed_tasks": 0,
-            "completion_percentage": 0.0,
-            "total_duration": 0,
-        }
-
-    # Count tasks for each day
+    tasks_by_date = {}
+    for i in range(last_day_number):
+        tasks_by_date[date(year, month, i + 1)] = []
     for task in tasks:
-        date_key = str(task.due_date)
-        if date_key in daily_data:
-            daily_data[date_key]["total_tasks"] += 1
-            if task.is_completed:
-                daily_data[date_key]["completed_tasks"] += 1
-            if (
-                task.is_completed and task.duration
-            ):  # only count the duration for completed tasks
-                daily_data[date_key]["total_duration"] = daily_data[date_key][
-                    "total_duration"
-                ] + round(task.duration / 60, 2)
+        if task.due_date in tasks_by_date:
+            tasks_by_date[task.due_date].append(task)
 
-    # Calcuate percentages for each day
-    for date_key in daily_data:
-        total = daily_data[date_key]["total_tasks"]
-        completed = daily_data[date_key]["completed_tasks"]
-        if total > 0:
-            daily_data[date_key]["completion_percentage"] = round(
-                (completed / total) * 100, 1
-            )
+    # Build daily breakdown
+    daily_breakdown = []
+    candidates = []
 
-    # Calculate Monthly totals
-    month_total_tasks = sum(
-        [day["total_tasks"] for day in daily_data.values()]
-    )
-    month_completed_tasks = sum(
-        [day["completed_tasks"] for day in daily_data.values()]
-    )
-    month_total_duration = sum(
-        [day["total_duration"] for day in daily_data.values()]
-    )
-
-    # Calcuate month completion percentage
-    month_completion_percentage = 0
-    if month_total_tasks > 0:
-        month_completion_percentage = round(
-            month_completed_tasks / month_total_tasks * 100, 2
+    for single_date, day_tasks in tasks_by_date.items():
+        total = len(day_tasks)
+        completed = sum(1 for t in day_tasks if t.is_completed)
+        completion_percentage = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        total_duration = round(
+            sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
-    # Calcuate averages (only count days with tasks)
-    days_with_task = sum(
-        [1 for day in daily_data.values() if day["total_tasks"] > 0]
-    )
-    avg_daily_task = 0
-    avg_daily_duration = 0
-    if month_total_tasks > 0:
-        avg_daily_task = round(month_total_tasks / days_with_task, 1)
-        avg_daily_duration = round(month_total_duration / days_with_task, 1)
+        daily_breakdown.append(
+            DailyProductivityResponse(
+                date=single_date,
+                total_tasks=total,
+                completed_tasks=completed,
+                completion_percentage=completion_percentage,
+                total_hours=total_duration,
+                arenas=[],
+            )
+        )
 
-    # Find most productive day
-    # Sort by: 1) completion_percentage DESC, 2) total_duration DESC
+        if total > 0:
+            candidates.append(
+                {
+                    "date": single_date,
+                    "total_tasks": total,
+                    "completed_tasks": completed,
+                    "completion_percentage": completion_percentage,
+                    "total_hours": total_duration,
+                }
+            )
+
+    # Most productive day with duration as tiebreaker
     most_productive_day = None
-    all_days_with_tasks = [
-        day for day in daily_data.values() if day["total_tasks"] > 0
-    ]
-    if all_days_with_tasks:
-        best_day = all_days_with_tasks[0]
-        for day in all_days_with_tasks[1:]:
+    if candidates:
+        best = candidates[0]
+        for candidate in candidates[1:]:
             if (
-                day["completion_percentage"]
-                > best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                > best["completion_percentage"]
             ):
-                best_day = day
-            # User duration as tie breaker
+                best = candidate
             elif (
-                day["completion_percentage"]
-                == best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                == best["completion_percentage"]
             ):
-                if day["total_duration"] > best_day["total_duration"]:
-                    best_day = day
+                if candidate["total_hours"] > best["total_hours"]:
+                    best = candidate
+        most_productive_day = DailyProductivityResponse(**best, arenas=[])
 
-        most_productive_day = best_day
+    # Monthly summary stats
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for t in tasks if t.is_completed)
+    completion_percentage = round(
+        (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0, 2
+    )
+    total_duration_hours = round(
+        sum((t.duration or 0) for t in tasks if t.is_completed) / 60, 2
+    )
+    days_with_tasks = sum(
+        1 for day_tasks in tasks_by_date.values() if len(day_tasks) > 0
+    )
+    average_tasks_per_day = round(
+        total_tasks / days_with_tasks if days_with_tasks > 0 else 0, 2
+    )
+    average_duration_per_day = round(
+        total_duration_hours / days_with_tasks if days_with_tasks > 0 else 0, 2
+    )
 
-    return {
-        "year": year,
-        "month": month,
-        "summary": {
-            "month": month,
-            "total_tasks": month_total_tasks,
-            "completed_tasks": month_completed_tasks,
-            "completion_percentage": month_completion_percentage,
-            "total_duration_hours": month_total_duration,
-            "average_tasks_per_day": avg_daily_task,
-            "average_duration_per_day": avg_daily_duration,
-            "days_with_tasks": days_with_task,
-        },
-        "most_productive_day": most_productive_day,
-        "daily_breakdown": list(daily_data.values()),
-    }
+    # Arena breakdown
+    arena_map = {}
+    for task in tasks:
+        if task.arena:
+            arena_id = task.arena.id
+            if arena_id not in arena_map:
+                arena_map[arena_id] = {
+                    "arena_id": arena_id,
+                    "arena_name": task.arena.name,
+                    "arena_color": task.arena.color,
+                    "total_tasks": 0,
+                    "completed_tasks": 0,
+                    "total_hours": 0.0,
+                }
+            arena_map[arena_id]["total_tasks"] += 1
+            if task.is_completed:
+                arena_map[arena_id]["completed_tasks"] += 1
+                arena_map[arena_id]["total_hours"] += round(
+                    (task.duration or 0) / 60, 2
+                )
+
+    arenas = []
+    for arena_data in arena_map.values():
+        total = arena_data["total_tasks"]
+        completed = arena_data["completed_tasks"]
+        arena_data["completion_percentage"] = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        arenas.append(ArenaBreakdown(**arena_data))
+
+    summary = MonthlySummary(
+        month=month,
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+        completion_percentage=completion_percentage,
+        total_duration_hours=total_duration_hours,
+        average_tasks_per_day=average_tasks_per_day,
+        average_duration_per_day=average_duration_per_day,
+        days_with_tasks=days_with_tasks,
+        arenas=arenas,
+    )
+
+    return MonthlyProductivityResponse(
+        year=year,
+        month=month,
+        summary=summary,
+        most_productive_day=most_productive_day,
+        daily_breakdown=daily_breakdown,
+    )
 
 
 @router.get("/year", response_model=YearlyProductivityResponse)
@@ -421,180 +408,219 @@ def get_yearly_productivity(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get yearly productivity metrics
-    Returns daily breakdown for the heatmap + aggregate stats and monthly stats
-    """
     first_day = date(year, 1, 1)
     last_day = date(year, 12, 31)
 
-    # Get tasks for the current year
-    try:
-        tasks = (
-            db.query(Task)
-            .filter(
-                Task.user_id == current_user.id,
-                Task.due_date >= first_day,
-                Task.due_date <= last_day,
-            )
-            .all()
+    tasks = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(
+            Task.user_id == current_user.id,
+            Task.due_date >= first_day,
+            Task.due_date <= last_day,
         )
-        tasks = lock_overdue_tasks(tasks, db)
-    except OperationalError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection failed",
-        )
-    except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred",
-        )
-
-    # Group tasks by date
-    daily_data = {}
-    num_days = (last_day - first_day).days + 1
-    # add one because subtracting gives the difference between the 2 dates.
-    for i in range(num_days):
-        current_date = first_day + timedelta(days=i)
-        daily_data[str(current_date)] = {
-            "date": current_date,
-            "total_tasks": 0,
-            "completed_tasks": 0,
-            "completion_percentage": 0.0,
-            "total_duration": 0,
-        }
-
-    # Count tasks for each day
-    for task in tasks:
-        date_key = str(task.due_date)
-        if date_key in daily_data:
-            daily_data[date_key]["total_tasks"] += 1
-
-            if task.is_completed:
-                daily_data[date_key]["completed_tasks"] += 1
-
-                if task.duration:
-                    daily_data[date_key]["total_duration"] = daily_data[
-                        date_key
-                    ]["total_duration"] + round(task.duration / 60, 2)
-
-    for day in daily_data.values():
-        if day["total_tasks"] > 0:
-            day["completion_percentage"] = round(
-                day["completed_tasks"] / day["total_tasks"] * 100, 1
-            )
-
-    # Count total tasks for the year
-    year_total_tasks = sum([day["total_tasks"] for day in daily_data.values()])
-
-    # Count completed tasks for the year
-    year_completed_tasks = sum(
-        [day["completed_tasks"] for day in daily_data.values()]
+        .all()
     )
 
-    # Calculate completion percentage
-    year_completion_percentage = 0
-    if year_total_tasks > 0:
-        year_completion_percentage = round(
-            year_completed_tasks / year_total_tasks * 100, 2
+    tasks = lock_overdue_tasks(tasks, db)
+
+    # Group tasks by date and month
+    tasks_by_date = {}
+    tasks_by_month = {m: [] for m in range(1, 13)}
+
+    for task in tasks:
+        if task.due_date:
+            tasks_by_date.setdefault(task.due_date, []).append(task)
+            tasks_by_month[task.due_date.month].append(task)
+
+    # Daily breakdown for heatmap + best day candidates
+    daily_breakdown = []
+    day_candidates = []
+
+    for single_date, day_tasks in sorted(tasks_by_date.items()):
+        total = len(day_tasks)
+        completed = sum(1 for t in day_tasks if t.is_completed)
+        completion_percentage = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        total_hours = round(
+            sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
-    # Find the best day of the year
-    days_with_task = [
-        day for day in daily_data.values() if day["total_tasks"] > 0
-    ]  # list of days with task
-    most_productive_day = None
-    if days_with_task:
-        best_day = days_with_task[0]
-        for day in days_with_task[1:]:
+        day_entry = DailyProductivityResponse(
+            date=single_date,
+            total_tasks=total,
+            completed_tasks=completed,
+            completion_percentage=completion_percentage,
+            total_hours=total_hours,
+            arenas=[],
+        )
+        daily_breakdown.append(day_entry)
+
+        if total > 0:
+            day_candidates.append(
+                {
+                    "date": single_date,
+                    "total_tasks": total,
+                    "completed_tasks": completed,
+                    "completion_percentage": completion_percentage,
+                    "total_hours": total_hours,
+                }
+            )
+
+    # Best day with duration as tiebreaker
+    best_day = None
+    if day_candidates:
+        best = day_candidates[0]
+        for candidate in day_candidates[1:]:
             if (
-                day["completion_percentage"]
-                > best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                > best["completion_percentage"]
             ):
-                best_day = day
-            # Use duration as tie breaker
+                best = candidate
             elif (
-                day["completion_percentage"]
-                == best_day["completion_percentage"]
+                candidate["completion_percentage"]
+                == best["completion_percentage"]
             ):
-                if day["total_duration"] > best_day["total_duration"]:
-                    best_day = day
+                if candidate["total_hours"] > best["total_hours"]:
+                    best = candidate
+        best_day = DailyProductivityResponse(**best, arenas=[])
 
-        most_productive_day = best_day
+    # Monthly summaries
+    months = []
+    month_candidates = []
 
-    # list of montly summary
-    monthly_data = {}
-    for i in range(1, 13):
-        monthly_data[i] = {
-            "month": i,
-            "total_tasks": 0,
-            "completed_tasks": 0,
-            "completion_percentage": 0,
-            "total_duration_hours": 0,
-            "average_tasks_per_day": 0,
-            "average_duration_per_day": 0,
-            "days_with_tasks": 0,
-        }
+    for month_num, month_tasks in tasks_by_month.items():
+        total_tasks = len(month_tasks)
+        completed_tasks = sum(1 for t in month_tasks if t.is_completed)
+        completion_percentage = round(
+            (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0, 2
+        )
+        total_duration_hours = round(
+            sum((t.duration or 0) for t in month_tasks if t.is_completed) / 60,
+            2,
+        )
+        days_with_tasks = len(
+            set(t.due_date for t in month_tasks if t.due_date)
+        )
+        average_tasks_per_day = round(
+            total_tasks / days_with_tasks if days_with_tasks > 0 else 0, 2
+        )
+        average_duration_per_day = round(
+            (
+                total_duration_hours / days_with_tasks
+                if days_with_tasks > 0
+                else 0
+            ),
+            2,
+        )
 
-    # Roll up daily data into monthly summaries
-    for day in daily_data.values():
-        m = day["date"].month
-        monthly_data[m]["total_tasks"] += day["total_tasks"]
-        monthly_data[m]["completed_tasks"] += day["completed_tasks"]
-        monthly_data[m]["total_duration_hours"] += day["total_duration"]
-        if day["total_tasks"] > 0:
-            monthly_data[m]["days_with_tasks"] += 1
+        # Arena breakdown per month
+        arena_map = {}
+        for task in month_tasks:
+            if task.arena:
+                arena_id = task.arena.id
+                if arena_id not in arena_map:
+                    arena_map[arena_id] = {
+                        "arena_id": arena_id,
+                        "arena_name": task.arena.name,
+                        "arena_color": task.arena.color,
+                        "total_tasks": 0,
+                        "completed_tasks": 0,
+                        "total_hours": 0.0,
+                    }
+                arena_map[arena_id]["total_tasks"] += 1
+                if task.is_completed:
+                    arena_map[arena_id]["completed_tasks"] += 1
+                    arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
 
-    # Calculate monthly percentages and averages
-    for m in monthly_data.values():
-        if m["total_tasks"] > 0:
-            m["completion_percentage"] = round(
-                m["completed_tasks"] / m["total_tasks"] * 100, 1
+        arenas = []
+        for arena_data in arena_map.values():
+            total = arena_data["total_tasks"]
+            completed = arena_data["completed_tasks"]
+            arena_data["completion_percentage"] = round(
+                (completed / total * 100) if total > 0 else 0, 2
             )
-        if m["days_with_tasks"] > 0:
-            m["average_tasks_per_day"] = round(
-                m["total_tasks"] / m["days_with_tasks"], 1
-            )
-            m["average_duration_per_day"] = round(
-                m["total_duration_hours"] / m["days_with_tasks"], 1
-            )
+            arenas.append(ArenaBreakdown(**arena_data))
 
-    # Find the best month of the year
-    months_with_tasks = [
-        month for month in monthly_data.values() if month["total_tasks"] > 0
-    ]
-    most_productive_month = None
+        month_summary = MonthlySummary(
+            month=month_num,
+            total_tasks=total_tasks,
+            completed_tasks=completed_tasks,
+            completion_percentage=completion_percentage,
+            total_duration_hours=total_duration_hours,
+            average_tasks_per_day=average_tasks_per_day,
+            average_duration_per_day=average_duration_per_day,
+            days_with_tasks=days_with_tasks,
+            arenas=arenas,
+        )
+        months.append(month_summary)
 
-    if months_with_tasks:
-        best_month = months_with_tasks[0]
-        for m in months_with_tasks[1:]:
-            if (
-                m["completion_percentage"]
-                > best_month["completion_percentage"]
-            ):
-                best_month = m
-            elif (
-                m["completion_percentage"]
-                == best_month["completion_percentage"]
-            ):
-                if (
-                    m["total_duration_hours"]
-                    > best_month["total_duration_hours"]
-                ):
-                    best_month = m
+        if total_tasks > 0:
+            month_candidates.append(month_summary)
 
-        most_productive_month = best_month
+    # Best month with duration as tiebreaker
+    best_month = None
+    if month_candidates:
+        best = month_candidates[0]
+        for candidate in month_candidates[1:]:
+            if candidate.completion_percentage > best.completion_percentage:
+                best = candidate
+            elif candidate.completion_percentage == best.completion_percentage:
+                if candidate.total_duration_hours > best.total_duration_hours:
+                    best = candidate
+        best_month = best
 
-    return {
-        "year": year,
-        "summary": {
-            "total_tasks": year_total_tasks,
-            "completed_tasks": year_completed_tasks,
-            "completion_percentage": year_completion_percentage,
-        },
-        "daily_breakdown": list(daily_data.values()),
-        "best_day": most_productive_day,
-        "best_month": most_productive_month,
-        "months": list(monthly_data.values()),
-    }
+    # Yearly summary arena breakdown
+    arena_map = {}
+    for task in tasks:
+        if task.arena:
+            arena_id = task.arena.id
+            if arena_id not in arena_map:
+                arena_map[arena_id] = {
+                    "arena_id": arena_id,
+                    "arena_name": task.arena.name,
+                    "arena_color": task.arena.color,
+                    "total_tasks": 0,
+                    "completed_tasks": 0,
+                    "total_hours": 0.0,
+                }
+            arena_map[arena_id]["total_tasks"] += 1
+            if task.is_completed:
+                arena_map[arena_id]["completed_tasks"] += 1
+                arena_map[arena_id]["total_hours"] += round(
+                    (task.duration or 0) / 60, 2
+                )
+
+    yearly_arenas = []
+    for arena_data in arena_map.values():
+        total = arena_data["total_tasks"]
+        completed = arena_data["completed_tasks"]
+        arena_data["completion_percentage"] = round(
+            (completed / total * 100) if total > 0 else 0, 2
+        )
+        yearly_arenas.append(ArenaBreakdown(**arena_data))
+
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for t in tasks if t.is_completed)
+    completion_percentage = round(
+        (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0, 2
+    )
+
+    summary = YearlySummary(
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+        completion_percentage=completion_percentage,
+        arenas=yearly_arenas,
+    )
+
+    return YearlyProductivityResponse(
+        year=year,
+        summary=summary,
+        daily_breakdown=daily_breakdown,
+        best_day=best_day,
+        best_month=best_month,
+        months=months,
+    )

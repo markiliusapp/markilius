@@ -4,28 +4,23 @@ from typing import Optional
 from app.schemas.task import TaskResponse
 
 
+class ArenaBreakdown(BaseModel):
+    arena_id: int
+    arena_name: str
+    arena_color: str
+    total_tasks: int
+    completed_tasks: int
+    completion_percentage: float
+    total_hours: float
+
+
 class DailyProductivityResponse(BaseModel):
     date: date
     total_tasks: int
     completed_tasks: int
     completion_percentage: float
-    high_priority_tasks: int
-    low_priority_tasks: int
-    high_priority_completed: int
-    low_priority_completed: int
-    high_priority_completion_percentage: float
-    low_priority_completion_percentage: float
     total_hours: float
-    high_priority_hours: float
-    low_priority_hours: float
-
-
-class DailyBreakdown(BaseModel):
-    date: date
-    total_tasks: int
-    completed_tasks: int
-    completion_percentage: float
-    total_duration: float
+    arenas: list[ArenaBreakdown]
 
 
 class MonthlySummary(BaseModel):
@@ -37,14 +32,15 @@ class MonthlySummary(BaseModel):
     average_tasks_per_day: float
     average_duration_per_day: float
     days_with_tasks: int
+    arenas: list[ArenaBreakdown]
 
 
 class MonthlyProductivityResponse(BaseModel):
     year: int
     month: int
     summary: MonthlySummary
-    most_productive_day: Optional[DailyBreakdown] = None
-    daily_breakdown: list[DailyBreakdown]
+    most_productive_day: Optional[DailyProductivityResponse] = None
+    daily_breakdown: list[DailyProductivityResponse]
 
 
 class DailyBreakDownWithTasks(BaseModel):
@@ -65,13 +61,14 @@ class WeeklySummary(BaseModel):
     average_tasks_per_day: float
     average_duration_per_day: float
     days_with_tasks: int
+    arenas: list[ArenaBreakdown]
 
 
 class WeeklyProductivityResponse(BaseModel):
-    start_date: date  # Monday
-    end_date: date  # Sunday
+    start_date: date
+    end_date: date
     summary: WeeklySummary
-    most_productive_day: Optional[DailyBreakdown] = None
+    most_productive_day: Optional[DailyProductivityResponse] = None
     daily_breakdown: list[DailyBreakDownWithTasks]
 
 
@@ -79,12 +76,13 @@ class YearlySummary(BaseModel):
     total_tasks: int
     completed_tasks: int
     completion_percentage: float
+    arenas: list[ArenaBreakdown]
 
 
 class YearlyProductivityResponse(BaseModel):
     year: int
     summary: YearlySummary
-    daily_breakdown: list[DailyBreakdown]
-    best_day: Optional[DailyBreakdown] = None
+    daily_breakdown: list[DailyProductivityResponse]
+    best_day: Optional[DailyProductivityResponse] = None
     best_month: Optional[MonthlySummary] = None
     months: list[MonthlySummary]

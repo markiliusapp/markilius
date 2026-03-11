@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP
 from sqlalchemy.sql import func
 from app.database import Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -18,3 +19,4 @@ class User(Base):
     # Password reset fields
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+    arenas = relationship("Arena", back_populates="user")
