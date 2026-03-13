@@ -269,14 +269,27 @@ const TaskInput = ({ onTaskCreated, onCancel, task }: TaskInputProps) => {
                     <div className="form-row">
                         <div className="form-group">
                             <label htmlFor="frequency">Frequency</label>
-                            <select id="frequency" name="frequency" value={formData.frequency ?? "once"} onChange={handleChange}>
-                                <option value="once">Once</option>
-                                <option value="daily">Daily</option>
-                                <option value="saturday">Every Saturday</option>
-                                <option value="sunday">Every Sunday</option>
-                                <option value="weekends">Weekends</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
+                            <div className={`select-wrapper ${editMode ? 'select-wrapper-disabled' : ''}`}>
+                                <select
+                                    id="frequency"
+                                    name="frequency"
+                                    value={formData.frequency ?? "once"}
+                                    onChange={handleChange}
+                                    disabled={editMode}
+                                >
+                                    <option value="once">Once</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="saturday">Every Saturday</option>
+                                    <option value="sunday">Every Sunday</option>
+                                    <option value="weekends">Weekends</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                                {editMode && (
+                                    <div className="select-tooltip">
+                                        To change frequency, delete and recreate the task.
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="form-group">

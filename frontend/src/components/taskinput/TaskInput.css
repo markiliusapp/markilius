@@ -191,3 +191,28 @@
         transform: rotate(360deg);
     }
 }
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper-disabled:hover .select-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.select-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    background-color: var(--color-primary);
+    color: #fff;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 10;
+}
