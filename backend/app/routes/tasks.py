@@ -11,6 +11,7 @@ from datetime import date
 from app.services.locking_tasks import lock_overdue_tasks
 from sqlalchemy.orm import joinedload
 from app.services.frequency_management import generate_due_dates
+import uuid
 
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
@@ -39,6 +40,10 @@ def create_task(
         if not arena:
             raise HTTPException(status_code=404, detail="Arena not found")
 
+    # Generate shared group_id for recurring tasks
+    group_id = (
+        str(uuid.uuid4()) if task_data.frequency.value != "once" else None
+    )
     due_dates = generate_due_dates(task_data.due_date, task_data.frequency)
 
     new_tasks = [
@@ -50,6 +55,7 @@ def create_task(
             duration=task_data.duration,
             due_date=due_date,
             arena_id=task_data.arena_id,
+            group_id=group_id,
         )
         for due_date in due_dates
     ]
@@ -244,3 +250,34 @@ def toggle_task_completion(
     db.refresh(task)
 
     return task
+
+
+@router.delete("/{task_id}/series", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task_series(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Find the task to get its group_id
+    task = (
+        db.query(Task)
+        .filter(Task.id == task_id, Task.user_id == current_user.id)
+        .first()
+    )
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if not task.group_id:
+        raise HTTPException(
+            status_code=400, detail="Task is not part of a series"
+        )
+
+    # Delete all incomplete future tasks in the series
+    db.query(Task).filter(
+        Task.group_id == task.group_id,
+        Task.user_id == current_user.id,
+        Task.is_completed == False,
+        Task.due_date >= date.today(),
+    ).delete(synchronize_session=False)
+
+    db.commit()

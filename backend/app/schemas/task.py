@@ -35,6 +35,7 @@ class TaskResponse(BaseModel):
     due_date: date
     is_completed: bool
     is_locked: bool
+    group_id: Optional[str] = None
     arena: Optional[ArenaResponse] = None
 
     class Config:

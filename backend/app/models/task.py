@@ -30,7 +30,7 @@ class Task(Base):
     due_date = Column(Date, nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
     is_locked = Column(Boolean, default=False, nullable=False)
-
+    group_id = Column(String, nullable=True, index=True)
     arena_id = Column(
         Integer, ForeignKey("arenas.id"), nullable=True, index=True
     )
