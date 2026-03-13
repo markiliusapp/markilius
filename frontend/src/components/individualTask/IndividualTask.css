@@ -149,19 +149,17 @@
 }
 
 /* Task Details */
-.task-details {
-    padding-left: 32px;
-}
-
 .task-description {
     font-size: 13px;
     color: var(--color-text-secondary);
     margin-bottom: 8px;
     line-height: 1.5;
+    padding-left: 32px;
 }
 
 .task-meta {
     display: flex;
+    justify-content: start;
     gap: 16px;
 }
 
@@ -219,3 +217,5 @@
         transform: rotate(360deg);
     }
 }
+
+
