@@ -292,6 +292,36 @@ def get_monthly_productivity(
             sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
+        # Arena breakdown per day
+        day_arena_map = {}
+        for task in day_tasks:
+            if task.arena:
+                arena_id = task.arena.id
+                if arena_id not in day_arena_map:
+                    day_arena_map[arena_id] = {
+                        "arena_id": arena_id,
+                        "arena_name": task.arena.name,
+                        "arena_color": task.arena.color,
+                        "total_tasks": 0,
+                        "completed_tasks": 0,
+                        "total_hours": 0.0,
+                    }
+                day_arena_map[arena_id]["total_tasks"] += 1
+                if task.is_completed:
+                    day_arena_map[arena_id]["completed_tasks"] += 1
+                    day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+
+        day_arenas = []
+        for arena_data in day_arena_map.values():
+            t = arena_data["total_tasks"]
+            c = arena_data["completed_tasks"]
+            arena_data["completion_percentage"] = round(
+                (c / t * 100) if t > 0 else 0, 2
+            )
+            day_arenas.append(ArenaBreakdown(**arena_data))
+
         daily_breakdown.append(
             DailyProductivityResponse(
                 date=single_date,
@@ -299,7 +329,7 @@ def get_monthly_productivity(
                 completed_tasks=completed,
                 completion_percentage=completion_percentage,
                 total_hours=total_duration,
-                arenas=[],
+                arenas=day_arenas,
             )
         )
 
@@ -351,7 +381,7 @@ def get_monthly_productivity(
         total_duration_hours / days_with_tasks if days_with_tasks > 0 else 0, 2
     )
 
-    # Arena breakdown
+    # Arena breakdown for summary
     arena_map = {}
     for task in tasks:
         if task.arena:
@@ -433,7 +463,7 @@ def get_yearly_productivity(
             tasks_by_date.setdefault(task.due_date, []).append(task)
             tasks_by_month[task.due_date.month].append(task)
 
-    # Daily breakdown for heatmap + best day candidates
+    # Daily breakdown
     daily_breakdown = []
     day_candidates = []
 
@@ -447,15 +477,46 @@ def get_yearly_productivity(
             sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
-        day_entry = DailyProductivityResponse(
-            date=single_date,
-            total_tasks=total,
-            completed_tasks=completed,
-            completion_percentage=completion_percentage,
-            total_hours=total_hours,
-            arenas=[],
+        # Arena breakdown per day
+        day_arena_map = {}
+        for task in day_tasks:
+            if task.arena:
+                arena_id = task.arena.id
+                if arena_id not in day_arena_map:
+                    day_arena_map[arena_id] = {
+                        "arena_id": arena_id,
+                        "arena_name": task.arena.name,
+                        "arena_color": task.arena.color,
+                        "total_tasks": 0,
+                        "completed_tasks": 0,
+                        "total_hours": 0.0,
+                    }
+                day_arena_map[arena_id]["total_tasks"] += 1
+                if task.is_completed:
+                    day_arena_map[arena_id]["completed_tasks"] += 1
+                    day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+
+        day_arenas = []
+        for arena_data in day_arena_map.values():
+            t = arena_data["total_tasks"]
+            c = arena_data["completed_tasks"]
+            arena_data["completion_percentage"] = round(
+                (c / t * 100) if t > 0 else 0, 2
+            )
+            day_arenas.append(ArenaBreakdown(**arena_data))
+
+        daily_breakdown.append(
+            DailyProductivityResponse(
+                date=single_date,
+                total_tasks=total,
+                completed_tasks=completed,
+                completion_percentage=completion_percentage,
+                total_hours=total_hours,
+                arenas=day_arenas,
+            )
         )
-        daily_breakdown.append(day_entry)
 
         if total > 0:
             day_candidates.append(
@@ -468,7 +529,7 @@ def get_yearly_productivity(
                 }
             )
 
-    # Best day with duration as tiebreaker
+    # Best day
     best_day = None
     if day_candidates:
         best = day_candidates[0]
@@ -538,10 +599,10 @@ def get_yearly_productivity(
 
         arenas = []
         for arena_data in arena_map.values():
-            total = arena_data["total_tasks"]
-            completed = arena_data["completed_tasks"]
+            t = arena_data["total_tasks"]
+            c = arena_data["completed_tasks"]
             arena_data["completion_percentage"] = round(
-                (completed / total * 100) if total > 0 else 0, 2
+                (c / t * 100) if t > 0 else 0, 2
             )
             arenas.append(ArenaBreakdown(**arena_data))
 
@@ -561,7 +622,7 @@ def get_yearly_productivity(
         if total_tasks > 0:
             month_candidates.append(month_summary)
 
-    # Best month with duration as tiebreaker
+    # Best month
     best_month = None
     if month_candidates:
         best = month_candidates[0]
@@ -574,12 +635,12 @@ def get_yearly_productivity(
         best_month = best
 
     # Yearly summary arena breakdown
-    arena_map = {}
+    yearly_arena_map = {}
     for task in tasks:
         if task.arena:
             arena_id = task.arena.id
-            if arena_id not in arena_map:
-                arena_map[arena_id] = {
+            if arena_id not in yearly_arena_map:
+                yearly_arena_map[arena_id] = {
                     "arena_id": arena_id,
                     "arena_name": task.arena.name,
                     "arena_color": task.arena.color,
@@ -587,19 +648,19 @@ def get_yearly_productivity(
                     "completed_tasks": 0,
                     "total_hours": 0.0,
                 }
-            arena_map[arena_id]["total_tasks"] += 1
+            yearly_arena_map[arena_id]["total_tasks"] += 1
             if task.is_completed:
-                arena_map[arena_id]["completed_tasks"] += 1
-                arena_map[arena_id]["total_hours"] += round(
+                yearly_arena_map[arena_id]["completed_tasks"] += 1
+                yearly_arena_map[arena_id]["total_hours"] += round(
                     (task.duration or 0) / 60, 2
                 )
 
     yearly_arenas = []
-    for arena_data in arena_map.values():
-        total = arena_data["total_tasks"]
-        completed = arena_data["completed_tasks"]
+    for arena_data in yearly_arena_map.values():
+        t = arena_data["total_tasks"]
+        c = arena_data["completed_tasks"]
         arena_data["completion_percentage"] = round(
-            (completed / total * 100) if total > 0 else 0, 2
+            (c / t * 100) if t > 0 else 0, 2
         )
         yearly_arenas.append(ArenaBreakdown(**arena_data))
 

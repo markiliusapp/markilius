@@ -62,14 +62,14 @@ def get_task(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    print("printing status: ", status)
-    print("Printing due date: ", due_date)
+    """
+    Returns all the tasks for a given status and a due date
+    """
     query = (
         db.query(Task)
         .options(joinedload(Task.arena))
         .filter(Task.user_id == current_user.id)
     )
-    print("Printing query: ", query)
     if status is not None:
         query = query.filter(Task.is_completed == status)
 
@@ -81,9 +81,7 @@ def get_task(
 
     # Order by due_date (most recent first), then created_at
     tasks = query.order_by(Task.due_date.desc(), Task.created_at.desc()).all()
-    print("Printing tasks: ", tasks)
     tasks = lock_overdue_tasks(tasks, db)
-    print("printing tasks: ", tasks)
 
     return tasks
 
