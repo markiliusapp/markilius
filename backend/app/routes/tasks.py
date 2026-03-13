@@ -10,6 +10,7 @@ from typing import Optional
 from datetime import date
 from app.services.locking_tasks import lock_overdue_tasks
 from sqlalchemy.orm import joinedload
+from app.services.frequency_management import generate_due_dates
 
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
@@ -38,21 +39,29 @@ def create_task(
         if not arena:
             raise HTTPException(status_code=404, detail="Arena not found")
 
-    new_task = Task(
-        user_id=current_user.id,
-        title=task_data.title,
-        description=task_data.description,
-        frequency=task_data.frequency.value,
-        duration=task_data.duration,
-        due_date=task_data.due_date,
-        arena_id=task_data.arena_id,
-    )
+    due_dates = generate_due_dates(task_data.due_date, task_data.frequency)
 
-    db.add(new_task)
+    new_tasks = [
+        Task(
+            user_id=current_user.id,
+            title=task_data.title,
+            description=task_data.description,
+            frequency=task_data.frequency.value,
+            duration=task_data.duration,
+            due_date=due_date,
+            arena_id=task_data.arena_id,
+        )
+        for due_date in due_dates
+    ]
+
+    db.add_all(new_tasks)
     db.commit()
-    db.refresh(new_task)
 
-    return new_task
+    # Refresh all to get IDs and relationships
+    for task in new_tasks:
+        db.refresh(task)
+
+    return new_tasks[0]
 
 
 @router.get("/", response_model=list[TaskResponse])
