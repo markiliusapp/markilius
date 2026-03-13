@@ -1,0 +1,18 @@
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.legend-cell {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+}
+
+.legend-label {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin: 0 4px;
+}

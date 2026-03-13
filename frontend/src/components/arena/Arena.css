@@ -1,0 +1,144 @@
+.arena-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.arena-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.arena-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.arena-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.arena-pill:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.arena-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.arena-selector-footer {
+    margin-top: 4px;
+}
+
+.arena-manage-btn {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.arena-manage-btn:hover {
+    color: var(--color-text);
+}
+
+.arena-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background-color: var(--color-bg-subtle);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.arena-manager-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.arena-color-picker {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    padding: 2px;
+    background: none;
+}
+
+.arena-name-input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+.arena-name-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.arena-delete-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-error);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.arena-delete-btn:hover {
+    background-color: var(--color-error-bg);
+}
+
+.arena-add-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    background: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.arena-add-btn:hover:not(:disabled) {
+    background-color: var(--color-bg-muted);
+}
+
+.arena-add-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

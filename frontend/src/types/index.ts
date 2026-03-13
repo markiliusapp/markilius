@@ -18,23 +18,33 @@ export interface CreateTask {
     title: string;
     description?: string;
     frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
-    priority: boolean;
     duration?: number;
     due_date: string;
+    arena_id?: number;
 }
 
 export interface UpdateTask {
     title?: string;
     description?: string | null;
     frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
-    priority?: boolean;
     duration?: number | null;
     due_date?: string;
+    arena_id?: number;
 }
 export interface GetTaskFilter {
     status?: boolean;
     due_date?: string;
-    priority?: boolean;
+}
+
+// NEW: Arena interface
+export interface ArenaCreate {
+    name: string;
+    color: string;
+}
+
+export interface ArenaUpdate {
+    name?: string;
+    color?: string;
 }
 
 // ================================
@@ -60,12 +70,12 @@ export interface TaskResponse {
     title: string;
     description: string | null;
     frequency: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
-    priority: boolean;
     duration: number | null;
     created_at: string;
     due_date: string;
     is_completed: boolean;
     is_locked: boolean;
+    arena: ArenaResponse | null
 }
 
 export interface DailyBreakDownWithTasks {
@@ -86,13 +96,14 @@ export interface WeeklySummary {
     average_tasks_per_day: number;
     average_duration_per_day: number;
     days_with_tasks: number;
+    arenas: ArenaBreakdown[];
 }
 
 export interface WeeklyProductivityResponse {
     start_date: string;
     end_date: string;
     summary: WeeklySummary
-    most_productive_day: DailyBreakdown | null
+    most_productive_day: DailyProductivityResponse | null
     daily_breakdown: DailyBreakDownWithTasks[] 
 }
 
@@ -102,24 +113,10 @@ export interface DailyProductivityResponse {
     total_tasks: number;
     completed_tasks: number;
     completion_percentage: number;
-    high_priority_tasks: number;
-    low_priority_tasks: number;
-    high_priority_completed: number;
-    low_priority_completed: number;
-    high_priority_completion_percentage: number;
-    low_priority_completion_percentage: number;
     total_hours: number;
-    high_priority_hours: number;
-    low_priority_hours: number;
+    arenas: ArenaBreakdown[]
 }
 
-export interface DailyBreakdown {
-    date: string;
-    total_tasks: number;
-    completed_tasks: number;
-    completion_percentage: number;
-    total_duration: number;
-}
 
 export interface MonthlySummary {
     month: number;
@@ -130,14 +127,15 @@ export interface MonthlySummary {
     average_tasks_per_day: number;
     average_duration_per_day: number;
     days_with_tasks: number;
+    arenas: ArenaBreakdown[]
 }
 
 export interface MonthlyProductivity {
     year: number;
     month: number;
     summary: MonthlySummary;
-    most_productive_day: DailyBreakdown | null;
-    daily_breakdown: DailyBreakdown[];
+    most_productive_day: DailyProductivityResponse | null;
+    daily_breakdown: DailyProductivityResponse[];
 }
 
 export interface YearlyProductivity {
@@ -146,9 +144,10 @@ export interface YearlyProductivity {
         total_tasks: number;
         completed_tasks: number;
         completion_percentage: number;
+        arenas: ArenaBreakdown[]
     };
-    daily_breakdown: DailyBreakdown[];
-    best_day: DailyBreakdown | null;
+    daily_breakdown: DailyProductivityResponse[];
+    best_day: DailyProductivityResponse | null;
     best_month: MonthlySummary | null;
     months: MonthlySummary[];
 }
@@ -166,4 +165,22 @@ export interface AuthContextType {
     loading: boolean;
     login: (token: string) => Promise<void>;
     logout: () => void;
+}
+
+
+export interface ArenaResponse {
+    id: number;
+    name: string;
+    color: string;
+    created_at: string;
+}
+
+export interface ArenaBreakdown {
+    arena_id: number;
+    arena_name: string;
+    arena_color: string;
+    total_tasks: number;
+    completed_tasks: number;
+    completion_percentage: number;
+    total_hours: number;
 }

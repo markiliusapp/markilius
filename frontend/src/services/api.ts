@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-import type { RegisterUser, LoginUser, CreateTask, UpdateTask, GetTaskFilter } from "@/types";
+import type { RegisterUser, LoginUser, CreateTask, UpdateTask, GetTaskFilter, ArenaResponse, ArenaCreate, ArenaUpdate } from "@/types";
 
 // Helper to get token from localStorage
 const getToken = (): string | null => {
@@ -88,7 +88,6 @@ export const taskAPI = {
         const params = new URLSearchParams();
         if (filters?.status !== undefined) params.append("status", filters.status.toString())
         if (filters?.due_date) params.append("due_date", filters.due_date)
-        if (filters?.priority !== undefined) params.append("priority", filters.priority.toString())
 
         const url = `${API_URL}/tasks/?${params.toString()}`
         const response = await fetch(url, {
@@ -185,4 +184,43 @@ export const productivityAPI = {
         })
         return handleResponse(response)
     }
+};
+
+export const arenaAPI = {
+    getAll: async (): Promise<ArenaResponse[]> => {
+        const response = await fetch(`${API_URL}/arenas/`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    create: async (arena: ArenaCreate): Promise<ArenaResponse> => {
+        const response = await fetch(`${API_URL}/arenas/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify(arena),
+        });
+        return handleResponse(response);
+    },
+    update: async (arenaId: number, arena: ArenaUpdate): Promise<ArenaResponse> => {
+        const response = await fetch(`${API_URL}/arenas/${arenaId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify(arena),
+        });
+        return handleResponse(response);
+    },
+    delete: async (arenaId: number): Promise<void> => {
+        const response = await fetch(`${API_URL}/arenas/${arenaId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (response.status === 204) return;
+        return handleResponse(response);
+    },
 };

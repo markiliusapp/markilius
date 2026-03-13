@@ -181,6 +181,45 @@
     margin-top: 16px;
 }
 
+.arena-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.arena-filter-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.arena-filter-pill:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.arena-filter-pill.active {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-muted);
+    color: var(--color-primary);
+}
+
+.arena-filter-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 /* ================================
    RESPONSIVE BREAKPOINTS
 ================================ */
