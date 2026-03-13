@@ -137,6 +137,16 @@ export const taskAPI = {
         if (response.status === 204) return; // No content
         return handleResponse(response);
     },
+    deleteSeries: async (taskId: number): Promise<void> => {
+        const response = await fetch(`${API_URL}/tasks/${taskId}/series`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+            },
+        });
+        if (response.status === 204) return;
+        return handleResponse(response);
+    },
 }
 
 // Productivity endpoints

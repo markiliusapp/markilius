@@ -75,6 +75,7 @@ export interface TaskResponse {
     due_date: string;
     is_completed: boolean;
     is_locked: boolean;
+    group_id: string | null;
     arena: ArenaResponse | null
 }
 

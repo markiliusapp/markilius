@@ -178,6 +178,16 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
         setEditMode(true)
         setShowActions(false)
     }
+    const handleDeleteSeries = async () => {
+        if (task.is_locked) { alert('Cannot delete a locked task'); return; }
+        if (!confirm('Delete all upcoming incomplete tasks in this series?')) return;
+        try {
+            await taskAPI.deleteSeries(task.id)
+            onToggle()
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     return (
         <>
@@ -239,6 +249,16 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
                                     </svg>
                                     Delete
                                 </button>
+                                {task.group_id && task.frequency !== 'once' && (
+                                    <button onClick={handleDeleteSeries} className={`delete-btn ${task.is_locked ? 'disabled' : ''}`} disabled={task.is_locked}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            <line x1="10" y1="11" x2="10" y2="17" />
+                                            <line x1="14" y1="11" x2="14" y2="17" />
+                                        </svg>
+                                        Delete Series
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
