@@ -5,9 +5,15 @@
 /* Header */
 .week-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+}
+
+.week-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 .week-nav {

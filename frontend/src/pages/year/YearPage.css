@@ -5,9 +5,15 @@
 /* Header */
 .year-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+}
+
+.year-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 
@@ -218,6 +224,31 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+
+.view-toggle-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.view-toggle-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-muted);
+    color: var(--color-primary);
+}
+
+.switch-view {
+    display: flex;
+    justify-content: end;
+    padding: 16px 0px;
 }
 
 /* ================================

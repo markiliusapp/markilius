@@ -1,0 +1,112 @@
+/* src/components/compactHeatmap/CompactHeatmap.css */
+
+.compact-heatmap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 32px;
+}
+
+.compact-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    background-color: var(--color-bg);
+    padding: 0 16px;
+    padding-top: 16px;
+}
+
+.compact-row-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.compact-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.compact-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+}
+
+.compact-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.compact-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.compact-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.compact-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+}
+
+.compact-month-row {
+    display: grid;
+    grid-template-columns: repeat(53, minmax(14px, 1fr));
+    gap: 5px;
+}
+
+.compact-month-cell {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    overflow: visible;
+}
+
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(53, minmax(14px, 1fr));
+    grid-template-rows: repeat(7, minmax(14px, 1fr));
+    grid-auto-flow: column;
+    gap: 5px;
+    min-width: max-content;
+    width: 100%;
+    padding: 16px 0px;
+}
+
+.compact-cell {
+    min-width: 14px;
+    min-height: 14px;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background-color: #e5e7eb;
+}
+
+.compact-cell-outside {
+    min-width: 14px;
+    min-height: 14px;
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background-color: var(--color-bg);
+}
+
+@media (max-width:  768px) {
+    .compact-grid {
+        gap: 5px;
+    }
+    .compact-cell {
+        border-radius: 2px;
+    }
+}

@@ -62,27 +62,7 @@
     outline: none;
 }
 
-.btn-add-task {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 14px;
-    font-weight: 500;
-    transition: var(--transition);
-}
 
-.btn-add-task:hover {
-    background-color: var(--color-primary-hover);
-}
-
-.btn-add-task svg {
-    flex-shrink: 0;
-}
 
 /* Task panes - Desktop: side by side */
 .panes {

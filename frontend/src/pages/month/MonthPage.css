@@ -5,9 +5,15 @@
 /* Header */
 .month-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+}
+
+.month-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 

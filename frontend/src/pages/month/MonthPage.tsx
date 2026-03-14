@@ -318,6 +318,8 @@ import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Label } from 'recharts'
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
+import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import TaskInput from '@/components/taskinput/TaskInput';
 
 const MonthPage = () => {
     const navigate = useNavigate()
@@ -326,6 +328,8 @@ const MonthPage = () => {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
+    const [showTaskInput, setShowTaskInput] = useState(false)
+
 
     useEffect(() => {
         fetchMonthData();
@@ -414,12 +418,21 @@ const MonthPage = () => {
             <div className="month-page">
                 {/* Header */}
                 <div className="month-header">
+                    <h1>Current Month</h1>
                     <div className="month-nav">
                         <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
                         <span className="month-name">{getMonthName()}</span>
                         <button onClick={handleNextMonth} aria-label="Next month">→</button>
                     </div>
+                    <AddTaskButton onClick={() => setShowTaskInput(true)} />
                 </div>
+
+                {showTaskInput && (
+                    <TaskInput
+                        onTaskCreated={() => { setShowTaskInput(false); }}
+                        onCancel={() => setShowTaskInput(false)}
+                    />
+                )}
 
                 {/* Arena Filter */}
                 {arenas.length > 0 && (

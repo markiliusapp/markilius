@@ -5,6 +5,8 @@ import type { WeeklyProductivityResponse } from '@/types';
 import IndividualTask from '@/components/individualTask/IndividualTask';
 import './WeekPage.css';
 import { useNavigate } from 'react-router-dom';
+import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import TaskInput from '@/components/taskinput/TaskInput';
 
 const WeekPage = () => {
     const navigate = useNavigate()
@@ -12,6 +14,8 @@ const WeekPage = () => {
     const [loading, setLoading] = useState(true);
     const [currentSunday, setCurrentSunday] = useState<string>(getSundayOfWeek(new Date()));
     const [refreshKey, setRefreshKey] = useState(0);
+    const [showTaskInput, setShowTaskInput] = useState(false)
+
 
     useEffect(() => {
         fetchWeekData();
@@ -93,6 +97,7 @@ const WeekPage = () => {
             <div className="week-page">
                 {/* Header */}
                 <div className="week-header">
+                    <h1>Current Week</h1>
                     <div className="week-nav">
                         <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
                         <span className="week-range">
@@ -100,7 +105,15 @@ const WeekPage = () => {
                         </span>
                         <button onClick={handleNextWeek} aria-label="Next week">→</button>
                     </div>
+                    <AddTaskButton onClick={() => setShowTaskInput(true)} />
                 </div>
+
+                {showTaskInput && (
+                    <TaskInput
+                        onTaskCreated={() => { setShowTaskInput(false); }}
+                        onCancel={() => setShowTaskInput(false)}
+                    />
+                )}
 
                 {/* 7 Day Columns */}
                 <div className="week-grid-wrapper">
