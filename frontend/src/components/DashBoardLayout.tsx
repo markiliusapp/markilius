@@ -16,7 +16,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     return (
         <div className="dashboard-layout">
             {/* Mobile menu toggle */}
-            <button
+            {!sidebarOpen && <button
                 className="mobile-menu-toggle"
                 onClick={() => setSidebarOpen(true)}
             >
@@ -25,7 +25,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     <line x1="3" y1="6" x2="21" y2="6" />
                     <line x1="3" y1="18" x2="21" y2="18" />
                 </svg>
-            </button>
+            </button>}
 
             {/* Overlay */}
             <div
