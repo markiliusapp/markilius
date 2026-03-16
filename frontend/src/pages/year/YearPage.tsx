@@ -11,6 +11,8 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Label } fr
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
+import type { StreakResponse } from '@/types';
+import Streaks from '@/components/streaks/Streaks';
 
 const YearPage = () => {
     const navigate = useNavigate()
@@ -20,6 +22,8 @@ const YearPage = () => {
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [compactView, setCompactView] = useState(false)
+    const [streaks, setStreaks] = useState<StreakResponse | null>(null)
+    
 
 
 
@@ -36,6 +40,19 @@ const YearPage = () => {
             console.error('Failed to fetch year data:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStreaks();
+    }, []);
+
+    const fetchStreaks = async () => {
+        try {
+            const data = await productivityAPI.getStreaks();
+            setStreaks(data);
+        } catch (err) {
+            console.error('Failed to fetch streaks:', err);
         }
     };
 
@@ -246,6 +263,9 @@ const YearPage = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
+
+                {/* Streaks */}
+                {streaks && <Streaks streaks={streaks} />}
 
                 {/* Year Overview Stats */}
                 <div className="year-overview">

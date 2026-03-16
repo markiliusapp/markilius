@@ -185,3 +185,17 @@ export interface ArenaBreakdown {
     completion_percentage: number;
     total_hours: number;
 }
+
+export interface ArenaStreak {
+    arena_id: number;
+    arena_name: string;
+    arena_color: string;
+    current_streak: number;
+    longest_streak: number;
+}
+
+export interface StreakResponse {
+    current_streak: number;
+    longest_streak: number;
+    arenas: ArenaStreak[];
+}

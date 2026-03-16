@@ -193,7 +193,13 @@ export const productivityAPI = {
             }
         })
         return handleResponse(response)
-    }
+    },
+    getStreaks: async () => {
+        const response = await fetch(`${API_URL}/productivity/streaks`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
 };
 
 export const arenaAPI = {

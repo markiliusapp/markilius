@@ -8,6 +8,8 @@ import { productivityAPI } from '@/services/api';
 import type { DailyProductivityResponse } from '@/types';
 import { useSearchParams } from 'react-router-dom'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import type { StreakResponse } from '@/types';
+import Streaks from '@/components/streaks/Streaks'
 
 const DashboardPage = () => {
     const [searchParams] = useSearchParams()
@@ -18,10 +20,16 @@ const DashboardPage = () => {
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [productivity, setProductivity] = useState<DailyProductivityResponse | null>(null)
     const [loading, setLoading] = useState(true)
+    const [streaks, setStreaks] = useState<StreakResponse | null>(null)
+
 
     useEffect(() => {
         fetchProductivity();
     }, [selectedDate, refreshKey]);
+
+    useEffect(() => {
+        fetchStreaks();
+    }, [refreshKey]);
 
     const fetchProductivity = async () => {
         setLoading(true)
@@ -32,6 +40,15 @@ const DashboardPage = () => {
             console.error('Failed to fetch productivity:', err);
         } finally {
             setLoading(false)
+        }
+    };
+
+    const fetchStreaks = async () => {
+        try {
+            const data = await productivityAPI.getStreaks();
+            setStreaks(data);
+        } catch (err) {
+            console.error('Failed to fetch streaks:', err);
         }
     };
 
@@ -76,7 +93,6 @@ const DashboardPage = () => {
                     </div>
                     <AddTaskButton onClick={() => setShowTaskInput(true)} />
                 </div>
-
                 {/* Task Input Modal */}
                 {showTaskInput && (
                     <TaskInput
@@ -109,6 +125,9 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Streaks */}
+                {streaks && <Streaks streaks={streaks} />}
 
                 {/* Stats Section */}
                 {loading ? (
