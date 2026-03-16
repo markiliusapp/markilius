@@ -86,3 +86,17 @@ class YearlyProductivityResponse(BaseModel):
     best_day: Optional[DailyProductivityResponse] = None
     best_month: Optional[MonthlySummary] = None
     months: list[MonthlySummary]
+
+
+class ArenaStreakResponse(BaseModel):
+    arena_id: int
+    arena_name: str
+    arena_color: str
+    current_streak: int
+    longest_streak: int
+
+
+class StreakResponse(BaseModel):
+    current_streak: int
+    longest_streak: int
+    arenas: list[ArenaStreakResponse]

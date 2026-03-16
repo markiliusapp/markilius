@@ -9,7 +9,10 @@ from app.schemas.productivity import (
     WeeklySummary,
     MonthlySummary,
     YearlySummary,
+    ArenaStreakResponse,
+    StreakResponse,
 )
+
 from datetime import date, timedelta
 from app.models.user import User
 from app.utils.auth import get_current_user, get_db
@@ -18,11 +21,11 @@ from app.models.task import Task
 from sqlalchemy import func
 from calendar import monthrange
 from app.services.locking_tasks import lock_overdue_tasks
-
-router = APIRouter(prefix="/productivity", tags=["Productivity"])
-
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from fastapi import HTTPException, status
+
+
+router = APIRouter(prefix="/productivity", tags=["Productivity"])
 
 
 @router.get("/day", response_model=DailyProductivityResponse)
@@ -684,4 +687,111 @@ def get_yearly_productivity(
         best_day=best_day,
         best_month=best_month,
         months=months,
+    )
+
+
+@router.get("/streaks", response_model=StreakResponse)
+def get_streaks(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    tasks = (
+        db.query(Task)
+        .options(joinedload(Task.arena))
+        .filter(Task.user_id == current_user.id)
+        .order_by(Task.due_date)
+        .all()
+    )
+
+    # Group tasks by date
+    tasks_by_date: dict[date, list[Task]] = {}
+    for task in tasks:
+        if task.due_date:
+            tasks_by_date.setdefault(task.due_date, []).append(task)
+
+    # Group tasks by date per arena
+    tasks_by_date_by_arena: dict[int, dict[date, list[Task]]] = {}
+    for task in tasks:
+        if task.arena and task.due_date:
+            arena_id = task.arena.id
+            tasks_by_date_by_arena.setdefault(arena_id, {})
+            tasks_by_date_by_arena[arena_id].setdefault(
+                task.due_date, []
+            ).append(task)
+
+    def compute_streaks(
+        date_task_map: dict[date, list[Task]],
+    ) -> tuple[int, int]:
+        """Returns (current_streak, longest_streak)"""
+        if not date_task_map:
+            return 0, 0
+
+        # Only keep days where 100% of tasks are completed
+        perfect_days = sorted(
+            [
+                d
+                for d, day_tasks in date_task_map.items()
+                if len(day_tasks) > 0
+                and all(t.is_completed for t in day_tasks)
+            ]
+        )
+
+        if not perfect_days:
+            return 0, 0
+
+        # Compute longest streak
+        longest = 1
+        current_run = 1
+        for i in range(1, len(perfect_days)):
+            if (perfect_days[i] - perfect_days[i - 1]).days == 1:
+                current_run += 1
+                longest = max(longest, current_run)
+            else:
+                current_run = 1
+
+        # Compute current streak — must include today or yesterday
+        today = date.today()
+        current = 0
+        check = today
+        while check in perfect_days or (
+            check == today and today not in perfect_days
+        ):
+            if check not in perfect_days:
+                if check == today:
+                    # Allow streak to still be alive if yesterday was perfect
+                    check -= timedelta(days=1)
+                    continue
+                break
+            current += 1
+            check -= timedelta(days=1)
+
+        return current, longest
+
+    # Overall streaks
+    current_streak, longest_streak = compute_streaks(tasks_by_date)
+
+    # Per-arena streaks
+    arena_streaks = []
+    arena_meta: dict[int, tuple[str, str]] = {}
+    for task in tasks:
+        if task.arena:
+            arena_meta[task.arena.id] = (task.arena.name, task.arena.color)
+
+    for arena_id, date_map in tasks_by_date_by_arena.items():
+        arena_current, arena_longest = compute_streaks(date_map)
+        name, color = arena_meta[arena_id]
+        arena_streaks.append(
+            ArenaStreakResponse(
+                arena_id=arena_id,
+                arena_name=name,
+                arena_color=color,
+                current_streak=arena_current,
+                longest_streak=arena_longest,
+            )
+        )
+
+    return StreakResponse(
+        current_streak=current_streak,
+        longest_streak=longest_streak,
+        arenas=arena_streaks,
     )
