@@ -21,7 +21,7 @@ class TaskCreate(BaseModel):
     frequency: FrequencyType
     duration: Optional[int] = None
     due_date: date
-    arena_id: Optional[int] = None
+    arena_id: int
 
 
 class TaskResponse(BaseModel):
@@ -36,7 +36,7 @@ class TaskResponse(BaseModel):
     is_completed: bool
     is_locked: bool
     group_id: Optional[str] = None
-    arena: Optional[ArenaResponse] = None
+    arena: ArenaResponse
 
     class Config:
         from_attributes = True

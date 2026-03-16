@@ -28,17 +28,6 @@ def create_task(
     """
     Creates a new task for the current user
     """
-    if task_data.arena_id:
-        arena = (
-            db.query(Arena)
-            .filter(
-                Arena.id == task_data.arena_id,
-                Arena.user_id == current_user.id,
-            )
-            .first()
-        )
-        if not arena:
-            raise HTTPException(status_code=404, detail="Arena not found")
 
     # Generate shared group_id for recurring tasks
     group_id = (
@@ -139,22 +128,6 @@ def update_task(
             status_code=status.HTTP_423_LOCKED,
             detail="Cannot update locked task - Past Deadline",
         )
-
-    # Validate arena_id if provided
-    if task.arena_id is not None:
-        arena = (
-            db.query(Arena)
-            .filter(
-                Arena.id == task.arena_id,
-                Arena.user_id == current_user.id,
-            )
-            .first()
-        )
-
-        if not arena:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Arena not found"
-            )
 
     # Update only provided fields
     if task_data.title is not None:

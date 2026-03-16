@@ -5,7 +5,7 @@ import './Arena.css'
 
 interface ArenaProps {
     selectedArenaId?: number;
-    onSelect: (arenaId: number | undefined) => void;
+    onSelect: (arenaId: number) => void;
 }
 
 const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
@@ -20,6 +20,10 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
             try {
                 const data = await arenaAPI.getAll()
                 setArenas(data)
+                // Auto-select first arena if none selected
+                if (!selectedArenaId && data.length > 0) {
+                    onSelect(data[0].id)
+                }
             } catch (err) {
                 console.error(err)
             }
@@ -50,8 +54,12 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
     const handleDelete = async (arenaId: number) => {
         try {
             await arenaAPI.delete(arenaId)
-            setArenas(prev => prev.filter(a => a.id !== arenaId))
-            if (selectedArenaId === arenaId) onSelect(undefined)
+            const updated = arenas.filter(a => a.id !== arenaId)
+            setArenas(updated)
+            // If deleted arena was selected, select first available
+            if (selectedArenaId === arenaId && updated.length > 0) {
+                onSelect(updated[0].id)
+            }
         } catch (err) {
             console.error(err)
         }
@@ -82,17 +90,6 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
 
             {/* Arena selector pills */}
             <div className="arena-selector">
-                <button
-                    type="button"
-                    className="arena-pill"
-                    style={{
-                        borderColor: !selectedArenaId ? 'var(--color-primary)' : 'var(--color-border)',
-                        backgroundColor: !selectedArenaId ? 'var(--color-bg-muted)' : 'transparent',
-                    }}
-                    onClick={() => onSelect(undefined)}
-                >
-                    None
-                </button>
                 {arenas.map(arena => (
                     <button
                         key={arena.id}
@@ -102,7 +99,7 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
                             borderColor: selectedArenaId === arena.id ? arena.color : 'var(--color-border)',
                             backgroundColor: selectedArenaId === arena.id ? `${arena.color}20` : 'transparent',
                         }}
-                        onClick={() => onSelect(selectedArenaId === arena.id ? undefined : arena.id)}
+                        onClick={() => onSelect(arena.id)}
                     >
                         <span className="arena-dot" style={{ backgroundColor: arena.color }} />
                         {arena.name}
@@ -150,7 +147,6 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
                         </div>
                     ))}
 
-                    {/* New arena row */}
                     {arenas.length < 10 && (
                         <div className="arena-manager-row">
                             <input

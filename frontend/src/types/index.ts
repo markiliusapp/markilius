@@ -20,7 +20,7 @@ export interface CreateTask {
     frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     duration?: number;
     due_date: string;
-    arena_id?: number;
+    arena_id: number;
 }
 
 export interface UpdateTask {
@@ -76,7 +76,7 @@ export interface TaskResponse {
     is_completed: boolean;
     is_locked: boolean;
     group_id: string | null;
-    arena: ArenaResponse | null
+    arena: ArenaResponse;
 }
 
 export interface DailyBreakDownWithTasks {

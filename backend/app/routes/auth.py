@@ -9,6 +9,7 @@ from app.schemas.user import (
     ForgotPasswordRequest,
     ResetPasswordRequest,
 )
+from app.models.arena import Arena
 from app.models.user import User
 from app.utils.auth import (
     hash_password,
@@ -28,6 +29,15 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+DEFAULT_ARENAS = [
+    {"name": "Miscellaneous", "color": "#a8a29e"},
+    {"name": "Fitness", "color": "#f97316"},
+    {"name": "Learning", "color": "#3b82f6"},
+    {"name": "Work", "color": "#8b5cf6"},
+    {"name": "Creativity", "color": "#ec4899"},
+    {"name": "Mindfulness", "color": "#10b981"},
+]
 
 
 @router.post(
@@ -51,9 +61,19 @@ def register(user_input: UserCreate, db: Session = Depends(get_db)):
         email=user_input.email,
         hashed_password=hash_password(user_input.password),
     )
-
     db.add(new_user)
     db.commit()
+
+    for arena_data in DEFAULT_ARENAS:
+        db.add(
+            Arena(
+                user_id=new_user.id,
+                name=arena_data["name"],
+                color=arena_data["color"],
+            )
+        )
+    db.commit()
+
     db.refresh(new_user)
 
     return new_user
