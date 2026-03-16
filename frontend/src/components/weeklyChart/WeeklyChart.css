@@ -1,0 +1,134 @@
+/* src/components/weeklyChart/WeeklyChart.css */
+
+.weekly-chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 100%;
+}
+
+.weekly-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.weekly-chart-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.weekly-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.weekly-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.weekly-chart-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.weekly-chart-legend-name {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.weekly-chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+/* Tooltip */
+.weekly-chart-tooltip {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-size: 12px;
+    min-width: 140px;
+}
+
+.weekly-chart-tooltip-label {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.weekly-chart-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.weekly-chart-tooltip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.weekly-chart-tooltip-name {
+    flex: 1;
+    color: var(--color-text-secondary);
+}
+
+.weekly-chart-tooltip-val {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.weekly-chart-tooltip-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--color-border);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.weekly-chart-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.weekly-chart-pill:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.weekly-chart-pill.active {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-muted);
+    color: var(--color-primary);
+}

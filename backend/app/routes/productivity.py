@@ -136,8 +136,38 @@ def get_weekly_productivity(
             sum((t.duration or 0) for t in day_tasks if t.is_completed) / 60, 2
         )
 
-        completed_tasks = [t for t in day_tasks if t.is_completed]
-        incomplete_tasks = [t for t in day_tasks if not t.is_completed]
+        # Arena breakdown per day
+        day_arena_map = {}
+        for task in day_tasks:
+            if task.arena:
+                arena_id = task.arena.id
+                if arena_id not in day_arena_map:
+                    day_arena_map[arena_id] = {
+                        "arena_id": arena_id,
+                        "arena_name": task.arena.name,
+                        "arena_color": task.arena.color,
+                        "total_tasks": 0,
+                        "completed_tasks": 0,
+                        "total_hours": 0.0,
+                    }
+                day_arena_map[arena_id]["total_tasks"] += 1
+                if task.is_completed:
+                    day_arena_map[arena_id]["completed_tasks"] += 1
+                    day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+
+        day_arenas = []
+        for arena_data in day_arena_map.values():
+            t = arena_data["total_tasks"]
+            c = arena_data["completed_tasks"]
+            arena_data["completion_percentage"] = round(
+                (c / t * 100) if t > 0 else 0, 2
+            )
+            day_arenas.append(ArenaBreakdown(**arena_data))
+
+        completed_tasks_list = [t for t in day_tasks if t.is_completed]
+        incomplete_tasks_list = [t for t in day_tasks if not t.is_completed]
 
         daily_breakdown.append(
             DailyBreakDownWithTasks(
@@ -146,8 +176,9 @@ def get_weekly_productivity(
                 completed_tasks=completed,
                 completion_percentage=completion_percentage,
                 total_duration=total_duration,
-                completed=completed_tasks,
-                incomplete=incomplete_tasks,
+                completed=completed_tasks_list,
+                incomplete=incomplete_tasks_list,
+                arenas=day_arenas,
             )
         )
 

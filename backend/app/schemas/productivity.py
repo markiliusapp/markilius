@@ -51,6 +51,7 @@ class DailyBreakDownWithTasks(BaseModel):
     total_duration: float
     completed: list[TaskResponse]
     incomplete: list[TaskResponse]
+    arenas: list[ArenaBreakdown]
 
 
 class WeeklySummary(BaseModel):

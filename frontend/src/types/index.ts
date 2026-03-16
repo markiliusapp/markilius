@@ -87,6 +87,7 @@ export interface DailyBreakDownWithTasks {
     total_duration: number;
     completed: TaskResponse[]
     incomplete: TaskResponse[]
+    arenas: ArenaBreakdown[]
 }
 
 export interface WeeklySummary {

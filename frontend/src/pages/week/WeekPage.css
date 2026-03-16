@@ -215,6 +215,12 @@
     font-size: 12px;
 }
 
+.week-stats-section {
+    display: flex;
+    gap: 32px;
+    padding: 0px;
+}
+
 /* Week Summary */
 .week-summary {
     background-color: var(--color-bg);
@@ -309,6 +315,29 @@
     color: var(--color-primary);
 }
 
+.summary-card-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-delta {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+.summary-delta.positive {
+    color: #10b981;
+    background-color: #d1fae5;
+}
+
+.summary-delta.negative {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
 /* ================================
    RESPONSIVE BREAKPOINTS
 ================================ */
@@ -317,6 +346,12 @@
 @media (max-width: 1024px) {
     .summary-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1320px) {
+    .week-stats-section {
+        flex-direction: column;
     }
 }
 
