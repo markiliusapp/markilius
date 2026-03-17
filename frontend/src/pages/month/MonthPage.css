@@ -93,6 +93,7 @@
 .chart-section {
     display: flex;
     flex-direction: column;
+    align-self: stretch;
 }
 
 .chart-section h2 {
@@ -208,6 +209,121 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+.arena-breakdown-section {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.arena-breakdown-section h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.arena-breakdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.arena-breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.arena-breakdown-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.arena-breakdown-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.arena-breakdown-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.arena-breakdown-center {
+    flex: 1;
+}
+
+.arena-breakdown-track {
+    height: 6px;
+    background-color: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.arena-breakdown-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    min-width: 4px;
+}
+
+.arena-breakdown-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.arena-breakdown-pct {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 40px;
+    text-align: right;
+}
+
+.arena-breakdown-meta {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    min-width: 60px;
+    text-align: right;
+}
+
+.summary-card-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-delta {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+.summary-delta.positive {
+    color: #10b981;
+    background-color: #d1fae5;
+}
+
+.summary-delta.negative {
+    color: #ef4444;
+    background-color: #fee2e2;
 }
 /* ================================
    RESPONSIVE BREAKPOINTS

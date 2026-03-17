@@ -132,56 +132,59 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                     ))}
                 </div>
             </div>
-            <ResponsiveContainer width="100%" height={200}>
-                <BarChart
-                    data={chartData}
-                    margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
-                    barCategoryGap="30%"
-                >
-                    <XAxis
-                        dataKey="day"
-                        tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
-                        axisLine={false}
-                        tickLine={false}
-                    />
-                    <YAxis
-                        ticks={ticks}
-                        tickFormatter={(v) => `${v}h`}
-                        tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
-                        axisLine={false}
-                        tickLine={false}
-                        width={32}
-                    />
-                    <Tooltip
-                        content={<CustomTooltip />}
-                        cursor={false}
-                    />
-                    {averageDuration > 0 && (
-                        <ReferenceLine
-                            y={averageDuration}
-                            stroke="var(--color-text-muted)"
-                            strokeDasharray="4 4"
-                            strokeWidth={1.5}
-                            label={{
-                                value: `avg ${averageDuration.toFixed(1)}h`,
-                                position: 'insideTopRight',
-                                fontSize: 11,
-                                fill: 'var(--color-text-muted)',
-                            }}
+            <div className='week-chart-container'>
+                <ResponsiveContainer width="100%" height={240}>
+                    <BarChart
+                        data={chartData}
+                        margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
+                        barCategoryGap="30%"
+                    >
+                        <XAxis
+                            dataKey="day"
+                            tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
+                            axisLine={false}
+                            tickLine={false}
                         />
-                    )}
-                    {visibleArenas.map((arena, idx) => (
-                        <Bar
-                            key={arena.arena_id}
-                            dataKey={`arena_${arena.arena_id}`}
-                            name={arena.arena_name}
-                            stackId="a"
-                            fill={arena.arena_color}
-                            radius={idx === visibleArenas.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                        <YAxis
+                            ticks={ticks}
+                            tickFormatter={(v) => `${v}h`}
+                            tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={32}
                         />
-                    ))}
-                </BarChart>
-            </ResponsiveContainer>
+                        <Tooltip
+                            content={<CustomTooltip />}
+                            cursor={false}
+                        />
+                        {averageDuration > 0 && (
+                            <ReferenceLine
+                                y={averageDuration}
+                                stroke="var(--color-text-muted)"
+                                strokeDasharray="4 4"
+                                strokeWidth={1.5}
+                                label={{
+                                    value: `avg ${averageDuration.toFixed(1)}h`,
+                                    position: 'insideTopRight',
+                                    fontSize: 11,
+                                    fill: 'var(--color-text-muted)',
+                                }}
+                            />
+                        )}
+                        {visibleArenas.map((arena, idx) => (
+                            <Bar
+                                key={arena.arena_id}
+                                dataKey={`arena_${arena.arena_id}`}
+                                name={arena.arena_name}
+                                stackId="a"
+                                fill={arena.arena_color}
+                                radius={idx === visibleArenas.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                            />
+                        ))}
+                    </BarChart>
+                </ResponsiveContainer> 
+            </div>
+            
         </div>
     )
 }

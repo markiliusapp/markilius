@@ -195,6 +195,13 @@
     transition: width 0.3s ease;
 }
 
+.streaks-and-stats {
+    display: flex;
+    /* grid-template-columns: 1fr 1fr; */
+    gap: 24px;
+
+}
+
 /* ================================
    RESPONSIVE BREAKPOINTS
 ================================ */
@@ -292,6 +299,7 @@
 /* Stats Section */
 .stats-section {
     margin-top: 24px;
+    width: 100%;
 }
 
 .stats-grid {
@@ -445,6 +453,10 @@
         grid-template-columns: 1fr;
     }
 
+    .streaks-and-stats {
+        flex-direction: column;
+    }
+
     .time-column {
         padding-left: 0;
         padding-top: 24px;
@@ -459,6 +471,11 @@
     }
 }
 
+@media (max-width: 1320px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
 @media (max-width: 768px) {
     .stats-grid {
         padding: 16px;

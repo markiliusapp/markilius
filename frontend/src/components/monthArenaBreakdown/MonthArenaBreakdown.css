@@ -1,0 +1,133 @@
+/* src/components/arenaBreakdown/MonthArenaBreakdown.css */
+
+.mab-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mab-section h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.mab-list {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.mab-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mab-row:last-child {
+    border-bottom: none;
+}
+
+.mab-row-overall {
+    background-color: var(--color-bg-muted);
+}
+
+.mab-left {
+    width: 100px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 12px;
+    border-right: 1px solid var(--color-border);
+    gap: 2px;
+}
+
+.mab-big-pct {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1;
+}
+
+.mab-pct-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+}
+
+.mab-right {
+    flex: 1;
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.mab-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mab-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mab-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    flex: 1;
+}
+
+.mab-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.mab-delta {
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.mab-delta-pos {
+    color: #10b981;
+    background-color: #d1fae5;
+}
+
+.mab-delta-neg {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.mab-hours {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.mab-track {
+    height: 4px;
+    background-color: var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.mab-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
