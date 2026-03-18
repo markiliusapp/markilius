@@ -48,6 +48,31 @@
 }
 
 
+.mac-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mac-pill:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.mac-pill.active {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-muted);
+    color: var(--color-primary);
+}
+
 .mac-chart-container {
     flex: 1;
     min-height: 200px;

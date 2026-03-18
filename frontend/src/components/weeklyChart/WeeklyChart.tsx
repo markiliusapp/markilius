@@ -111,13 +111,12 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                             key={arena.arena_id}
                             className={`weekly-chart-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
                             style={{
-                                borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-border)',
-                                backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}20` : 'transparent',
+                                borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
+                                backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
                                 color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
                             }}
                             onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
                         >
-                            <span className="weekly-chart-legend-dot" style={{ backgroundColor: arena.arena_color }} />
                             {arena.arena_name}
                         </button>
                     ))}

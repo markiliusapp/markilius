@@ -10,6 +10,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from 'recharts'
+import { useState } from 'react'
 
 interface MonthlyArenaChartProps {
     dailyBreakdown: DailyProductivityResponse[]
@@ -47,6 +48,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartProps) => {
+    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
+
     // Collect all unique arenas
     const arenaMap = new Map<number, ArenaBreakdown>()
     dailyBreakdown.forEach(day => {
@@ -55,6 +58,10 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
         })
     })
     const allArenas = Array.from(arenaMap.values())
+
+    const visibleArenas = selectedArenaId
+        ? allArenas.filter(a => a.arena_id === selectedArenaId)
+        : allArenas
 
     // Group days into weeks
     const weeks: Map<number, DailyProductivityResponse[]> = new Map()
@@ -105,11 +112,25 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
             <div className="mac-header">
                 <h2>Time by Arena</h2>
                 <div className="mac-legend">
+                    <button
+                        className={`mac-pill ${!selectedArenaId ? 'active' : ''}`}
+                        onClick={() => setSelectedArenaId(null)}
+                    >
+                        All
+                    </button>
                     {allArenas.map(arena => (
-                        <div key={arena.arena_id} className="mac-legend-item">
-                            <span className="mac-legend-dot" style={{ backgroundColor: arena.arena_color }} />
-                            <span className="mac-legend-name">{arena.arena_name}</span>
-                        </div>
+                        <button
+                            key={arena.arena_id}
+                            className={`mac-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
+                            style={{
+                                borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
+                                backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
+                                color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
+                            }}
+                            onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
+                        >
+                            {arena.arena_name}
+                        </button>
                     ))}
                 </div>
             </div>
@@ -137,7 +158,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                             width={32}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={false} />
-                        {allArenas.map((arena, idx) => (
+                        {visibleArenas.map((arena) => (
                             <Bar
                                 key={arena.arena_id}
                                 dataKey={`arena_${arena.arena_id}`}

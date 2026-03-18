@@ -120,10 +120,6 @@ const Streaks = ({ streaks }: StreaksProps) => {
                             <div className="streak-panel-meta">
                                 <div className="streak-panel-top">
                                     <span
-                                        className="streak-arena-dot"
-                                        style={{ backgroundColor: arena.arena_color }}
-                                    />
-                                    <span
                                         className="streak-panel-eyebrow"
                                         style={{ color: arena.arena_color }}
                                     >
