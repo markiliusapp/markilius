@@ -3,7 +3,6 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     margin-bottom: 8px;
-    overflow: hidden;
     transition: var(--transition);
 }
 
@@ -203,6 +202,32 @@
     background-color: rgba(249, 115, 22, 0.1);
     padding: 3px 8px;
     border-radius: 4px;
+}
+
+/* Compact mode */
+.individual-task.task-compact .task-content {
+    padding: 7px 14px;
+}
+
+.individual-task.task-compact .task-header {
+    margin-bottom: 0;
+    align-items: center;
+}
+
+.individual-task.task-compact .task-header-left h3 {
+    font-size: 13px;
+}
+
+.individual-task.task-compact .task-details,
+.individual-task.task-compact .task-locked-badge {
+    display: none;
+}
+
+.task-compact-lock {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted);
+    padding: 4px;
 }
 
 @keyframes spin {

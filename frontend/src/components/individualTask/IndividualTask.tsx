@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { taskAPI } from "@/services/api"
 import type { TaskResponse } from "@/types"
@@ -8,11 +8,23 @@ import './IndividualTask.css'
 interface IndividualTaskProps {
     task: TaskResponse;
     onToggle: () => void;
+    compact?: boolean;
 }
 
-const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
+const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
     const [editMode, setEditMode] = useState(false)
     const [showActions, setShowActions] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!showActions) return
+        const handler = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node))
+                setShowActions(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [showActions])
 
     const handleCompleteToggle = async () => {
         if (task.is_locked) return;
@@ -63,7 +75,7 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
             )}
 
             <div
-                className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed' : ''}`}
+                className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed' : ''} ${compact ? 'task-compact' : ''}`}
                 style={{
                     '--arena-color': task.arena?.color,
                     backgroundColor: task.arena ? `${task.arena.color}12` : undefined,
@@ -86,6 +98,7 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
                                 onClick={handleCompleteToggle}
                                 className={`task-checkbox ${task.is_completed ? 'task-checkbox-checked' : ''}`}
                                 style={{ borderColor: task.arena?.color ?? 'var(--color-border)' }}
+                                title={task.is_locked ? 'Can not modify past due date tasks' : undefined}
                             >
                                 {task.is_completed && (
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -96,14 +109,25 @@ const IndividualTask = ({ task, onToggle }: IndividualTaskProps) => {
                             <h3 className={task.is_completed ? 'task-completed' : ''}>{task.title}</h3>
                         </div>
 
-                        <div className="task-header-right">
-                            <button onClick={() => setShowActions(!showActions)} className="task-menu-btn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
-                                </svg>
-                            </button>
+                        <div className="task-header-right" ref={menuRef}>
+                            {compact && task.is_locked ? (
+                                <span className="task-compact-lock">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                </span>
+                            ) : !compact && (
+                                <>
+                                <button onClick={() => setShowActions(!showActions)} className="task-menu-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
+                                    </svg>
+                                </button>
+                                </>
+                            )}
 
-                            {showActions && (
+                            {!compact && showActions && (
                                 <div className="task-actions-menu">
                                     <button onClick={handleEditClick}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

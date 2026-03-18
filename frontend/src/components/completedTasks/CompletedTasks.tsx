@@ -42,9 +42,10 @@ interface CompletedTasksProps {
     onToggle: () => void;
     selectedDate: string;
     selectedArenaId?: number | null;
+    compact?: boolean;
 }
 
-const CompletedTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId }: CompletedTasksProps) => {
+const CompletedTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId, compact }: CompletedTasksProps) => {
     const [taskList, setTaskList] = useState<TaskResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -120,6 +121,7 @@ const CompletedTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId }:
                     key={task.id}
                     task={task}
                     onToggle={onToggle}
+                    compact={compact}
                 />
             ))}
         </div>

@@ -45,9 +45,10 @@ interface ActiveTasksProps {
     onToggle: () => void;
     selectedDate: string;
     selectedArenaId?: number | null;
+    compact?: boolean;
 }
 
-const ActiveTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId }: ActiveTasksProps) => {
+const ActiveTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId, compact }: ActiveTasksProps) => {
     const [taskList, setTaskList] = useState<TaskResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -124,6 +125,7 @@ const ActiveTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId }: Ac
                     key={task.id}
                     task={task}
                     onToggle={onToggle}
+                    compact={compact}
                 />
             ))}
         </div>

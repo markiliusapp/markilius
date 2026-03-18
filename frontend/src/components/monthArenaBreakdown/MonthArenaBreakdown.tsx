@@ -81,7 +81,7 @@ const MonthArenaBreakdown = ({ arenas, prevArenas }: MonthArenaBreakdownProps) =
                                         className="mab-big-pct"
                                         style={{ color: arena.arena_color }}
                                     >
-                                        {arena.completion_percentage}%
+                                        {Math.round(arena.completion_percentage)}%
                                     </span>
                                 </div>
                                 <div className="mab-right">
