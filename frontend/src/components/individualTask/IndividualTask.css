@@ -1,19 +1,10 @@
 .individual-task {
-    background-color: var(--color-bg);
+    display: flex;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 16px;
     margin-bottom: 8px;
+    overflow: hidden;
     transition: var(--transition);
-}
-
-.individual-task.task-completed {
-    background-color: var(--color-bg-subtle);
-}
-
-.individual-task.task-completed .task-header-left,
-.individual-task.task-completed .task-details {
-    opacity: 0.85;
 }
 
 .individual-task:hover {
@@ -21,19 +12,28 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Header */
+
+/* Content */
+.task-content {
+    flex: 1;
+    padding: 12px 14px;
+    min-width: 0;
+}
+
+/* Header row */
 .task-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .task-header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex: 1;
+    min-width: 0;
 }
 
 .task-header-left h3 {
@@ -41,18 +41,20 @@
     font-weight: 500;
     color: var(--color-text);
     margin: 0;
+    white-space: wrap;
+    overflow: wrap;
+    text-overflow: ellipsis;
 }
 
 .task-completed {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
 }
 
-
-
+/* Checkbox */
 .task-checkbox {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--color-border);
+    border: 2px solid;
     border-radius: 50%;
     background-color: transparent;
     display: flex;
@@ -64,26 +66,20 @@
 }
 
 .task-checkbox:hover {
-    border-color: var(--color-primary);
+    opacity: 0.75;
 }
 
 .task-checkbox-checked {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
+    background-color: var(--arena-color, var(--color-primary));
+    border-color: var(--arena-color, var(--color-primary));
 }
 
-.task-priority-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-primary);
-    background-color: rgba(249, 115, 22, 0.1);
-    padding: 3px 8px;
-    border-radius: 4px;
-}
 
-/* Actions Menu */
+
+/* Actions menu */
 .task-header-right {
     position: relative;
+    flex-shrink: 0;
 }
 
 .task-menu-btn {
@@ -100,7 +96,7 @@
 }
 
 .task-menu-btn:hover {
-    background-color: var(--color-bg-subtle);
+    background-color: var(--color-bg-muted);
     color: var(--color-text);
 }
 
@@ -114,7 +110,7 @@
     border-radius: var(--radius-md);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     min-width: 140px;
-    z-index: 1;
+    z-index: 10;
 }
 
 .task-actions-menu button {
@@ -152,60 +148,30 @@
     background-color: var(--color-error-bg);
 }
 
-/* Task Details */
+
+/* Task details */
 .task-description {
     font-size: 13px;
     color: var(--color-text-secondary);
     margin-bottom: 8px;
     line-height: 1.5;
-    padding-left: 32px;
 }
 
 .task-meta {
     display: flex;
-    justify-content: start;
-    gap: 16px;
+    gap: 14px;
 }
 
 .task-meta-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     font-size: 12px;
     color: var(--color-text-muted);
 }
 
 .task-meta-item svg {
     flex-shrink: 0;
-}
-
-
-/* lock styling */
-
-
-.task-locked-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-}
-
-.task-checkbox:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.task-actions-menu button:disabled,
-.task-actions-menu button.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
 }
 
 .task-arena-dot {
@@ -216,10 +182,31 @@
     display: inline-block;
 }
 
+/* Lock */
+.task-locked-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg-muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.task-priority-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-primary);
+    background-color: rgba(249, 115, 22, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
 }
-
-
