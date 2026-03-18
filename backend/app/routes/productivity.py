@@ -16,8 +16,9 @@ from app.schemas.productivity import (
 from datetime import date, timedelta
 from app.models.user import User
 from app.utils.auth import get_current_user, get_db
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, contains_eager
 from app.models.task import Task
+from app.models.arena import Arena
 from sqlalchemy import func
 from calendar import monthrange
 from app.services.locking_tasks import lock_overdue_tasks
@@ -36,10 +37,12 @@ def get_daily_productivity(
 ):
     tasks = (
         db.query(Task)
-        .options(joinedload(Task.arena))
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
         .filter(
             Task.user_id == current_user.id,
             Task.due_date == target_date,
+            Arena.is_archived == False,
         )
         .all()
     )
@@ -103,11 +106,13 @@ def get_weekly_productivity(
 
     tasks = (
         db.query(Task)
-        .options(joinedload(Task.arena))
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
         .filter(
             Task.user_id == current_user.id,
             Task.due_date >= start_date,
             Task.due_date <= end_date,
+            Arena.is_archived == False,
         )
         .all()
     )
@@ -293,11 +298,13 @@ def get_monthly_productivity(
 
     tasks = (
         db.query(Task)
-        .options(joinedload(Task.arena))
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
         .filter(
             Task.user_id == current_user.id,
             Task.due_date >= first_day,
             Task.due_date <= last_day,
+            Arena.is_archived == False,
         )
         .all()
     )
@@ -477,11 +484,13 @@ def get_yearly_productivity(
 
     tasks = (
         db.query(Task)
-        .options(joinedload(Task.arena))
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
         .filter(
             Task.user_id == current_user.id,
             Task.due_date >= first_day,
             Task.due_date <= last_day,
+            Arena.is_archived == False,
         )
         .all()
     )
@@ -728,8 +737,9 @@ def get_streaks(
 ):
     tasks = (
         db.query(Task)
-        .options(joinedload(Task.arena))
-        .filter(Task.user_id == current_user.id)
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
+        .filter(Task.user_id == current_user.id, Arena.is_archived == False)
         .order_by(Task.due_date)
         .all()
     )

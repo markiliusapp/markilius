@@ -9,7 +9,7 @@ from app.models.arena import Arena
 from typing import Optional
 from datetime import date
 from app.services.locking_tasks import lock_overdue_tasks
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, contains_eager
 from app.services.frequency_management import generate_due_dates
 import uuid
 
@@ -28,6 +28,19 @@ def create_task(
     """
     Creates a new task for the current user
     """
+
+    arena = (
+        db.query(Arena)
+        .filter(Arena.id == task_data.arena_id, Arena.user_id == current_user.id)
+        .first()
+    )
+    if not arena:
+        raise HTTPException(status_code=404, detail="Arena not found")
+    if arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot create a task in an archived arena",
+        )
 
     # Generate shared group_id for recurring tasks
     group_id = (
@@ -71,8 +84,9 @@ def get_task(
     """
     query = (
         db.query(Task)
-        .options(joinedload(Task.arena))
-        .filter(Task.user_id == current_user.id)
+        .join(Arena, Task.arena_id == Arena.id)
+        .options(contains_eager(Task.arena))
+        .filter(Task.user_id == current_user.id, Arena.is_archived == False)
     )
     if status is not None:
         query = query.filter(Task.is_completed == status)
@@ -120,6 +134,26 @@ def update_task(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this task",
         )
+
+    if task.arena and task.arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot update a task that belongs to an archived arena",
+        )
+
+    if task_data.arena_id is not None and task_data.arena_id != task.arena_id:
+        new_arena = (
+            db.query(Arena)
+            .filter(Arena.id == task_data.arena_id, Arena.user_id == current_user.id)
+            .first()
+        )
+        if not new_arena:
+            raise HTTPException(status_code=404, detail="Arena not found")
+        if new_arena.is_archived:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot move a task to an archived arena",
+            )
 
     # Check if the task is locked (can't update locked tasks)
 

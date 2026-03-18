@@ -17,6 +17,7 @@ class ArenaResponse(BaseModel):
     id: int
     name: str
     color: str
+    is_archived: bool
     created_at: datetime
 
     class Config:

@@ -18,12 +18,12 @@ def get_arenas(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Fetches all the arenas
+    Fetches all active (non-archived) arenas
     """
     try:
         arenas = (
             db.query(Arena)
-            .filter(Arena.user_id == current_user.id)
+            .filter(Arena.user_id == current_user.id, Arena.is_archived == False)
             .order_by(Arena.created_at)
             .all()
         )
@@ -32,7 +32,36 @@ def get_arenas(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database connection failed",
         )
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error occurred",
+        )
+
+    return arenas
+
+
+@router.get("/archived", response_model=list[ArenaResponse])
+def get_archived_arenas(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Fetches all archived arenas
+    """
+    try:
+        arenas = (
+            db.query(Arena)
+            .filter(Arena.user_id == current_user.id, Arena.is_archived == True)
+            .order_by(Arena.created_at)
+            .all()
+        )
+    except OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection failed",
+        )
+    except SQLAlchemyError:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database error occurred",
@@ -49,7 +78,12 @@ def create_arena(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    count = db.query(Arena).filter(Arena.user_id == current_user.id).count()
+    # Only count active (non-archived) arenas toward the limit
+    count = (
+        db.query(Arena)
+        .filter(Arena.user_id == current_user.id, Arena.is_archived == False)
+        .count()
+    )
     if count >= ARENA_LIMIT:
         raise HTTPException(
             status_code=400, detail=f"Arena limit of {ARENA_LIMIT} reached"
@@ -82,6 +116,12 @@ def update_arena(
     if not db_arena:
         raise HTTPException(status_code=404, detail="Arena not found")
 
+    if db_arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot update an archived arena",
+        )
+
     if arena.name is not None:
         db_arena.name = arena.name
     if arena.color is not None:
@@ -98,6 +138,9 @@ def delete_arena(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """
+    Archives an arena and all its tasks instead of permanently deleting them.
+    """
     db_arena = (
         db.query(Arena)
         .filter(
@@ -109,6 +152,55 @@ def delete_arena(
     if not db_arena:
         raise HTTPException(status_code=404, detail="Arena not found")
 
-    db.delete(db_arena)
+    if db_arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Arena is already archived",
+        )
+
+    db_arena.is_archived = True
     db.commit()
-    return {"message": "Arena deleted"}
+
+
+@router.post("/{arena_id}/restore", response_model=ArenaResponse)
+def restore_arena(
+    arena_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Restores an archived arena and makes its tasks active again.
+    """
+    db_arena = (
+        db.query(Arena)
+        .filter(
+            Arena.id == arena_id,
+            Arena.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not db_arena:
+        raise HTTPException(status_code=404, detail="Arena not found")
+
+    if not db_arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Arena is not archived",
+        )
+
+    # Check active arena limit before restoring
+    count = (
+        db.query(Arena)
+        .filter(Arena.user_id == current_user.id, Arena.is_archived == False)
+        .count()
+    )
+    if count >= ARENA_LIMIT:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot restore: active arena limit of {ARENA_LIMIT} reached",
+        )
+
+    db_arena.is_archived = False
+    db.commit()
+    db.refresh(db_arena)
+    return db_arena
