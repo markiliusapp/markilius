@@ -193,13 +193,12 @@ const WeekPage = () => {
                                     key={arena.id}
                                     className={`arena-filter-pill ${selectedArenaId === arena.id ? 'active' : ''}`}
                                     style={{
-                                        borderColor: selectedArenaId === arena.id ? arena.color : 'var(--color-border)',
-                                        backgroundColor: selectedArenaId === arena.id ? `${arena.color}20` : 'transparent',
+                                        borderColor: selectedArenaId === arena.id ? arena.color : `${arena.color}40`,
+                                        backgroundColor: selectedArenaId === arena.id ? `${arena.color}25` : `${arena.color}12`,
                                         color: selectedArenaId === arena.id ? arena.color : 'var(--color-text-secondary)',
                                     }}
                                     onClick={() => setSelectedArenaId(selectedArenaId === arena.id ? null : arena.id)}
                                 >
-                                    <span className="arena-filter-dot" style={{ backgroundColor: arena.color }} />
                                     {arena.name}
                                 </button>
                             ))}

@@ -54,15 +54,7 @@ const ForgotPasswordPage = () => {
                     )}
 
                     {message && (
-                        <div style={{
-                            padding: '12px 16px',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            border: '1px solid rgba(34, 197, 94, 0.2)',
-                            borderRadius: 'var(--radius-md)',
-                            marginBottom: '20px',
-                            fontSize: '14px',
-                            color: '#16a34a'
-                        }}>
+                        <div className="login-success">
                             {message}
                         </div>
                     )}

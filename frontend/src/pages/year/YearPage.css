@@ -2,43 +2,14 @@
     width: 100%;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.compact-toggle {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.compact-toggle:hover {
-    background-color: var(--color-bg-subtle);
-    color: var(--color-text);
-}
-
-.compact-toggle.active {
-    background-color: var(--color-bg-muted);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
 /* Header */
 .year-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 .year-header h1 {
@@ -78,10 +49,10 @@
 }
 
 .year-name {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--color-text);
-    padding: 0 24px;
+    padding: 0 12px;
     min-width: 100px;
     text-align: center;
 }
@@ -125,8 +96,8 @@
 }
 
 .overview-card-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     background-color: var(--color-bg-subtle);
     border-radius: var(--radius-md);
     display: flex;
@@ -201,7 +172,7 @@
     margin-bottom: 24px;
 }
 
-.year-chart-section h2 {
+.year-chart-header h2 {
     font-size: 18px;
     font-weight: 600;
     color: var(--color-text);
@@ -261,46 +232,6 @@
     color: var(--color-text-secondary);
     margin-top: 16px;
 }
-
-.arena-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 24px;
-}
-
-.arena-filter-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    background-color: transparent;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.arena-filter-pill:hover {
-    background-color: var(--color-bg-subtle);
-}
-
-.arena-filter-pill.active {
-    border-color: var(--color-primary);
-    background-color: var(--color-bg-muted);
-    color: var(--color-primary);
-}
-
-.arena-filter-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
 
 .view-toggle-btn {
     padding: 6px 14px;

@@ -3,76 +3,6 @@
     width: 100%;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.compact-toggle {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.compact-toggle:hover {
-    background-color: var(--color-bg-subtle);
-    color: var(--color-text);
-}
-
-.compact-toggle.active {
-    background-color: var(--color-bg-muted);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
-.arena-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.arena-filter-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    background-color: transparent;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.arena-filter-pill:hover {
-    background-color: var(--color-bg-subtle);
-}
-
-.arena-filter-pill.active {
-    border-color: var(--color-primary);
-    background-color: var(--color-bg-muted);
-    color: var(--color-primary);
-}
-
-.arena-filter-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -250,21 +180,6 @@
     color: var(--color-primary);
 }
 
-.progress-bar {
-    width: 100%;
-    height: 12px;
-    background-color: var(--color-bg-subtle);
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: var(--color-primary);
-    border-radius: 6px;
-    transition: width 0.3s ease;
-}
-
 .streaks-and-stats {
     display: flex;
     /* grid-template-columns: 1fr 1fr; */
@@ -437,6 +352,7 @@
 
 .progress-fill {
     height: 100%;
+    background-color: var(--color-primary);
     border-radius: 5px;
     transition: width 0.3s ease;
 }

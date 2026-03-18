@@ -160,12 +160,6 @@
     animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 .login-signup {
     margin-top: 20px;
     font-size: 14px;

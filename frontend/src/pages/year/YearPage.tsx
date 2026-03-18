@@ -212,13 +212,12 @@ const YearPage = () => {
                                         key={arena.arena_id}
                                         className={`arena-filter-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
                                         style={{
-                                            borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-border)',
-                                            backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}20` : 'transparent',
+                                            borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
+                                            backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
                                             color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
                                         }}
                                         onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
                                     >
-                                        <span className="arena-filter-dot" style={{ backgroundColor: arena.arena_color }} />
                                         {arena.arena_name}
                                     </button>
                                 ))}
