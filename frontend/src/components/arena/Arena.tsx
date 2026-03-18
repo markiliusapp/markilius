@@ -130,12 +130,12 @@ const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
                         type="button"
                         className="arena-pill"
                         style={{
-                            borderColor: selectedArenaId === arena.id ? arena.color : 'var(--color-border)',
-                            backgroundColor: selectedArenaId === arena.id ? `${arena.color}20` : 'transparent',
+                            borderColor: selectedArenaId === arena.id ? arena.color : `${arena.color}40`,
+                            backgroundColor: selectedArenaId === arena.id ? `${arena.color}25` : `${arena.color}12`,
+                            color: selectedArenaId === arena.id ? arena.color : 'var(--color-text-secondary)',
                         }}
                         onClick={() => onSelect(arena.id)}
                     >
-                        <span className="arena-dot" style={{ backgroundColor: arena.color }} />
                         {arena.name}
                     </button>
                 ))}
