@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
-import type { MonthlyProductivity, ArenaBreakdown } from '@/types';
+import type { MonthlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
 import Heatmap from '@/components/heatmap/Heatmap';
 import './MonthPage.css';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { hexToRgb } from '@/services/colorIntensity';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import MonthlyArenaChart from '@/components/monthArenaChart/MonthlyArenaChart';
-import MonthArenaBreakdown from '@/components/monthArenaBreakdown/MonthArenaBreakdown'
+import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 
 
 const MonthPage = () => {
@@ -65,9 +65,9 @@ const MonthPage = () => {
 
     const handleDayClick = (date: string) => navigate(`/dashboard?date=${date}`);
 
-    const getArenas = (): ArenaBreakdown[] => {
+    const getArenas = (): ArenaBreakdownType[] => {
         if (!monthData) return []
-        const arenaMap = new Map<number, ArenaBreakdown>()
+        const arenaMap = new Map<number, ArenaBreakdownType>()
         monthData.daily_breakdown.forEach(day => {
             day.arenas.forEach(arena => {
                 if (!arenaMap.has(arena.arena_id)) arenaMap.set(arena.arena_id, arena)
@@ -343,7 +343,7 @@ const MonthPage = () => {
                     {/* Section 3: Insights */}
                     <div className="stats-section">
                         {/* Section 5: Arena Breakdown */}
-                        <MonthArenaBreakdown
+                        <ArenaBreakdown
                             arenas={monthData.summary.arenas}
                             prevArenas={prevMonthData?.summary.arenas}
                         />

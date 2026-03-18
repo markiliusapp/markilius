@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import WeeklyChart from '@/components/weeklyChart/WeeklyChart'
+import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 
 
 const WeekPage = () => {
@@ -293,6 +294,12 @@ const WeekPage = () => {
                         dailyBreakdown={weekData.daily_breakdown}
                         averageDuration={weekData.summary.average_duration_per_day}
                     />
+                    <div className="week-chart-section">
+                        <ArenaBreakdown
+                            arenas={weekData.summary.arenas}
+                            prevArenas={prevWeekData?.summary.arenas}
+                        />
+                    </div>
                     {/* Week Summary Stats */}
                     <div className="week-summary">
                         <h2>Week Summary</h2>

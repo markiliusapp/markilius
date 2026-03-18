@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
-import type { YearlyProductivity, ArenaBreakdown } from '@/types';
+import type { YearlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
+import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 import Heatmap from '@/components/heatmap/Heatmap';
 import './YearPage.css';
 import { useNavigate } from 'react-router-dom';
@@ -101,9 +102,9 @@ const YearPage = () => {
         return arena?.completion_percentage ?? 0;
     };
 
-    const getArenas = (): ArenaBreakdown[] => {
+    const getArenas = (): ArenaBreakdownType[] => {
         if (!yearData) return []
-        const arenaMap = new Map<number, ArenaBreakdown>()
+        const arenaMap = new Map<number, ArenaBreakdownType>()
         yearData.summary.arenas.forEach(arena => {
             if (!arenaMap.has(arena.arena_id)) arenaMap.set(arena.arena_id, arena)
         })
@@ -162,15 +163,26 @@ const YearPage = () => {
                         <span className="year-name">{currentYear}</span>
                         <button onClick={handleNextYear} aria-label="Next year">→</button>
                     </div>
-                    <AddTaskButton onClick={() => setShowTaskInput(true)} />
-                </div>
-                <div className='switch-view'>
-                   <button
-                    className={`view-toggle-btn ${compactView}`}
-                    onClick={() => setCompactView(!compactView)}
-                    >
-                        {compactView ? 'Switch View' : 'Switch View'}
-                    </button> 
+                    <div className="header-actions">
+                        <button className={`compact-toggle ${compactView ? 'active' : ''}`} onClick={() => setCompactView(!compactView)} title={compactView ? 'Expand' : 'Compact'}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                {compactView ? (
+                                    <>
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <line x1="7" y1="9" x2="17" y2="9" />
+                                        <line x1="7" y1="13" x2="13" y2="13" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <line x1="3" y1="6" x2="21" y2="6" />
+                                        <line x1="3" y1="12" x2="21" y2="12" />
+                                        <line x1="3" y1="18" x2="21" y2="18" />
+                                    </>
+                                )}
+                            </svg>
+                        </button>
+                        <AddTaskButton onClick={() => setShowTaskInput(true)} />
+                    </div>
                 </div>
                 {showTaskInput && (
                     <TaskInput
@@ -234,7 +246,7 @@ const YearPage = () => {
                     </>
                 )}
                 {/* Monthly Arena Chart */}
-                <div className="year-chart-section">
+                <div className="year-chart-section year-chart-section--standalone">
                     <div className="year-chart-header">
                         <h2>Monthly Hours by Arena</h2>
                         <div className="year-chart-legend">
@@ -281,9 +293,13 @@ const YearPage = () => {
                 <div className='streaks-and-year-overview'>
                     {/* Streaks */}
                         {streaks && <Streaks streaks={streaks} />}
+                        <div className="year-chart-section">
+                            <ArenaBreakdown arenas={yearData.summary.arenas} />
+                        </div>
 
                         {/* Year Overview Stats */}
                         <div className="year-overview">
+                            <h2 className="year-overview-title">Year Summary</h2>
                             <div className="overview-card overview-card-large">
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{yearData.summary.completion_percentage}%</span>

@@ -2,6 +2,37 @@
     width: 100%;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.compact-toggle {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.compact-toggle:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.compact-toggle.active {
+    background-color: var(--color-bg-muted);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
 /* Header */
 .year-header {
     display: flex;
@@ -56,11 +87,19 @@
 }
 
 /* Year Overview */
+.year-overview-title {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
 .year-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    padding: 16px;
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -69,11 +108,11 @@
 .overview-card {
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .overview-card-large {
@@ -81,13 +120,13 @@
 }
 
 .overview-card-highlight {
-    background-color: rgba(249, 115, 22, 0.1);
+    background-color: rgba(249, 115, 22, 0.08);
     border: 1px solid rgba(249, 115, 22, 0.2);
 }
 
 .overview-card-icon {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     background-color: var(--color-bg-subtle);
     border-radius: var(--radius-md);
     display: flex;
@@ -100,27 +139,27 @@
 .overview-card-content {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .overview-card-value {
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--color-text);
 }
 
 .overview-card-large .overview-card-value {
-    font-size: 48px;
+    font-size: 32px;
     color: var(--color-primary);
 }
 
 .overview-card-label {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--color-text-secondary);
 }
 
 .overview-card-meta {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--color-text-secondary);
     font-weight: 500;
 }
@@ -156,7 +195,10 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 24px;
-    margin-bottom: 32px;
+}
+
+.year-chart-section--standalone {
+    margin-bottom: 24px;
 }
 
 .year-chart-section h2 {
@@ -286,7 +328,7 @@
 
 .streaks-and-year-overview {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
     gap: 24px;
 }
 
@@ -297,8 +339,7 @@
 
 @media (max-width: 1450px) {
     .streaks-and-year-overview {
-        display: flex;
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
 }
 @media (max-width: 768px) {

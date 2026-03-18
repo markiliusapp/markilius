@@ -78,6 +78,7 @@ const Streaks = ({ streaks }: StreaksProps) => {
 
     return (
         <div className="streaks-wrapper">
+            <h2 className="streaks-title">Streaks</h2>
             {/* Overall */}
             <div className="streak-panel streak-panel-overall">
                 <div className="streak-panel-head">

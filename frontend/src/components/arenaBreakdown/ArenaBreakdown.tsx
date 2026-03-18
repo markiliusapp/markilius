@@ -1,8 +1,7 @@
-// src/components/arenaBreakdown/ArenaBreakdown.tsx
-import './MonthArenaBreakdown.css'
+import './ArenaBreakdown.css'
 import type { ArenaBreakdown as ArenaBreakdownType } from '@/types'
 
-interface MonthArenaBreakdownProps {
+interface ArenaBreakdownProps {
     arenas: ArenaBreakdownType[]
     prevArenas?: ArenaBreakdownType[]
 }
@@ -14,7 +13,7 @@ const getDelta = (current: number, previous: number) => {
     return { diff, pct, positive: diff >= 0 }
 }
 
-const MonthArenaBreakdown = ({ arenas, prevArenas }: MonthArenaBreakdownProps) => {
+const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
     if (arenas.length === 0) return null
 
     const totalTasks = arenas.reduce((sum, a) => sum + a.total_tasks, 0)
@@ -118,4 +117,4 @@ const MonthArenaBreakdown = ({ arenas, prevArenas }: MonthArenaBreakdownProps) =
     )
 }
 
-export default MonthArenaBreakdown
+export default ArenaBreakdown
