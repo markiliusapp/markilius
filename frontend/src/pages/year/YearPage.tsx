@@ -176,6 +176,7 @@ const YearPage = () => {
                     <TaskInput
                         onTaskCreated={() => { setShowTaskInput(false); }}
                         onCancel={() => setShowTaskInput(false)}
+                        onArenaChange={() => { fetchYearData(); fetchStreaks(); }}
                     />
                 )}
                 {/* 12 Month Heatmaps */}

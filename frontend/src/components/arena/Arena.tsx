@@ -6,9 +6,10 @@ import './Arena.css'
 interface ArenaProps {
     selectedArenaId?: number;
     onSelect: (arenaId: number) => void;
+    onArenaChange?: () => void;
 }
 
-const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
+const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
     const [arenas, setArenas] = useState<ArenaResponse[]>([])
     const [archivedArenas, setArchivedArenas] = useState<ArenaResponse[]>([])
     const [managing, setManaging] = useState(false)
@@ -81,6 +82,7 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
             if (showArchived) {
                 await refreshArchivedArenas()
             }
+            onArenaChange?.()
         } catch (err) {
             console.error(err)
         }
@@ -91,6 +93,7 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
             await arenaAPI.restore(arenaId)
             await refreshArenas()
             await refreshArchivedArenas()
+            onArenaChange?.()
         } catch (err) {
             console.error(err)
         }

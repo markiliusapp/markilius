@@ -8,9 +8,10 @@ interface TaskInputProps {
     onTaskCreated: () => void;
     onCancel: () => void;
     task?: TaskResponse;
+    onArenaChange?: () => void;
 }
 
-const TaskInput = ({ onTaskCreated, onCancel, task }: TaskInputProps) => {
+const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputProps) => {
     const editMode = !!task
     const [formData, setFormData] = useState<CreateTask>({
         title: task?.title ?? "",
@@ -107,6 +108,7 @@ const TaskInput = ({ onTaskCreated, onCancel, task }: TaskInputProps) => {
                     <Arena
                         selectedArenaId={formData.arena_id}
                         onSelect={(arenaId) => setFormData(prev => ({ ...prev, arena_id: arenaId }))}
+                        onArenaChange={onArenaChange}
                     />
                     <div className="form-row">
                         <div className="form-group">

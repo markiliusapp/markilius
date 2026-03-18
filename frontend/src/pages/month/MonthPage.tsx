@@ -124,6 +124,7 @@ const MonthPage = () => {
                     <TaskInput
                         onTaskCreated={() => { setShowTaskInput(false); }}
                         onCancel={() => setShowTaskInput(false)}
+                        onArenaChange={fetchMonthData}
                     />
                 )}
 

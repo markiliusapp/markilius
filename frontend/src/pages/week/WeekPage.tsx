@@ -132,6 +132,7 @@ const WeekPage = () => {
                     <TaskInput
                         onTaskCreated={() => { setShowTaskInput(false); }}
                         onCancel={() => setShowTaskInput(false)}
+                        onArenaChange={() => setRefreshKey(prev => prev + 1)}
                     />
                 )}
 

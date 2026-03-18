@@ -98,6 +98,7 @@ const DashboardPage = () => {
                     <TaskInput
                         onTaskCreated={handleTaskCreated}
                         onCancel={() => setShowTaskInput(false)}
+                        onArenaChange={() => setRefreshKey(prev => prev + 1)}
                     />
                 )}
 
