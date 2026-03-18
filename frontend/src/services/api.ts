@@ -209,6 +209,12 @@ export const arenaAPI = {
         });
         return handleResponse(response);
     },
+    getArchived: async (): Promise<ArenaResponse[]> => {
+        const response = await fetch(`${API_URL}/arenas/archived`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
     create: async (arena: ArenaCreate): Promise<ArenaResponse> => {
         const response = await fetch(`${API_URL}/arenas/`, {
             method: 'POST',
@@ -231,12 +237,19 @@ export const arenaAPI = {
         });
         return handleResponse(response);
     },
-    delete: async (arenaId: number): Promise<void> => {
+    archive: async (arenaId: number): Promise<void> => {
         const response = await fetch(`${API_URL}/arenas/${arenaId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });
         if (response.status === 204) return;
+        return handleResponse(response);
+    },
+    restore: async (arenaId: number): Promise<ArenaResponse> => {
+        const response = await fetch(`${API_URL}/arenas/${arenaId}/restore`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
         return handleResponse(response);
     },
 };

@@ -10,7 +10,9 @@ interface ArenaProps {
 
 const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
     const [arenas, setArenas] = useState<ArenaResponse[]>([])
+    const [archivedArenas, setArchivedArenas] = useState<ArenaResponse[]>([])
     const [managing, setManaging] = useState(false)
+    const [showArchived, setShowArchived] = useState(false)
     const [newArenaName, setNewArenaName] = useState("")
     const [newArenaColor, setNewArenaColor] = useState("#f97316")
     const [loading, setLoading] = useState(false)
@@ -20,7 +22,6 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
             try {
                 const data = await arenaAPI.getAll()
                 setArenas(data)
-                // Auto-select first arena if none selected
                 if (!selectedArenaId && data.length > 0) {
                     onSelect(data[0].id)
                 }
@@ -36,12 +37,30 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
         setArenas(updated)
     }
 
+    const refreshArchivedArenas = async () => {
+        const updated = await arenaAPI.getArchived()
+        setArchivedArenas(updated)
+    }
+
+    const handleToggleArchived = async () => {
+        const next = !showArchived
+        setShowArchived(next)
+        if (next && archivedArenas.length === 0) {
+            try {
+                await refreshArchivedArenas()
+            } catch (err) {
+                console.error(err)
+            }
+        }
+    }
+
     const handleCreate = async () => {
         if (!newArenaName.trim()) return
         setLoading(true)
         try {
             const created = await arenaAPI.create({ name: newArenaName.trim(), color: newArenaColor })
             setArenas(prev => [...prev, created])
+            onSelect(created.id)
             setNewArenaName("")
             setNewArenaColor("#f97316")
         } catch (err) {
@@ -51,15 +70,27 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
         }
     }
 
-    const handleDelete = async (arenaId: number) => {
+    const handleArchive = async (arenaId: number) => {
         try {
-            await arenaAPI.delete(arenaId)
+            await arenaAPI.archive(arenaId)
             const updated = arenas.filter(a => a.id !== arenaId)
             setArenas(updated)
-            // If deleted arena was selected, select first available
             if (selectedArenaId === arenaId && updated.length > 0) {
                 onSelect(updated[0].id)
             }
+            if (showArchived) {
+                await refreshArchivedArenas()
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const handleRestore = async (arenaId: number) => {
+        try {
+            await arenaAPI.restore(arenaId)
+            await refreshArenas()
+            await refreshArchivedArenas()
         } catch (err) {
             console.error(err)
         }
@@ -121,6 +152,7 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
             {/* Inline manager */}
             {managing && (
                 <div className="arena-manager">
+                    {/* Active arenas */}
                     {arenas.map(arena => (
                         <div key={arena.id} className="arena-manager-row">
                             <input
@@ -137,16 +169,20 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
                             />
                             <button
                                 type="button"
-                                className="arena-delete-btn"
-                                onClick={() => handleDelete(arena.id)}
+                                className="arena-archive-btn"
+                                title="Archive arena"
+                                onClick={() => handleArchive(arena.id)}
                             >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="21 8 21 21 3 21 3 8" />
+                                    <rect x="1" y="3" width="22" height="5" />
+                                    <line x1="10" y1="12" x2="14" y2="12" />
                                 </svg>
                             </button>
                         </div>
                     ))}
 
+                    {/* New arena row */}
                     {arenas.length < 10 && (
                         <div className="arena-manager-row">
                             <input
@@ -176,6 +212,59 @@ const Arena = ({ selectedArenaId, onSelect }: ArenaProps) => {
                             </button>
                         </div>
                     )}
+
+                    {/* Archived arenas section */}
+                    <div className="arena-archived-section">
+                        <button
+                            type="button"
+                            className="arena-archived-toggle"
+                            onClick={handleToggleArchived}
+                        >
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={`arena-archived-chevron ${showArchived ? 'arena-archived-chevron--open' : ''}`}
+                            >
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                            Archived arenas
+                            {archivedArenas.length > 0 && (
+                                <span className="arena-archived-count">{archivedArenas.length}</span>
+                            )}
+                        </button>
+
+                        {showArchived && (
+                            <div className="arena-archived-list">
+                                {archivedArenas.length === 0 ? (
+                                    <p className="arena-archived-empty">No archived arenas</p>
+                                ) : (
+                                    archivedArenas.map(arena => (
+                                        <div key={arena.id} className="arena-manager-row arena-archived-row">
+                                            <span className="arena-dot" style={{ backgroundColor: arena.color }} />
+                                            <span className="arena-archived-name">{arena.name}</span>
+                                            <button
+                                                type="button"
+                                                className="arena-restore-btn"
+                                                title="Restore arena"
+                                                onClick={() => handleRestore(arena.id)}
+                                            >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="1 4 1 10 7 10" />
+                                                    <path d="M3.51 15a9 9 0 1 0 .49-4.46" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

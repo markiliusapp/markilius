@@ -102,7 +102,7 @@
     border-color: var(--color-primary);
 }
 
-.arena-delete-btn {
+.arena-archive-btn {
     width: 28px;
     height: 28px;
     display: flex;
@@ -110,14 +110,99 @@
     justify-content: center;
     border: none;
     background: none;
-    color: var(--color-error);
+    color: var(--color-text-muted);
     cursor: pointer;
     border-radius: var(--radius-md);
     transition: var(--transition);
 }
 
-.arena-delete-btn:hover {
-    background-color: var(--color-error-bg);
+.arena-archive-btn:hover {
+    background-color: var(--color-bg-muted);
+    color: var(--color-primary-hover);
+}
+
+.arena-archived-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
+.arena-archived-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.arena-archived-toggle:hover {
+    color: var(--color-text);
+}
+
+.arena-archived-chevron {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.arena-archived-chevron--open {
+    transform: rotate(90deg);
+}
+
+.arena-archived-count {
+    margin-left: auto;
+    font-size: 11px;
+    background-color: var(--color-bg-muted);
+    color: var(--color-text-muted);
+    border-radius: 10px;
+    padding: 1px 6px;
+}
+
+.arena-archived-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.arena-archived-row {
+    opacity: 0.7;
+}
+
+.arena-archived-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.arena-archived-empty {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 0;
+    padding: 4px 0;
+}
+
+.arena-restore-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.arena-restore-btn:hover {
+    background-color: var(--color-bg-muted);
 }
 
 .arena-add-btn {
