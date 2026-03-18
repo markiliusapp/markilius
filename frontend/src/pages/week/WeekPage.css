@@ -329,13 +329,13 @@
 }
 
 .summary-delta.positive {
-    color: #10b981;
-    background-color: #d1fae5;
+    color: var(--color-increase);
+    background-color: var(--color-increase-bg);
 }
 
 .summary-delta.negative {
-    color: #ef4444;
-    background-color: #fee2e2;
+    color: var(--color-decrease);
+    background-color: var(--color-decrease-bg);
 }
 
 /* ================================

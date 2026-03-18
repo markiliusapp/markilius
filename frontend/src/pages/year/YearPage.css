@@ -58,9 +58,12 @@
 /* Year Overview */
 .year-overview {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 16px;
-    margin-bottom: 32px;
+    padding: 24px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
 }
 
 .overview-card {
@@ -160,14 +163,44 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--color-text);
+}
+
+.year-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
-.year-area-chart {
+.year-chart-header h2 {
+    margin-bottom: 0;
+}
+
+.year-chart-legend {
     display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    padding-top: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.year-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.year-chart-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.year-bar-chart {
+    height: 250px;
 }
 
 /* Loading/Error */
@@ -251,17 +284,23 @@
     padding: 16px 0px;
 }
 
+.streaks-and-year-overview {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+}
+
 /* ================================
    RESPONSIVE BREAKPOINTS
 ================================ */
 
 
-@media (max-width: 1400px) {
-    .year-overview {
-        grid-template-columns: 1fr 1fr;
+@media (max-width: 1450px) {
+    .streaks-and-year-overview {
+        display: flex;
+        flex-direction: column;
     }
 }
-
 @media (max-width: 768px) {
     .year-header {
         flex-direction: column;

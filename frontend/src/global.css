@@ -14,6 +14,10 @@
   --color-error: #dc2626;
   --color-error-bg: #fef2f2;
   --color-error-border: #fee2e2;
+  --color-increase: #10b981;
+  --color-increase-bg: #d1fae5;
+  --color-decrease: #ef4444;
+  --color-decrease-bg: #fee2e2;
 
   /* Typography I wrote*/
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
