@@ -123,7 +123,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                 </div>
             </div>
             <div className='week-chart-container'>
-                <ResponsiveContainer width="100%" height={240}>
+                <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
                         margin={{ top: 16, right: 0, left: 0, bottom: 0 }}

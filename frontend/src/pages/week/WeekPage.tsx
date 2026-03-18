@@ -9,6 +9,7 @@ import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import WeeklyChart from '@/components/weeklyChart/WeeklyChart'
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
+import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
 
 const WeekPage = () => {
@@ -177,34 +178,11 @@ const WeekPage = () => {
                 )}
 
                 {/* Arena Filter */}
-                {(() => {
-                    const arenas = getArenas()
-                    if (arenas.length === 0) return null
-                    return (
-                        <div className="arena-filter">
-                            <button
-                                className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
-                                onClick={() => setSelectedArenaId(null)}
-                            >
-                                All
-                            </button>
-                            {arenas.map(arena => (
-                                <button
-                                    key={arena.id}
-                                    className={`arena-filter-pill ${selectedArenaId === arena.id ? 'active' : ''}`}
-                                    style={{
-                                        borderColor: selectedArenaId === arena.id ? arena.color : `${arena.color}40`,
-                                        backgroundColor: selectedArenaId === arena.id ? `${arena.color}25` : `${arena.color}12`,
-                                        color: selectedArenaId === arena.id ? arena.color : 'var(--color-text-secondary)',
-                                    }}
-                                    onClick={() => setSelectedArenaId(selectedArenaId === arena.id ? null : arena.id)}
-                                >
-                                    {arena.name}
-                                </button>
-                            ))}
-                        </div>
-                    )
-                })()}
+                <ArenaFilter
+                    arenas={getArenas()}
+                    selectedArenaId={selectedArenaId}
+                    onSelect={setSelectedArenaId}
+                />
 
                 {/* 7 Day Columns */}
                 <div className="week-grid-wrapper">

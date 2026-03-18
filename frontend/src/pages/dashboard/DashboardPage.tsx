@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router-dom'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import type { StreakResponse } from '@/types';
 import Streaks from '@/components/streaks/Streaks'
+import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
 const DashboardPage = () => {
     const [searchParams] = useSearchParams()
@@ -126,29 +127,12 @@ const DashboardPage = () => {
                 )}
 
                 {/* Arena Filter */}
-                {productivity && productivity.arenas.length > 0 && (
-                    <div className="arena-filter">
-                        <button
-                            className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
-                            onClick={() => setSelectedArenaId(null)}
-                        >
-                            All
-                        </button>
-                        {productivity.arenas.map(arena => (
-                            <button
-                                key={arena.arena_id}
-                                className={`arena-filter-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
-                                style={{
-                                    borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                    backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                    color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                                }}
-                                onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
-                            >
-                                {arena.arena_name}
-                            </button>
-                        ))}
-                    </div>
+                {productivity && (
+                    <ArenaFilter
+                        arenas={(productivity.arenas).map(a => ({ id: a.arena_id, name: a.arena_name, color: a.arena_color }))}
+                        selectedArenaId={selectedArenaId}
+                        onSelect={setSelectedArenaId}
+                    />
                 )}
 
                 {/* Two Panes */}

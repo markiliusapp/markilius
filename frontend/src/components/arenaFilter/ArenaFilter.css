@@ -1,0 +1,24 @@
+.arena-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+    .arena-filter {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 4px;
+    }
+
+    .arena-filter::-webkit-scrollbar {
+        display: none;
+    }
+
+    .arena-filter-pill {
+        flex-shrink: 0;
+    }
+}

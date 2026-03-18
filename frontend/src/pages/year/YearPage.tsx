@@ -14,6 +14,7 @@ import TaskInput from '@/components/taskinput/TaskInput';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
 import type { StreakResponse } from '@/types';
 import Streaks from '@/components/streaks/Streaks';
+import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
 const YearChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null
@@ -199,30 +200,11 @@ const YearPage = () => {
                         arenas={arenas}
                     />
                 ) : (<>
-                        {arenas.length > 0 && (
-                            <div className="arena-filter">
-                                <button
-                                    className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
-                                    onClick={() => setSelectedArenaId(null)}
-                                >
-                                    All
-                                </button>
-                                {arenas.map(arena => (
-                                    <button
-                                        key={arena.arena_id}
-                                        className={`arena-filter-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
-                                        style={{
-                                            borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                            backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                            color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                                        }}
-                                        onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
-                                    >
-                                        {arena.arena_name}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        <ArenaFilter
+                            arenas={arenas.map(a => ({ id: a.arena_id, name: a.arena_name, color: a.arena_color }))}
+                            selectedArenaId={selectedArenaId}
+                            onSelect={setSelectedArenaId}
+                        />
                         <div>
                             <div className="year-heatmaps">
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => (

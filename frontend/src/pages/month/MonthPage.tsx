@@ -11,6 +11,7 @@ import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import MonthlyArenaChart from '@/components/monthArenaChart/MonthlyArenaChart';
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
+import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
 
 const MonthPage = () => {
@@ -129,30 +130,11 @@ const MonthPage = () => {
                 )}
 
                 {/* Arena Filter */}
-                {arenas.length > 0 && (
-                    <div className="arena-filter">
-                        <button
-                            className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
-                            onClick={() => setSelectedArenaId(null)}
-                        >
-                            All
-                        </button>
-                        {arenas.map(arena => (
-                            <button
-                                key={arena.arena_id}
-                                className={`arena-filter-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
-                                style={{
-                                    borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                    backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                    color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                                }}
-                                onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
-                            >
-                                {arena.arena_name}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <ArenaFilter
+                    arenas={arenas.map(a => ({ id: a.arena_id, name: a.arena_name, color: a.arena_color }))}
+                    selectedArenaId={selectedArenaId}
+                    onSelect={setSelectedArenaId}
+                />
 
                 {/* 4-Section Grid */}
                 <div className="month-content">
