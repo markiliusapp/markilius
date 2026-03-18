@@ -223,6 +223,19 @@
     display: none;
 }
 
+.individual-task.task-compact {
+    cursor: pointer;
+}
+
+.individual-task.task-compact-expanded .task-details,
+.individual-task.task-compact-expanded .task-locked-badge {
+    display: block;
+}
+
+.individual-task.task-compact-expanded .task-header {
+    margin-bottom: 8px;
+}
+
 .task-compact-lock {
     display: flex;
     align-items: center;

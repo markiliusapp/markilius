@@ -21,10 +21,8 @@ const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
     const overallPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
     const totalHours = arenas.reduce((sum, a) => sum + a.total_hours, 0)
 
-    const prevTotalTasks = prevArenas?.reduce((sum, a) => sum + a.total_tasks, 0) ?? 0
-    const prevCompletedTasks = prevArenas?.reduce((sum, a) => sum + a.completed_tasks, 0) ?? 0
-    const prevOverallPct = prevTotalTasks > 0 ? Math.round((prevCompletedTasks / prevTotalTasks) * 100) : 0
-    const overallDelta = prevArenas ? getDelta(overallPct, prevOverallPct) : null
+    const prevTotalHours = prevArenas?.reduce((sum, a) => sum + a.total_hours, 0) ?? 0
+    const overallDelta = prevArenas ? getDelta(totalHours, prevTotalHours) : null
 
     return (
         <div className="mab-section">
@@ -70,7 +68,7 @@ const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
                     .map(arena => {
                         const prevArena = prevArenas?.find(a => a.arena_id === arena.arena_id)
                         const delta = prevArena
-                            ? getDelta(arena.completion_percentage, prevArena.completion_percentage)
+                            ? getDelta(arena.total_hours, prevArena.total_hours)
                             : null
 
                         return (

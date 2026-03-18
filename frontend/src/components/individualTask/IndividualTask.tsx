@@ -14,6 +14,7 @@ interface IndividualTaskProps {
 const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
     const [editMode, setEditMode] = useState(false)
     const [showActions, setShowActions] = useState(false)
+    const [expanded, setExpanded] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -75,11 +76,12 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
             )}
 
             <div
-                className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed' : ''} ${compact ? 'task-compact' : ''}`}
+                className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed' : ''} ${compact ? 'task-compact' : ''} ${compact && expanded ? 'task-compact-expanded' : ''}`}
                 style={{
                     '--arena-color': task.arena?.color,
                     backgroundColor: task.arena ? `${task.arena.color}12` : undefined,
                 } as React.CSSProperties}
+                onClick={compact ? () => setExpanded(v => !v) : undefined}
             >
                 <div className="task-content">
                     {task.is_locked && (
@@ -95,7 +97,7 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
                     <div className="task-header">
                         <div className="task-header-left">
                             <button
-                                onClick={handleCompleteToggle}
+                                onClick={e => { e.stopPropagation(); handleCompleteToggle(); }}
                                 className={`task-checkbox ${task.is_completed ? 'task-checkbox-checked' : ''}`}
                                 style={{ borderColor: task.arena?.color ?? 'var(--color-border)' }}
                                 title={task.is_locked ? 'Can not modify past due date tasks' : undefined}
@@ -110,24 +112,22 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
                         </div>
 
                         <div className="task-header-right" ref={menuRef}>
-                            {compact && task.is_locked ? (
+                            {compact && !expanded && task.is_locked ? (
                                 <span className="task-compact-lock">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                     </svg>
                                 </span>
-                            ) : !compact && (
-                                <>
-                                <button onClick={() => setShowActions(!showActions)} className="task-menu-btn">
+                            ) : (!compact || expanded) && (
+                                <button onClick={e => { e.stopPropagation(); setShowActions(!showActions); }} className="task-menu-btn">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
                                     </svg>
                                 </button>
-                                </>
                             )}
 
-                            {!compact && showActions && (
+                            {(!compact || expanded) && showActions && (
                                 <div className="task-actions-menu">
                                     <button onClick={handleEditClick}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
