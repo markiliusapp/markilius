@@ -13,6 +13,10 @@ class ArenaUpdate(BaseModel):
     color: Optional[str] = None
 
 
+class ArenaColorUpdate(BaseModel):
+    color: str
+
+
 class ArenaResponse(BaseModel):
     id: int
     name: str

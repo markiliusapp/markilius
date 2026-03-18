@@ -47,6 +47,10 @@ export interface ArenaUpdate {
     color?: string;
 }
 
+export interface ArenaColorUpdate {
+    color: string;
+}
+
 // ================================
 // Incoming Responses Shapes
 // ================================

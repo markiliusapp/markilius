@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.arena import Arena
 from app.models.user import User
-from app.schemas.arena import ArenaResponse, ArenaCreate, ArenaUpdate
+from app.schemas.arena import ArenaResponse, ArenaCreate, ArenaUpdate, ArenaColorUpdate
 from app.database import get_db
 from .auth import get_current_user
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
@@ -127,6 +127,33 @@ def update_arena(
     if arena.color is not None:
         db_arena.color = arena.color
 
+    db.commit()
+    db.refresh(db_arena)
+    return db_arena
+
+
+@router.patch("/{arena_id}/color", response_model=ArenaResponse)
+def update_arena_color(
+    arena_id: int,
+    body: ArenaColorUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    db_arena = (
+        db.query(Arena)
+        .filter(Arena.id == arena_id, Arena.user_id == current_user.id)
+        .first()
+    )
+    if not db_arena:
+        raise HTTPException(status_code=404, detail="Arena not found")
+
+    if db_arena.is_archived:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot update an archived arena",
+        )
+
+    db_arena.color = body.color
     db.commit()
     db.refresh(db_arena)
     return db_arena

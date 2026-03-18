@@ -9,14 +9,23 @@ interface ArenaProps {
     onArenaChange?: () => void;
 }
 
+const PALETTE = [
+    ['#93c5fd', '#3b82f6', '#1d4ed8'],  // Blue
+    ['#86efac', '#22c55e', '#15803d'],  // Green
+    ['#c4b5fd', '#8b5cf6', '#6d28d9'],  // Violet
+    ['#fda4af', '#f43f5e', '#be123c'],  // Rose
+]
+
 const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
     const [arenas, setArenas] = useState<ArenaResponse[]>([])
     const [archivedArenas, setArchivedArenas] = useState<ArenaResponse[]>([])
     const [managing, setManaging] = useState(false)
     const [showArchived, setShowArchived] = useState(false)
     const [newArenaName, setNewArenaName] = useState("")
-    const [newArenaColor, setNewArenaColor] = useState("#f97316")
+    const [newArenaColor, setNewArenaColor] = useState(PALETTE[0][1])
     const [loading, setLoading] = useState(false)
+    const [expandedColorId, setExpandedColorId] = useState<number | null>(null)
+    const [newPaletteOpen, setNewPaletteOpen] = useState(false)
 
     useEffect(() => {
         const fetchArenas = async () => {
@@ -111,8 +120,9 @@ const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
 
     const handleColorChange = async (arena: ArenaResponse, color: string) => {
         try {
-            await arenaAPI.update(arena.id, { color })
+            await arenaAPI.updateColor(arena.id, { color })
             await refreshArenas()
+            onArenaChange?.()
         } catch (err) {
             console.error(err)
         }
@@ -157,62 +167,102 @@ const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
                 <div className="arena-manager">
                     {/* Active arenas */}
                     {arenas.map(arena => (
-                        <div key={arena.id} className="arena-manager-row">
-                            <input
-                                type="color"
-                                defaultValue={arena.color}
-                                className="arena-color-picker"
-                                onChange={(e) => handleColorChange(arena, e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                defaultValue={arena.name}
-                                className="arena-name-input"
-                                onBlur={(e) => handleNameBlur(arena, e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                className="arena-archive-btn"
-                                title="Archive arena"
-                                onClick={() => handleArchive(arena.id)}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="21 8 21 21 3 21 3 8" />
-                                    <rect x="1" y="3" width="22" height="5" />
-                                    <line x1="10" y1="12" x2="14" y2="12" />
-                                </svg>
-                            </button>
+                        <div key={arena.id} className="arena-manager-item">
+                            <div className="arena-manager-row">
+                                <button
+                                    type="button"
+                                    className="arena-color-swatch"
+                                    style={{ backgroundColor: arena.color }}
+                                    onClick={() => setExpandedColorId(expandedColorId === arena.id ? null : arena.id)}
+                                    title="Change color"
+                                />
+                                <input
+                                    type="text"
+                                    defaultValue={arena.name}
+                                    className="arena-name-input"
+                                    onBlur={(e) => handleNameBlur(arena, e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    className="arena-archive-btn"
+                                    title="Archive arena"
+                                    onClick={() => handleArchive(arena.id)}
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="21 8 21 21 3 21 3 8" />
+                                        <rect x="1" y="3" width="22" height="5" />
+                                        <line x1="10" y1="12" x2="14" y2="12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {expandedColorId === arena.id && (
+                                <div className="arena-palette">
+                                    {PALETTE.map((group, gi) => (
+                                        <div key={gi} className="arena-palette-group">
+                                            {group.map(color => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    className={`arena-palette-swatch ${arena.color === color ? 'selected' : ''}`}
+                                                    style={{ backgroundColor: color }}
+                                                    onClick={() => { handleColorChange(arena, color); setExpandedColorId(null) }}
+                                                />
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     ))}
 
                     {/* New arena row */}
                     {arenas.length < 10 && (
-                        <div className="arena-manager-row">
-                            <input
-                                type="color"
-                                value={newArenaColor}
-                                className="arena-color-picker"
-                                onChange={(e) => setNewArenaColor(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="New arena name..."
-                                value={newArenaName}
-                                className="arena-name-input"
-                                onChange={(e) => setNewArenaName(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }}
-                            />
-                            <button
-                                type="button"
-                                className="arena-add-btn"
-                                onClick={handleCreate}
-                                disabled={loading || !newArenaName.trim()}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <line x1="12" y1="5" x2="12" y2="19" />
-                                    <line x1="5" y1="12" x2="19" y2="12" />
-                                </svg>
-                            </button>
+                        <div className="arena-manager-item">
+                            <div className="arena-manager-row">
+                                <button
+                                    type="button"
+                                    className="arena-color-swatch"
+                                    style={{ backgroundColor: newArenaColor }}
+                                    onClick={() => setNewPaletteOpen(o => !o)}
+                                    title="Pick color"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="New arena name..."
+                                    value={newArenaName}
+                                    className="arena-name-input"
+                                    onChange={(e) => setNewArenaName(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }}
+                                />
+                                <button
+                                    type="button"
+                                    className="arena-add-btn"
+                                    onClick={handleCreate}
+                                    disabled={loading || !newArenaName.trim()}
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {newPaletteOpen && (
+                                <div className="arena-palette">
+                                    {PALETTE.map((group, gi) => (
+                                        <div key={gi} className="arena-palette-group">
+                                            {group.map(color => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    className={`arena-palette-swatch ${newArenaColor === color ? 'selected' : ''}`}
+                                                    style={{ backgroundColor: color }}
+                                                    onClick={() => { setNewArenaColor(color); setNewPaletteOpen(false) }}
+                                                />
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 

@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-import type { RegisterUser, LoginUser, CreateTask, UpdateTask, GetTaskFilter, ArenaResponse, ArenaCreate, ArenaUpdate } from "@/types";
+import type { RegisterUser, LoginUser, CreateTask, UpdateTask, GetTaskFilter, ArenaResponse, ArenaCreate, ArenaUpdate, ArenaColorUpdate } from "@/types";
 
 // Helper to get token from localStorage
 const getToken = (): string | null => {
@@ -234,6 +234,17 @@ export const arenaAPI = {
                 'Authorization': `Bearer ${getToken()}`,
             },
             body: JSON.stringify(arena),
+        });
+        return handleResponse(response);
+    },
+    updateColor: async (arenaId: number, body: ArenaColorUpdate): Promise<ArenaResponse> => {
+        const response = await fetch(`${API_URL}/arenas/${arenaId}/color`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify(body),
         });
         return handleResponse(response);
     },
