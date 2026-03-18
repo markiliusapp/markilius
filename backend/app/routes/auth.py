@@ -138,6 +138,17 @@ def google_login(google_id_token: dict, db: Session = Depends(get_db)):
 
         db.add(user)
         db.commit()
+
+        for arena_data in DEFAULT_ARENAS:
+            db.add(
+                Arena(
+                    user_id=user.id,
+                    name=arena_data["name"],
+                    color=arena_data["color"],
+                )
+            )
+        db.commit()
+
         db.refresh(user)
 
     # Create access token

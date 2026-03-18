@@ -53,14 +53,6 @@
     color: var(--color-text-secondary);
 }
 
-.weekly-chart-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 280px;
-    color: var(--color-text-muted);
-    font-size: 13px;
-}
 
 /* Tooltip */
 .weekly-chart-tooltip {

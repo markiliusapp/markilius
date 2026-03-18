@@ -95,15 +95,6 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
     const maxHours = Math.max(...chartData.map(d => d.total), averageDuration)
     const ticks = Array.from({ length: Math.ceil(maxHours) + 1 }, (_, i) => i)
 
-
-    if (allArenas.length === 0) {
-        return (
-            <div className="weekly-chart-empty">
-                <p>No time tracked this week</p>
-            </div>
-        )
-    }
-
     return (
         <div className="weekly-chart-wrapper">
             <div className="weekly-chart-header">
