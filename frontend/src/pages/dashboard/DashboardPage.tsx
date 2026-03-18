@@ -21,6 +21,7 @@ const DashboardPage = () => {
     const [productivity, setProductivity] = useState<DailyProductivityResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
+    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
 
 
     useEffect(() => {
@@ -102,6 +103,33 @@ const DashboardPage = () => {
                     />
                 )}
 
+                {/* Arena Filter */}
+                {productivity && productivity.arenas.length > 0 && (
+                    <div className="arena-filter">
+                        <button
+                            className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
+                            onClick={() => setSelectedArenaId(null)}
+                        >
+                            All
+                        </button>
+                        {productivity.arenas.map(arena => (
+                            <button
+                                key={arena.arena_id}
+                                className={`arena-filter-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
+                                style={{
+                                    borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-border)',
+                                    backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}20` : 'transparent',
+                                    color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
+                                }}
+                                onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
+                            >
+                                <span className="arena-filter-dot" style={{ backgroundColor: arena.arena_color }} />
+                                {arena.arena_name}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 {/* Two Panes */}
                 <div className='panes'>
                     <div className='activePane'>
@@ -111,6 +139,7 @@ const DashboardPage = () => {
                                 refreshKey={refreshKey}
                                 onToggle={handleTaskCreated}
                                 selectedDate={selectedDate}
+                                selectedArenaId={selectedArenaId}
                             />
                         </div>
                     </div>
@@ -122,6 +151,7 @@ const DashboardPage = () => {
                                 refreshKey={refreshKey}
                                 onToggle={handleTaskCreated}
                                 selectedDate={selectedDate}
+                                selectedArenaId={selectedArenaId}
                             />
                         </div>
                     </div>

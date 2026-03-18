@@ -44,9 +44,10 @@ interface ActiveTasksProps {
     refreshKey: number;
     onToggle: () => void;
     selectedDate: string;
+    selectedArenaId?: number | null;
 }
 
-const ActiveTasks = ({ refreshKey, onToggle, selectedDate }: ActiveTasksProps) => {
+const ActiveTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId }: ActiveTasksProps) => {
     const [taskList, setTaskList] = useState<TaskResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -112,9 +113,13 @@ const ActiveTasks = ({ refreshKey, onToggle, selectedDate }: ActiveTasksProps) =
         )
     }
 
+    const displayed = selectedArenaId
+        ? taskList.filter(t => t.arena?.id === selectedArenaId)
+        : [...taskList].sort((a, b) => (a.arena?.name ?? '').localeCompare(b.arena?.name ?? ''))
+
     return (
         <div className="tasks-list">
-            {taskList.map((task) => (
+            {displayed.map((task) => (
                 <IndividualTask
                     key={task.id}
                     task={task}

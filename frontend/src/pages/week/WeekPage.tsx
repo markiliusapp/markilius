@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
-import type { WeeklyProductivityResponse } from '@/types';
+import type { WeeklyProductivityResponse, TaskResponse } from '@/types';
 import IndividualTask from '@/components/individualTask/IndividualTask';
 import './WeekPage.css';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ const WeekPage = () => {
     const [refreshKey, setRefreshKey] = useState(0);
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [prevWeekData, setPrevWeekData] = useState<WeeklyProductivityResponse | null>(null)
+    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
 
 
 
@@ -81,6 +82,22 @@ const WeekPage = () => {
         setRefreshKey(prev => prev + 1);
     };
 
+    const getArenas = () => {
+        const map = new Map<number, { id: number; name: string; color: string }>()
+        weekData?.daily_breakdown.forEach(day => {
+            ;[...day.incomplete, ...day.completed].forEach(task => {
+                if (task.arena && !map.has(task.arena.id))
+                    map.set(task.arena.id, { id: task.arena.id, name: task.arena.name, color: task.arena.color })
+            })
+        })
+        return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    const filterAndSort = (tasks: TaskResponse[]) => {
+        if (selectedArenaId) return tasks.filter(t => t.arena?.id === selectedArenaId)
+        return [...tasks].sort((a, b) => (a.arena?.name ?? '').localeCompare(b.arena?.name ?? ''))
+    }
+
     const getDayName = (dateStr: string) => {
         const [year, month, day] = dateStr.split('-').map(Number)
         const date = new Date(year, month - 1, day)
@@ -136,6 +153,37 @@ const WeekPage = () => {
                     />
                 )}
 
+                {/* Arena Filter */}
+                {(() => {
+                    const arenas = getArenas()
+                    if (arenas.length === 0) return null
+                    return (
+                        <div className="arena-filter">
+                            <button
+                                className={`arena-filter-pill ${!selectedArenaId ? 'active' : ''}`}
+                                onClick={() => setSelectedArenaId(null)}
+                            >
+                                All
+                            </button>
+                            {arenas.map(arena => (
+                                <button
+                                    key={arena.id}
+                                    className={`arena-filter-pill ${selectedArenaId === arena.id ? 'active' : ''}`}
+                                    style={{
+                                        borderColor: selectedArenaId === arena.id ? arena.color : 'var(--color-border)',
+                                        backgroundColor: selectedArenaId === arena.id ? `${arena.color}20` : 'transparent',
+                                        color: selectedArenaId === arena.id ? arena.color : 'var(--color-text-secondary)',
+                                    }}
+                                    onClick={() => setSelectedArenaId(selectedArenaId === arena.id ? null : arena.id)}
+                                >
+                                    <span className="arena-filter-dot" style={{ backgroundColor: arena.color }} />
+                                    {arena.name}
+                                </button>
+                            ))}
+                        </div>
+                    )
+                })()}
+
                 {/* 7 Day Columns */}
                 <div className="week-grid-wrapper">
                     <div className="week-grid">
@@ -167,45 +215,45 @@ const WeekPage = () => {
                                 {/* Tasks */}
                                 <div className="day-tasks">
                                     {/* Incomplete tasks */}
-                                    {day.incomplete.length > 0 && (
-                                        <div className="day-tasks-section">
-                                            <div className="day-tasks-header">
-                                                <span className="day-tasks-label">Active</span>
-                                                <span className="day-tasks-count">{day.incomplete.length}</span>
+                                    {(() => {
+                                        const tasks = filterAndSort(day.incomplete)
+                                        if (tasks.length === 0) return null
+                                        return (
+                                            <div className="day-tasks-section">
+                                                <div className="day-tasks-header">
+                                                    <span className="day-tasks-label">Active</span>
+                                                    <span className="day-tasks-count">{tasks.length}</span>
+                                                </div>
+                                                <div className="day-tasks-list">
+                                                    {tasks.map(task => (
+                                                        <IndividualTask key={task.id} task={task} onToggle={handleToggle} />
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="day-tasks-list">
-                                                {day.incomplete.map(task => (
-                                                    <IndividualTask
-                                                        key={task.id}
-                                                        task={task}
-                                                        onToggle={handleToggle}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                        )
+                                    })()}
 
                                     {/* Completed tasks */}
-                                    {day.completed.length > 0 && (
-                                        <div className="day-tasks-section">
-                                            <div className="day-tasks-header">
-                                                <span className="day-tasks-label">Done</span>
-                                                <span className="day-tasks-count">{day.completed.length}</span>
+                                    {(() => {
+                                        const tasks = filterAndSort(day.completed)
+                                        if (tasks.length === 0) return null
+                                        return (
+                                            <div className="day-tasks-section">
+                                                <div className="day-tasks-header">
+                                                    <span className="day-tasks-label">Done</span>
+                                                    <span className="day-tasks-count">{tasks.length}</span>
+                                                </div>
+                                                <div className="day-tasks-list">
+                                                    {tasks.map(task => (
+                                                        <IndividualTask key={task.id} task={task} onToggle={handleToggle} />
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="day-tasks-list">
-                                                {day.completed.map(task => (
-                                                    <IndividualTask
-                                                        key={task.id}
-                                                        task={task}
-                                                        onToggle={handleToggle}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                        )
+                                    })()}
 
                                     {/* Empty state */}
-                                    {day.incomplete.length === 0 && day.completed.length === 0 && (
+                                    {filterAndSort(day.incomplete).length === 0 && filterAndSort(day.completed).length === 0 && (
                                         <div className="day-empty">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                                 <circle cx="12" cy="12" r="10" opacity="0.3" />
