@@ -197,14 +197,14 @@
     .heatmap-cell-today::after {
         content: '';
         position: absolute;
-        bottom: 3px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background-color: var(--today-border-color, var(--color-primary));
-        box-shadow: 0 0 0 1.5px #ffffff;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 8px 8px 0;
+        border-color: transparent var(--today-border-color, var(--color-primary)) transparent transparent;
+        border-radius: 0 5px 0 0;
     }
 
     .heatmap-cell-today .heatmap-cell-day {
