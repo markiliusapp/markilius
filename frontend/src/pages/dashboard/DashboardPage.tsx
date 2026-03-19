@@ -206,10 +206,6 @@ const DashboardPage = () => {
                                             <div key={arena.arena_id} className="progress-item">
                                                 <div className="progress-item-header">
                                                     <span className="progress-item-label">
-                                                        <span
-                                                            className="arena-dot"
-                                                            style={{ backgroundColor: arena.arena_color }}
-                                                        />
                                                         {arena.arena_name}
                                                     </span>
                                                     <div className="progress-item-meta">
