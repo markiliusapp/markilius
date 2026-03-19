@@ -166,6 +166,59 @@
     margin-left: 200px;
 }
 
+/* ================================
+   MOBILE BOTTOM TAB BAR
+================================ */
+.mobile-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background-color: var(--color-bg);
+        border-top: 1px solid var(--color-border);
+        z-index: 100;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-tab-link {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--color-text-muted);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        padding: 8px 0;
+        text-decoration: none;
+    }
+
+    .mobile-tab-link:hover,
+    .mobile-tab-link.active {
+        color: var(--color-primary);
+    }
+
+    .mobile-tab-logout {
+        color: var(--color-text-muted);
+    }
+
+    .mobile-tab-logout:hover {
+        color: var(--color-error);
+    }
+}
+
 /* Mobile menu toggle button */
 .mobile-menu-toggle {
     display: none;
@@ -203,32 +256,21 @@
 /* Tablet and below (< 768px) */
 @media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
+        display: none;
     }
 
     .dashboard-main {
         margin-left: 0;
         padding: 20px 16px;
+        padding-bottom: calc(64px + 16px);
     }
 
     .mobile-menu-toggle {
-        display: flex;
+        display: none;
     }
 
     .sidebar-overlay {
-        display: block;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-    }
-
-    .sidebar-overlay.open {
-        opacity: 1;
-        pointer-events: auto;
+        display: none;
     }
 
     /* Adjust sidebar brand spacing on mobile */
