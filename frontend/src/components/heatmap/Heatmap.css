@@ -137,6 +137,11 @@
     color: var(--color-text-secondary);
 }
 
+.heatmap-cell-complete .heatmap-cell-day,
+.heatmap-cell-complete .heatmap-cell-percentage {
+    color: #ffffff;
+}
+
 /* Heatmap Legend */
 .heatmap-legend {
     display: flex;

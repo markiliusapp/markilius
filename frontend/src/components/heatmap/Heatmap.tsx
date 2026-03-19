@@ -174,10 +174,11 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }:
 
                         const todayCell = isToday(day);
                         const hasTasks = (dayData?.total_tasks ?? 0) > 0;
+                        const isComplete = percentage === 100;
                         return (
                             <div
                                 key={day}
-                                className={`heatmap-cell ${onDayClick ? 'heatmap-cell-clickable' : ''} ${todayCell ? 'heatmap-cell-today' : ''} ${hasTasks ? 'heatmap-cell-has-tasks' : ''}`}
+                                className={`heatmap-cell ${onDayClick ? 'heatmap-cell-clickable' : ''} ${todayCell ? 'heatmap-cell-today' : ''} ${hasTasks ? 'heatmap-cell-has-tasks' : ''} ${isComplete ? 'heatmap-cell-complete' : ''}`}
                                 style={{ backgroundColor: color }}
                                 onClick={() => onDayClick && onDayClick(dayData?.date || '')}
                             >
