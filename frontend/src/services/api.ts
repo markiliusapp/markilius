@@ -13,7 +13,7 @@ const handleResponse = async (response: Response) => {
         try {
             const errorData = await response.json()
             if (Array.isArray(errorData.detail)) {
-                errorMessage = errorMessage
+                errorMessage = errorData.detail.map((e: { msg: string; loc: string[] }) => `${e.loc.slice(1).join('.')}: ${e.msg}`).join(', ')
             } else {
                 errorMessage = errorData.detail || errorMessage
             }

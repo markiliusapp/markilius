@@ -28,10 +28,10 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
-        const { name, value } = e.target
+        const { name, value, type } = e.target
         setFormData(prev => ({
             ...prev,
-            [name]: value === "" ? undefined : value,
+            [name]: value === "" ? undefined : type === "number" ? Number(value) : value,
         }))
     }
 
@@ -42,7 +42,8 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
 
         try {
             if (editMode) {
-                await taskAPI.update(task!.id, formData as UpdateTask)
+                const { frequency: _freq, ...updatePayload } = formData
+                await taskAPI.update(task!.id, updatePayload as UpdateTask)
             } else {
                 await taskAPI.create(formData)
             }
