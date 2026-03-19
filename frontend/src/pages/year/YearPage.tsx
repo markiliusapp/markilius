@@ -160,6 +160,7 @@ const YearPage = () => {
         ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedChartArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
         : monthlyChartData.reduce((sum, d) => sum + arenas.reduce((s, a) => s + (d[`arena_${a.arena_id}`] || 0), 0), 0) / (monthlyChartData.length || 1)
 
+
     return (
         <DashboardLayout>
             <div className="year-page">
@@ -261,8 +262,9 @@ const YearPage = () => {
                         </div>
                     </div>
                     <div className="year-bar-chart">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-                            <BarChart data={monthlyChartData} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="30%">
+                        <div className="year-bar-chart-inner">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={monthlyChartData} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%" barGap={2} barSize={8}>
                                 <XAxis
                                     dataKey="month"
                                     tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
@@ -302,6 +304,7 @@ const YearPage = () => {
                                 ))}
                             </BarChart>
                         </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
 

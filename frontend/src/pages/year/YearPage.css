@@ -216,6 +216,22 @@
     height: 250px;
 }
 
+.year-bar-chart-inner {
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .year-bar-chart {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .year-bar-chart-inner {
+        min-width: 600px;
+    }
+}
+
+
 /* Loading/Error */
 .year-loading,
 .year-error {
