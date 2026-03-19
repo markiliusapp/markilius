@@ -88,12 +88,27 @@
 }
 
 .mac-empty {
+    flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 240px;
+    gap: 8px;
+    min-height: 200px;
     color: var(--color-text-muted);
+    text-align: center;
+}
+
+.mac-empty-title {
     font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.mac-empty-sub {
+    font-size: 12px;
+    color: var(--color-text-muted);
 }
 
 .mac-tooltip {

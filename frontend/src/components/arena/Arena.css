@@ -17,6 +17,13 @@
     gap: 8px;
 }
 
+.arena-selector-empty {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: 4px 2px;
+}
+
 .arena-pill {
     display: flex;
     align-items: center;

@@ -134,6 +134,9 @@ const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
 
             {/* Arena selector pills */}
             <div className="arena-selector">
+                {arenas.length === 0 && (
+                    <p className="arena-selector-empty">No arenas yet — create one below</p>
+                )}
                 {arenas.map(arena => (
                     <button
                         key={arena.id}

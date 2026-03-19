@@ -108,8 +108,17 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
 
     if (allArenas.length === 0) {
         return (
-            <div className="mac-empty">
-                <p>No time tracked this month</p>
+            <div className="mac-wrapper">
+                <div className="mac-header">
+                    <h2>Time by Arena</h2>
+                </div>
+                <div className="mac-empty">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                    <p className="mac-empty-title">No time logged this month</p>
+                    <p className="mac-empty-sub">Track time on tasks to see your breakdown</p>
+                </div>
             </div>
         )
     }

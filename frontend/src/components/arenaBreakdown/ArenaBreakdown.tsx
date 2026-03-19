@@ -14,7 +14,18 @@ const getDelta = (current: number, previous: number) => {
 }
 
 const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
-    if (arenas.length === 0) return null
+    if (arenas.length === 0) return (
+        <div className="mab-section">
+            <h2>Arena Breakdown</h2>
+            <div className="mab-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                </svg>
+                <p className="mab-empty-title">No arena data yet</p>
+                <p className="mab-empty-sub">Complete tasks to see your breakdown</p>
+            </div>
+        </div>
+    )
 
     const totalTasks = arenas.reduce((sum, a) => sum + a.total_tasks, 0)
     const completedTasks = arenas.reduce((sum, a) => sum + a.completed_tasks, 0)

@@ -66,6 +66,21 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
     })
     const allArenas = Array.from(arenaMap.values())
 
+    if (allArenas.length === 0) return (
+        <div className="weekly-chart-wrapper">
+            <div className="weekly-chart-header">
+                <h2>Time by Arena</h2>
+            </div>
+            <div className="weekly-chart-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                </svg>
+                <p className="weekly-chart-empty-title">No time logged this week</p>
+                <p className="weekly-chart-empty-sub">Track time on tasks to see your breakdown</p>
+            </div>
+        </div>
+    )
+
     const visibleArenas = selectedArenaId
         ? allArenas.filter(a => a.arena_id === selectedArenaId)
         : allArenas

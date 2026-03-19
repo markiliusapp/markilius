@@ -134,3 +134,27 @@
     background-color: var(--color-bg-muted);
     color: var(--color-primary);
 }
+
+.weekly-chart-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 200px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.weekly-chart-empty-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.weekly-chart-empty-sub {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
