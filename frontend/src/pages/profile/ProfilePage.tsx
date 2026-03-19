@@ -4,6 +4,8 @@ import { authAPI } from '@/services/api';
 import DashboardLayout from '@/components/DashBoardLayout';
 import './ProfilePage.css';
 
+const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const ProfilePage = () => {
     const { user, refreshUser } = useAuth();
 
@@ -27,6 +29,15 @@ const ProfilePage = () => {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    const [publicLoading, setPublicLoading] = useState(false);
+    const [publicError, setPublicError] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const [weeklyEmail, setWeeklyEmail] = useState(user?.weekly_email ?? true);
+    const [prefLoading, setPrefLoading] = useState(false);
+    const [prefSuccess, setPrefSuccess] = useState('');
+    const [prefError, setPrefError] = useState('');
+
     const handleInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setInfoLoading(true);
@@ -44,6 +55,42 @@ const ProfilePage = () => {
             setInfoError(err instanceof Error ? err.message : 'Failed to update profile.');
         } finally {
             setInfoLoading(false);
+        }
+    };
+
+    const handlePublicToggle = async () => {
+        setPublicLoading(true);
+        setPublicError('');
+        try {
+            await authAPI.togglePublicProfile(!user?.public_profile_enabled);
+            await refreshUser();
+        } catch (err: unknown) {
+            setPublicError(err instanceof Error ? err.message : 'Failed to update public profile.');
+        } finally {
+            setPublicLoading(false);
+        }
+    };
+
+    const handleCopyLink = () => {
+        if (user?.public_id) {
+            navigator.clipboard.writeText(`${window.location.origin}/u/${user.public_id}`);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
+    const handlePrefSubmit = async () => {
+        setPrefLoading(true);
+        setPrefSuccess('');
+        setPrefError('');
+        try {
+            await authAPI.updateMe({ weekly_email: weeklyEmail, timezone: detectedTimezone });
+            await refreshUser();
+            setPrefSuccess('Preferences saved.');
+        } catch (err: unknown) {
+            setPrefError(err instanceof Error ? err.message : 'Failed to save preferences.');
+        } finally {
+            setPrefLoading(false);
         }
     };
 
@@ -204,6 +251,83 @@ const ProfilePage = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                    {/* Email Preferences */}
+                    <div className="profile-card">
+                        <h2 className="profile-card-title">Email Preferences</h2>
+                        <p className="profile-card-subtitle">
+                            Receive a weekly summary every Sunday morning in your local time.
+                        </p>
+
+                        {prefSuccess && <div className="profile-success">{prefSuccess}</div>}
+                        {prefError && <div className="profile-error">{prefError}</div>}
+
+                        <div className="pref-row">
+                            <div className="pref-info">
+                                <span className="pref-label">Weekly Summary Email</span>
+                                <span className="pref-desc">Sent Sunday at 8 AM · {detectedTimezone}</span>
+                            </div>
+                            <button
+                                className={`toggle-btn ${weeklyEmail ? 'toggle-btn--on' : ''}`}
+                                onClick={() => setWeeklyEmail(v => !v)}
+                                type="button"
+                            >
+                                <span className="toggle-thumb" />
+                            </button>
+                        </div>
+
+                        <div className="profile-form-actions" style={{ marginTop: '16px' }}>
+                            <button
+                                type="button"
+                                className="profile-btn profile-btn--primary"
+                                onClick={handlePrefSubmit}
+                                disabled={prefLoading}
+                            >
+                                {prefLoading ? <><span className="spinner" />Saving...</> : 'Save Preferences'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Public Profile */}
+                    <div className="profile-card">
+                        <h2 className="profile-card-title">Public Profile</h2>
+                        <p className="profile-card-subtitle">Share a link to your productivity heatmap. No login required for viewers.</p>
+
+                        {publicError && <div className="profile-error">{publicError}</div>}
+
+                        <div className="public-profile-row">
+                            <div className="public-profile-info">
+                                <span className="public-profile-label">
+                                    {user?.public_profile_enabled ? 'Public profile is enabled' : 'Public profile is disabled'}
+                                </span>
+                            </div>
+                            <button
+                                className={`toggle-btn ${user?.public_profile_enabled ? 'toggle-btn--on' : ''}`}
+                                onClick={handlePublicToggle}
+                                disabled={publicLoading}
+                                type="button"
+                            >
+                                <span className="toggle-thumb" />
+                            </button>
+                        </div>
+
+                        {user?.public_profile_enabled && user?.public_id && (
+                            <div className="public-profile-link-row">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={`${window.location.origin}/u/${user.public_id}`}
+                                    className="public-profile-link-input"
+                                />
+                                <button
+                                    type="button"
+                                    className="profile-btn profile-btn--primary"
+                                    onClick={handleCopyLink}
+                                >
+                                    {copied ? 'Copied!' : 'Copy link'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

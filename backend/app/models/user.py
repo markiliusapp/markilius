@@ -25,4 +25,19 @@ class User(Base):
     verification_token = Column(String, nullable=True)
     verification_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
 
+    # Public profile fields
+    public_profile_enabled = Column(Boolean, nullable=False, default=False)
+    public_id = Column(String(36), nullable=True, unique=True, index=True)
+
+    # Email preferences
+    weekly_email = Column(Boolean, nullable=False, default=True)
+    timezone = Column(String(100), nullable=False, default="UTC")
+    last_weekly_email_sent = Column(TIMESTAMP(timezone=True), nullable=True)
+
+    # Subscription fields
+    subscription_status = Column(String(20), nullable=False, default="inactive")  # inactive | active | lifetime
+    subscription_tier = Column(String(20), nullable=True)  # monthly | yearly | lifetime
+    stripe_customer_id = Column(String(100), nullable=True, unique=True)
+    stripe_subscription_id = Column(String(100), nullable=True)
+
     arenas = relationship("Arena", back_populates="user")

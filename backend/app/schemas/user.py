@@ -17,6 +17,12 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
     is_verified: bool
+    public_profile_enabled: bool
+    public_id: Optional[str] = None
+    weekly_email: bool
+    timezone: str
+    subscription_status: str
+    subscription_tier: Optional[str] = None
 
     class Config:
         from_attributes = True  # Allows SQLAlchemy model conversion
@@ -53,3 +59,9 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     current_password: Optional[str] = None
     new_password: Optional[str] = None
+    weekly_email: Optional[bool] = None
+    timezone: Optional[str] = None
+
+
+class PublicProfileToggle(BaseModel):
+    enabled: bool

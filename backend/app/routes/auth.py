@@ -10,7 +10,9 @@ from app.schemas.user import (
     ResetPasswordRequest,
     ResendVerificationRequest,
     UserUpdate,
+    PublicProfileToggle,
 )
+import uuid
 from app.models.arena import Arena
 from app.models.user import User
 from app.utils.auth import (
@@ -144,6 +146,28 @@ def update_current_user(
             raise HTTPException(status_code=400, detail="Current password is incorrect")
         current_user.hashed_password = hash_password(user_update.new_password)
 
+    if user_update.weekly_email is not None:
+        current_user.weekly_email = user_update.weekly_email
+    if user_update.timezone:
+        current_user.timezone = user_update.timezone
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.put("/me/public-profile", response_model=UserResponse)
+def toggle_public_profile(
+    body: PublicProfileToggle,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if body.enabled:
+        if not current_user.public_id:
+            current_user.public_id = str(uuid.uuid4())
+        current_user.public_profile_enabled = True
+    else:
+        current_user.public_profile_enabled = False
     db.commit()
     db.refresh(current_user)
     return current_user

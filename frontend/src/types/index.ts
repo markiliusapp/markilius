@@ -158,12 +158,18 @@ export interface YearlyProductivity {
     months: MonthlySummary[];
 }
 
-export interface User { 
-    id: string; 
-    first_name: string; 
-    last_name: string; 
-    email: string; 
+export interface User {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
     createdAt: string;
+    public_profile_enabled: boolean;
+    public_id: string | null;
+    weekly_email: boolean;
+    timezone: string;
+    subscription_status: 'inactive' | 'active' | 'lifetime';
+    subscription_tier: 'monthly' | 'yearly' | 'lifetime' | null;
 }
 
 export interface UserUpdate {
@@ -172,6 +178,8 @@ export interface UserUpdate {
     email?: string;
     current_password?: string;
     new_password?: string;
+    weekly_email?: boolean;
+    timezone?: string;
 }
 
 export interface AuthContextType {
