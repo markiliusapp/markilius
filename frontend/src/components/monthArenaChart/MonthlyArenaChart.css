@@ -5,16 +5,15 @@
     flex-direction: column;
     gap: 16px;
     height: 100%;
+    min-width: 0;
 }
-
-
 
 .mac-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
 }
 
 .mac-header h2 {
@@ -25,8 +24,16 @@
 
 .mac-legend {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    align-self: stretch;
+}
+
+.mac-legend::-webkit-scrollbar {
+    display: none;
 }
 
 .mac-legend-item {
@@ -61,6 +68,7 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: var(--transition);
+    flex-shrink: 0;
 }
 
 .mac-pill:hover {
