@@ -8,7 +8,7 @@ import './YearPage.css';
 import { useNavigate } from 'react-router-dom';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
@@ -46,6 +46,7 @@ const YearPage = () => {
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [compactView, setCompactView] = useState(false)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
+    const [selectedChartArenaId, setSelectedChartArenaId] = useState<number | null>(null)
     
 
 
@@ -152,6 +153,12 @@ const YearPage = () => {
     const monthlyChartData = getMonthlyChartData()
     const selectedArena = arenas.find(a => a.arena_id === selectedArenaId)
     const rgbColor = selectedArena ? hexToRgb(selectedArena.arena_color) : undefined
+    const visibleChartArenas = selectedChartArenaId
+        ? arenas.filter(a => a.arena_id === selectedChartArenaId)
+        : arenas
+    const chartAverage = selectedChartArenaId
+        ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedChartArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
+        : monthlyChartData.reduce((sum, d) => sum + arenas.reduce((s, a) => s + (d[`arena_${a.arena_id}`] || 0), 0), 0) / (monthlyChartData.length || 1)
 
     return (
         <DashboardLayout>
@@ -230,18 +237,32 @@ const YearPage = () => {
                 <div className="year-chart-section year-chart-section--standalone">
                     <div className="year-chart-header">
                         <h2>Monthly Hours by Arena</h2>
-                        <div className="year-chart-legend">
+                        <div className="mac-legend">
+                            <button
+                                className={`mac-pill ${!selectedChartArenaId ? 'active' : ''}`}
+                                onClick={() => setSelectedChartArenaId(null)}
+                            >
+                                All
+                            </button>
                             {arenas.map(arena => (
-                                <div key={arena.arena_id} className="year-chart-legend-item">
-                                    <span className="year-chart-legend-dot" style={{ backgroundColor: arena.arena_color }} />
-                                    <span>{arena.arena_name}</span>
-                                </div>
+                                <button
+                                    key={arena.arena_id}
+                                    className={`mac-pill ${selectedChartArenaId === arena.arena_id ? 'active' : ''}`}
+                                    style={{
+                                        borderColor: selectedChartArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
+                                        backgroundColor: selectedChartArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
+                                        color: selectedChartArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
+                                    }}
+                                    onClick={() => setSelectedChartArenaId(selectedChartArenaId === arena.arena_id ? null : arena.arena_id)}
+                                >
+                                    {arena.arena_name}
+                                </button>
                             ))}
                         </div>
                     </div>
                     <div className="year-bar-chart">
                         <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-                            <BarChart data={monthlyChartData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barCategoryGap="30%">
+                            <BarChart data={monthlyChartData} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="30%">
                                 <XAxis
                                     dataKey="month"
                                     tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
@@ -256,14 +277,27 @@ const YearPage = () => {
                                     width={35}
                                 />
                                 <Tooltip content={<YearChartTooltip />} cursor={false} />
-                                {arenas.map((arena, idx) => (
+                                {chartAverage > 0 && (
+                                    <ReferenceLine
+                                        y={chartAverage}
+                                        stroke="var(--color-text-muted)"
+                                        strokeDasharray="4 4"
+                                        strokeWidth={1.5}
+                                        label={{
+                                            value: `avg ${chartAverage.toFixed(1)}h`,
+                                            position: 'insideTopRight',
+                                            fontSize: 11,
+                                            fill: 'var(--color-text-muted)',
+                                        }}
+                                    />
+                                )}
+                                {visibleChartArenas.map(arena => (
                                     <Bar
                                         key={arena.arena_id}
                                         dataKey={`arena_${arena.arena_id}`}
                                         name={arena.arena_name}
-                                        stackId="a"
                                         fill={arena.arena_color}
-                                        radius={idx === arenas.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                                        radius={[4, 4, 0, 0]}
                                     />
                                 ))}
                             </BarChart>
