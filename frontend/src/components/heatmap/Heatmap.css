@@ -99,6 +99,7 @@
     position: relative;
 }
 
+.heatmap-cell-today::before,
 .heatmap-cell-today::after {
     content: '';
     position: absolute;
@@ -107,10 +108,19 @@
     width: 0;
     height: 0;
     border-style: solid;
+    border-radius: 0 5px 0 0;
+}
+
+.heatmap-cell-today::before {
+    border-width: 0 11px 11px 0;
+    border-color: transparent #ffffff transparent transparent;
+    z-index: 1;
+}
+
+.heatmap-cell-today::after {
     border-width: 0 8px 8px 0;
     border-color: transparent var(--today-border-color, var(--color-primary)) transparent transparent;
-    border-radius: 0 5px 0 0;
-    z-index: 1;
+    z-index: 2;
 }
 
 .heatmap-cell-day {
@@ -122,7 +132,11 @@
 .heatmap-cell-percentage {
     font-size: 10px;
     font-weight: 600;
-    color: var(--color-text-secondary);
+    color: #111111;
+}
+
+[data-theme="dark"] .heatmap-cell-percentage {
+    color: #ffffff;
 }
 
 /* Heatmap Legend */
