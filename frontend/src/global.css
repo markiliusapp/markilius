@@ -141,7 +141,7 @@ input {
 }
 
 @media (max-width: 768px) {
-  .header-actions {
+  .header-actions .btn-add-task {
     display: none;
   }
 }
