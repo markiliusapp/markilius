@@ -10,6 +10,7 @@ import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
 import type { StreakResponse } from '@/types';
@@ -431,6 +432,7 @@ const YearPage = () => {
                         </div>
                     </div>
                 </div>
+            <FloatingAddButton onClick={() => setShowTaskInput(true)} />
         </DashboardLayout>
     );
 };

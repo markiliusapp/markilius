@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import MonthlyArenaChart from '@/components/monthArenaChart/MonthlyArenaChart';
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
@@ -332,6 +333,7 @@ const MonthPage = () => {
                     </div>
                 </div>
             </div>
+            <FloatingAddButton onClick={() => setShowTaskInput(true)} />
         </DashboardLayout>
     );
 };

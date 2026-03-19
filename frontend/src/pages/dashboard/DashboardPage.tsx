@@ -8,6 +8,7 @@ import { productivityAPI } from '@/services/api';
 import type { DailyProductivityResponse } from '@/types';
 import { useSearchParams } from 'react-router-dom'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
 import type { StreakResponse } from '@/types';
 import Streaks from '@/components/streaks/Streaks'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
@@ -267,6 +268,7 @@ const DashboardPage = () => {
                     }</div>
                 )}
             </div>
+            <FloatingAddButton onClick={() => setShowTaskInput(true)} />
         </DashboardLayout>
     );
 };

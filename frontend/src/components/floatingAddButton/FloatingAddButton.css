@@ -1,0 +1,29 @@
+.floating-add-btn {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .floating-add-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 16px rgba(249, 115, 22, 0.45);
+        z-index: 200;
+        touch-action: none;
+        cursor: grab;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    .floating-add-btn:active {
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.55);
+        transform: scale(1.08);
+        cursor: grabbing;
+    }
+}

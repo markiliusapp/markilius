@@ -6,6 +6,7 @@ import IndividualTask from '@/components/individualTask/IndividualTask';
 import './WeekPage.css';
 import { useNavigate } from 'react-router-dom';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
+import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
 import TaskInput from '@/components/taskinput/TaskInput';
 import WeeklyChart from '@/components/weeklyChart/WeeklyChart'
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
@@ -425,6 +426,7 @@ const WeekPage = () => {
                     </div>
                 </div>
             </div>
+            <FloatingAddButton onClick={() => setShowTaskInput(true)} />
         </DashboardLayout>
     );
 };

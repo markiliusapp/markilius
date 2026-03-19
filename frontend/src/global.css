@@ -140,6 +140,12 @@ input {
   gap: 8px;
 }
 
+@media (max-width: 768px) {
+  .header-actions {
+    display: none;
+  }
+}
+
 .compact-toggle {
   display: flex;
   align-items: center;
