@@ -73,6 +73,8 @@ const CompactHeatmapRow = ({
         return data.find(day => day.date === dateStr);
     };
 
+    const todayStr = getDateStr(new Date());
+
     return (
         <div className="compact-row">
             {/* Row label */}
@@ -102,10 +104,11 @@ const CompactHeatmapRow = ({
                                 const dayData = getDayData(day);
                                 const percentage = dayData ? getPercentage(dayData) : 0;
                                 const cellColor = getIntensityColor(percentage, color);
+                                const isToday = getDateStr(day) === todayStr;
                                 return (
                                     <div
                                         key={`${colIdx}-${rowIdx}`}
-                                        className="compact-cell"
+                                        className={`compact-cell ${isToday ? 'compact-cell-today' : ''}`}
                                         style={{ backgroundColor: cellColor }}
                                         title={`${getDateStr(day)}: ${Math.round(percentage)}%`}
                                     />

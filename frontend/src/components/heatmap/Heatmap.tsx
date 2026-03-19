@@ -136,6 +136,12 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }:
         : null
     const rgbColor = selectedArena ? hexToRgb(selectedArena.arena_color) : undefined
 
+    const today = new Date();
+    const isToday = (day: number) =>
+        today.getFullYear() === year &&
+        today.getMonth() + 1 === month &&
+        today.getDate() === day;
+
     const daysInMonth = getDaysInMonth();
     const firstDayOfMonth = getFirstDayOfMonth();
     const displayCompletion = getMonthArenaCompletion();
@@ -166,10 +172,11 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }:
                         const percentage = getArenaCompletion(dayData);
                         const color = getIntensityColor(percentage, rgbColor);
 
+                        const todayCell = isToday(day);
                         return (
                             <div
                                 key={day}
-                                className={`heatmap-cell ${onDayClick ? 'heatmap-cell-clickable' : ''}`}
+                                className={`heatmap-cell ${onDayClick ? 'heatmap-cell-clickable' : ''} ${todayCell ? 'heatmap-cell-today' : ''}`}
                                 style={{ backgroundColor: color }}
                                 onClick={() => onDayClick && onDayClick(dayData?.date || '')}
                             >
