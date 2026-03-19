@@ -184,6 +184,12 @@
     }
 
     .heatmap-cell-percentage {
-        display: none; /* Hide percentage on small screens */
+        display: none;
+    }
+
+    .heatmap-cell-has-tasks .heatmap-cell-day,
+    .heatmap-cell-has-tasks .heatmap-cell-percentage {
+        opacity: 1;
+        display: flex;
     }
 }
