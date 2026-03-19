@@ -357,7 +357,7 @@
 /* Small mobile (< 480px) */
 @media (max-width: 480px) {
     .dashboard-main {
-        padding: 16px 12px;
+        padding: 16px 12px calc(64px + 16px);
     }
 
     .sidebar {
