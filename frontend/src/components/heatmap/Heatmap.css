@@ -191,5 +191,11 @@
     .heatmap-cell-has-tasks .heatmap-cell-percentage {
         opacity: 1;
         display: flex;
+        color: #111111;
+    }
+
+    .heatmap-cell-has-tasks.heatmap-cell-dark-bg .heatmap-cell-day,
+    .heatmap-cell-has-tasks.heatmap-cell-dark-bg .heatmap-cell-percentage {
+        color: #ffffff;
     }
 }
