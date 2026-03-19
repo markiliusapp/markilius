@@ -178,7 +178,10 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }:
                             <div
                                 key={day}
                                 className={`heatmap-cell ${onDayClick ? 'heatmap-cell-clickable' : ''} ${todayCell ? 'heatmap-cell-today' : ''} ${hasTasks ? 'heatmap-cell-has-tasks' : ''}`}
-                                style={{ backgroundColor: color }}
+                                style={{
+                                    backgroundColor: color,
+                                    ...(todayCell && selectedArena ? { '--today-border-color': selectedArena.arena_color } as React.CSSProperties : {}),
+                                }}
                                 onClick={() => onDayClick && onDayClick(dayData?.date || '')}
                             >
                                 <span className="heatmap-cell-day">{day}</span>

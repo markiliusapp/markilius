@@ -191,7 +191,7 @@
     }
 
     .heatmap-cell-today {
-        border-color: var(--color-primary);
+        border-color: var(--today-border-color, var(--color-primary));
         border-width: 2px;
     }
 
