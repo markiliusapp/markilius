@@ -194,16 +194,26 @@
         border-color: transparent;
     }
 
-    .heatmap-cell-today .heatmap-cell-day {
-        background-color: var(--today-border-color, var(--color-primary));
-        color: #ffffff;
-        border-radius: 50%;
-        width: 1.3rem;
-        height: 1.3rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 1;
+    .heatmap-cell-today::before,
+    .heatmap-cell-today::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-radius: 0 5px 0 0;
+    }
+
+    .heatmap-cell-today::before {
+        border-width: 0 13px 13px 0;
+        border-color: transparent #ffffff transparent transparent;
+    }
+
+    .heatmap-cell-today::after {
+        border-width: 0 10px 10px 0;
+        border-color: transparent var(--today-border-color, var(--color-primary)) transparent transparent;
     }
 
     .heatmap-cell-today .heatmap-cell-day {
