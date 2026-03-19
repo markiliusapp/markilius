@@ -261,6 +261,15 @@ const YearPage = () => {
                             ))}
                         </div>
                     </div>
+                    {arenas.length === 0 ? (
+                        <div className="year-chart-empty">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 20V10M12 20V4M6 20v-6" />
+                            </svg>
+                            <p className="year-chart-empty-title">No time logged this year</p>
+                            <p className="year-chart-empty-sub">Track time on tasks to see your monthly breakdown</p>
+                        </div>
+                    ) : (
                     <div className="year-bar-chart">
                         <div className="year-bar-chart-inner">
                         <ResponsiveContainer width="100%" height={250}>
@@ -306,6 +315,7 @@ const YearPage = () => {
                         </ResponsiveContainer>
                         </div>
                     </div>
+                    )}
                 </div>
 
                 <div className='streaks-and-year-overview'>
