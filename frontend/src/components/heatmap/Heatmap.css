@@ -99,33 +99,18 @@
     position: relative;
 }
 
-.heatmap-cell-today .heatmap-cell-day {
-    opacity: 1;
+.heatmap-cell-today::after {
+    content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.85);
-    color: #111;
-    border-radius: 50%;
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .8rem;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 8px 8px 0;
+    border-color: transparent var(--today-border-color, var(--color-primary)) transparent transparent;
+    border-radius: 0 5px 0 0;
     z-index: 1;
-}
-
-.heatmap-cell-today:hover .heatmap-cell-day {
-    position: static;
-    transform: none;
-    background: none;
-    color: var(--color-text);
-    border-radius: 0;
-    width: auto;
-    height: auto;
-    font-size: 13px;
 }
 
 .heatmap-cell-day {
