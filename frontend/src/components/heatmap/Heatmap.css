@@ -190,6 +190,21 @@
         display: none;
     }
 
+    .heatmap-cell-today .heatmap-cell-day {
+        position: static;
+        transform: none;
+        background: none;
+        border-radius: 0;
+        width: auto;
+        height: auto;
+        font-size: 10px;
+        color: #111111;
+    }
+
+    [data-theme="dark"] .heatmap-cell-today .heatmap-cell-day {
+        color: #ffffff;
+    }
+
     .heatmap-cell-today .heatmap-cell-percentage,
     .heatmap-cell-has-tasks .heatmap-cell-day,
     .heatmap-cell-has-tasks .heatmap-cell-percentage {
