@@ -180,7 +180,7 @@ const WeekPage = () => {
 
                 {showTaskInput && (
                     <TaskInput
-                        onTaskCreated={() => { setShowTaskInput(false); }}
+                        onTaskCreated={() => { setShowTaskInput(false); setRefreshKey(prev => prev + 1); }}
                         onCancel={() => setShowTaskInput(false)}
                         onArenaChange={() => setRefreshKey(prev => prev + 1)}
                     />
