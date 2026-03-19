@@ -92,7 +92,14 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
 
         return point
     })
-    const maxHours = Math.max(...chartData.map(d => d.total), averageDuration)
+    const displayAverage = selectedArenaId
+        ? chartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / chartData.length
+        : averageDuration
+
+    const visibleMax = selectedArenaId
+        ? Math.max(...chartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
+        : Math.max(...chartData.map(d => d.total), averageDuration)
+    const maxHours = visibleMax
     const ticks = Array.from({ length: Math.ceil(maxHours) + 1 }, (_, i) => i)
 
     return (
@@ -147,14 +154,14 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                             content={<CustomTooltip />}
                             cursor={false}
                         />
-                        {averageDuration > 0 && (
+                        {displayAverage > 0 && (
                             <ReferenceLine
-                                y={averageDuration}
+                                y={displayAverage}
                                 stroke="var(--color-text-muted)"
                                 strokeDasharray="4 4"
                                 strokeWidth={1.5}
                                 label={{
-                                    value: `avg ${averageDuration.toFixed(1)}h`,
+                                    value: `avg ${displayAverage.toFixed(1)}h`,
                                     position: 'insideTopRight',
                                     fontSize: 11,
                                     fill: 'var(--color-text-muted)',
