@@ -91,13 +91,20 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
         return point
     })
 
-    const maxHours = Math.max(...chartData.map(d => d.total))
+    const displayAverage = selectedArenaId
+        ? chartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / chartData.length
+        : chartData.reduce((sum, d) => sum + d.total, 0) / chartData.length
+
+    const visibleMax = selectedArenaId
+        ? Math.max(...chartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
+        : Math.max(...chartData.map(d => d.total), displayAverage)
+
+    const maxHours = visibleMax
     const tickCount = 3
     const tickInterval = Math.ceil(maxHours / tickCount)
     const ticks = Array.from({ length: tickCount + 1 }, (_, i) => i * tickInterval)
     const weekCount = chartData.length
     const barSize = Math.max(24, Math.min(64, Math.floor(320 / weekCount)))
-    console.log('chartData', JSON.stringify(chartData, null, 2))
 
     if (allArenas.length === 0) {
         return (
@@ -158,6 +165,20 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                             width={32}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={false} />
+                        {displayAverage > 0 && (
+                            <ReferenceLine
+                                y={displayAverage}
+                                stroke="var(--color-text-muted)"
+                                strokeDasharray="4 4"
+                                strokeWidth={1.5}
+                                label={{
+                                    value: `avg ${displayAverage.toFixed(1)}h`,
+                                    position: 'insideTopRight',
+                                    fontSize: 11,
+                                    fill: 'var(--color-text-muted)',
+                                }}
+                            />
+                        )}
                         {visibleArenas.map((arena) => (
                             <Bar
                                 key={arena.arena_id}
