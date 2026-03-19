@@ -133,11 +133,27 @@
 }
 
 /* 12 Month Heatmaps Grid */
+.year-heatmaps-scroll {
+    margin-bottom: 16px;
+}
+
 .year-heatmaps {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: .5rem;
-    margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+    .year-heatmaps-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .year-heatmaps {
+        grid-template-columns: repeat(12, minmax(240px, 1fr));
+        flex-wrap: nowrap;
+    }
 }
 
 .month-heatmap-card {

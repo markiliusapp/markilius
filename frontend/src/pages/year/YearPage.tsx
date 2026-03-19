@@ -214,19 +214,21 @@ const YearPage = () => {
                             onSelect={setSelectedArenaId}
                         />
                         <div>
-                            <div className="year-heatmaps">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => (
-                                    <div key={month} className="month-heatmap-card">
-                                        <Heatmap
-                                            year={currentYear}
-                                            month={month}
-                                            data={getMonthData(month)}
-                                            completion={getMonthCompletion(month)}
-                                            selectedArenaId={selectedArenaId}
-                                            onDayClick={handleDayClick}
-                                        />
-                                    </div>
-                                ))}
+                            <div className="year-heatmaps-scroll">
+                                <div className="year-heatmaps">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => (
+                                        <div key={month} className="month-heatmap-card">
+                                            <Heatmap
+                                                year={currentYear}
+                                                month={month}
+                                                data={getMonthData(month)}
+                                                completion={getMonthCompletion(month)}
+                                                selectedArenaId={selectedArenaId}
+                                                onDayClick={handleDayClick}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="heatmap-legend">
                                 <HeatmapLegend color={rgbColor} />
