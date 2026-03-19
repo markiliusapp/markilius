@@ -190,6 +190,11 @@
         display: none;
     }
 
+    .heatmap-cell-today {
+        border-color: var(--color-primary);
+        border-width: 2px;
+    }
+
     .heatmap-cell-today .heatmap-cell-day {
         position: static;
         transform: none;
