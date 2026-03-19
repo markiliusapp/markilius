@@ -22,6 +22,15 @@ const WeekPage = () => {
     const [prevWeekData, setPrevWeekData] = useState<WeeklyProductivityResponse | null>(null)
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
     const [compact, setCompact] = useState(() => localStorage.getItem('taskCompact') === 'true')
+    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+
+    const toggleSection = (key: string) => {
+        setCollapsedSections(prev => {
+            const next = new Set(prev)
+            next.has(key) ? next.delete(key) : next.add(key)
+            return next
+        })
+    }
 
 
 
@@ -218,17 +227,26 @@ const WeekPage = () => {
                                     {(() => {
                                         const tasks = filterAndSort(day.incomplete)
                                         if (tasks.length === 0) return null
+                                        const key = `${day.date}-active`
+                                        const collapsed = collapsedSections.has(key)
                                         return (
                                             <div className="day-tasks-section">
-                                                <div className="day-tasks-header">
+                                                <div className="day-tasks-header day-tasks-header-toggle" onClick={() => toggleSection(key)}>
                                                     <span className="day-tasks-label">Active</span>
-                                                    <span className="day-tasks-count">{tasks.length}</span>
+                                                    <div className="day-tasks-header-right">
+                                                        <span className="day-tasks-count">{tasks.length}</span>
+                                                        <svg className={`day-tasks-chevron ${collapsed ? 'collapsed' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <polyline points="6 9 12 15 18 9" />
+                                                        </svg>
+                                                    </div>
                                                 </div>
-                                                <div className="day-tasks-list">
-                                                    {tasks.map(task => (
-                                                        <IndividualTask key={task.id} task={task} onToggle={handleToggle} compact={compact} />
-                                                    ))}
-                                                </div>
+                                                {!collapsed && (
+                                                    <div className="day-tasks-list">
+                                                        {tasks.map(task => (
+                                                            <IndividualTask key={task.id} task={task} onToggle={handleToggle} compact={compact} />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })()}
@@ -237,17 +255,26 @@ const WeekPage = () => {
                                     {(() => {
                                         const tasks = filterAndSort(day.completed)
                                         if (tasks.length === 0) return null
+                                        const key = `${day.date}-completed`
+                                        const collapsed = collapsedSections.has(key)
                                         return (
                                             <div className="day-tasks-section">
-                                                <div className="day-tasks-header">
+                                                <div className="day-tasks-header day-tasks-header-toggle" onClick={() => toggleSection(key)}>
                                                     <span className="day-tasks-label">Completed</span>
-                                                    <span className="day-tasks-count">{tasks.length}</span>
+                                                    <div className="day-tasks-header-right">
+                                                        <span className="day-tasks-count">{tasks.length}</span>
+                                                        <svg className={`day-tasks-chevron ${collapsed ? 'collapsed' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <polyline points="6 9 12 15 18 9" />
+                                                        </svg>
+                                                    </div>
                                                 </div>
-                                                <div className="day-tasks-list">
-                                                    {tasks.map(task => (
-                                                        <IndividualTask key={task.id} task={task} onToggle={handleToggle} compact={compact} />
-                                                    ))}
-                                                </div>
+                                                {!collapsed && (
+                                                    <div className="day-tasks-list">
+                                                        {tasks.map(task => (
+                                                            <IndividualTask key={task.id} task={task} onToggle={handleToggle} compact={compact} />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         )
                                     })()}

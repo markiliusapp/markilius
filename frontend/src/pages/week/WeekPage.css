@@ -172,6 +172,32 @@
     margin-bottom: 6px;
 }
 
+.day-tasks-header-toggle {
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.day-tasks-header-toggle:hover {
+    background-color: var(--color-bg-muted);
+}
+
+.day-tasks-header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.day-tasks-chevron {
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.day-tasks-chevron.collapsed {
+    transform: rotate(-90deg);
+}
+
 .day-tasks-label {
     font-size: 11px;
     font-weight: 600;
