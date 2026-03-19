@@ -141,15 +141,16 @@ input {
 }
 
 .compact-toggle {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: transparent;
+  color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: transparent;
-  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -160,9 +161,9 @@ input {
 }
 
 .compact-toggle.active {
-  background-color: var(--color-bg-muted);
   border-color: var(--color-primary);
   color: var(--color-primary);
+  background-color: transparent;
 }
 
 /* ================================
