@@ -190,6 +190,7 @@
         display: none;
     }
 
+    .heatmap-cell-today .heatmap-cell-percentage,
     .heatmap-cell-has-tasks .heatmap-cell-day,
     .heatmap-cell-has-tasks .heatmap-cell-percentage {
         opacity: 1;
