@@ -200,10 +200,11 @@
         bottom: 3px;
         left: 50%;
         transform: translateX(-50%);
-        width: 4px;
-        height: 4px;
+        width: 5px;
+        height: 5px;
         border-radius: 50%;
         background-color: var(--today-border-color, var(--color-primary));
+        box-shadow: 0 0 0 1.5px #ffffff;
     }
 
     .heatmap-cell-today .heatmap-cell-day {
