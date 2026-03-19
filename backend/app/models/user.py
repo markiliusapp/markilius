@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP
+from sqlalchemy import Column, Integer, String, TIMESTAMP, Boolean
 from sqlalchemy.sql import func
 from app.database import Base
 from sqlalchemy.orm import relationship
@@ -19,4 +19,10 @@ class User(Base):
     # Password reset fields
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+
+    # Email verification fields
+    is_verified = Column(Boolean, nullable=False, default=False)
+    verification_token = Column(String, nullable=True)
+    verification_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+
     arenas = relationship("Arena", back_populates="user")

@@ -9,6 +9,8 @@ LOGIN_URL = "/auth/login"
 ME_URL = "/auth/me"
 FORGOT_PASSWORD_URL = "/auth/forgot-password"
 RESET_PASSWORD_URL = "/auth/reset-password"
+VERIFY_EMAIL_URL = "/auth/verify-email"
+RESEND_VERIFICATION_URL = "/auth/resend-verification"
 
 VALID_USER = {
     "first_name": "John",
@@ -23,15 +25,21 @@ VALID_USER = {
 # ---------------------------------------------------------------------------
 
 
-def test_register_success(client):
+def test_register_success(client, mocker):
+    mocker.patch("app.routes.auth.send_verification_email")
     response = client.post(REGISTER_URL, json=VALID_USER)
     assert response.status_code == 201
-    data = response.json()
-    assert data["email"] == VALID_USER["email"]
-    assert data["first_name"] == VALID_USER["first_name"]
-    assert data["last_name"] == VALID_USER["last_name"]
-    assert "id" in data
-    assert "hashed_password" not in data
+    assert "message" in response.json()
+
+
+def test_register_sends_verification_email(client, db, mocker):
+    mock_send = mocker.patch("app.routes.auth.send_verification_email")
+    client.post(REGISTER_URL, json=VALID_USER)
+    assert mock_send.called
+    from app.models.user import User
+    user = db.query(User).filter(User.email == VALID_USER["email"]).first()
+    assert user.is_verified is False
+    assert user.verification_token is not None
 
 
 def test_register_creates_default_arenas(client, db):
@@ -273,3 +281,117 @@ def test_reset_password_expired_token(client, test_user, db, mocker):
     )
     assert response.status_code == 400
     assert "expired" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# Login blocked for unverified users
+# ---------------------------------------------------------------------------
+
+
+def test_login_blocked_if_unverified(client, db):
+    from app.models.user import User
+    from app.utils.auth import hash_password
+
+    unverified = User(
+        first_name="Unverified",
+        last_name="User",
+        email="unverified@example.com",
+        hashed_password=hash_password("password123"),
+        is_verified=False,
+    )
+    db.add(unverified)
+    db.commit()
+
+    response = client.post(
+        LOGIN_URL, json={"email": "unverified@example.com", "password": "password123"}
+    )
+    assert response.status_code == 403
+    assert "not verified" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# Email verification
+# ---------------------------------------------------------------------------
+
+
+def test_verify_email_success(client, test_user, db, mocker):
+    now_naive = datetime(2026, 3, 19, 12, 0, 0)
+    mock_dt = mocker.patch("app.routes.auth.datetime")
+    mock_dt.now.return_value = now_naive
+
+    test_user.is_verified = False
+    test_user.verification_token = "validverifytoken"
+    test_user.verification_token_expires = datetime(2026, 3, 20, 12, 0, 0)  # 24h later
+    db.commit()
+
+    response = client.post(f"{VERIFY_EMAIL_URL}?token=validverifytoken")
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+    db.refresh(test_user)
+    assert test_user.is_verified is True
+    assert test_user.verification_token is None
+
+
+def test_verify_email_invalid_token(client):
+    response = client.post(f"{VERIFY_EMAIL_URL}?token=doesnotexist")
+    assert response.status_code == 400
+
+
+def test_verify_email_expired_token(client, test_user, db, mocker):
+    now_naive = datetime(2026, 3, 19, 12, 0, 0)
+    mock_dt = mocker.patch("app.routes.auth.datetime")
+    mock_dt.now.return_value = now_naive
+
+    test_user.is_verified = False
+    test_user.verification_token = "expiredverifytoken"
+    test_user.verification_token_expires = datetime(2026, 3, 18, 12, 0, 0)  # yesterday
+    db.commit()
+
+    response = client.post(f"{VERIFY_EMAIL_URL}?token=expiredverifytoken")
+    assert response.status_code == 400
+    assert "expired" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# Resend verification
+# ---------------------------------------------------------------------------
+
+
+def test_resend_verification_sends_email(client, db, mocker):
+    from app.models.user import User
+    from app.utils.auth import hash_password
+
+    mock_send = mocker.patch("app.routes.auth.send_verification_email")
+    unverified = User(
+        first_name="Un",
+        last_name="Verified",
+        email="resend@example.com",
+        hashed_password=hash_password("pass"),
+        is_verified=False,
+        verification_token="oldtoken",
+        verification_token_expires=datetime(2026, 3, 18, 0, 0, 0),
+    )
+    db.add(unverified)
+    db.commit()
+
+    response = client.post(RESEND_VERIFICATION_URL, json={"email": "resend@example.com"})
+    assert response.status_code == 200
+    assert mock_send.called
+
+    db.refresh(unverified)
+    assert unverified.verification_token != "oldtoken"
+
+
+def test_resend_verification_already_verified_is_silent(client, test_user, mocker):
+    mock_send = mocker.patch("app.routes.auth.send_verification_email")
+    response = client.post(RESEND_VERIFICATION_URL, json={"email": test_user.email})
+    assert response.status_code == 200
+    assert not mock_send.called
+
+
+def test_resend_verification_unknown_email_is_silent(client, mocker):
+    mock_send = mocker.patch("app.routes.auth.send_verification_email")
+    response = client.post(RESEND_VERIFICATION_URL, json={"email": "ghost@example.com"})
+    assert response.status_code == 200
+    assert not mock_send.called

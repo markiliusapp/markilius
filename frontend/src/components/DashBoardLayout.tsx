@@ -145,7 +145,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         <span>Year</span>
                     </NavLink>
                     <button className="mobile-tab-link" onClick={() => setMobileMenuOpen(p => !p)}>
-                        <div className="mobile-tab-avatar">{user?.first_name.charAt(0)}{user?.last_name.charAt(0)}</div>
+                        <div className="mobile-tab-avatar">{user?.first_name.charAt(0).toUpperCase()}{user?.last_name.charAt(0).toUpperCase()}</div>
                         <span>Account</span>
                     </button>
                 </nav>
@@ -283,7 +283,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     >
                         <div className="sidebar-user">
                             <div className="sidebar-user-avatar">
-                                {user?.first_name.charAt(0)}{user?.last_name.charAt(0)}
+                                {user?.first_name.charAt(0).toUpperCase()}{user?.last_name.charAt(0).toUpperCase()}
                             </div>
                             <div className="sidebar-user-info">
                                 <div className="sidebar-user-name">

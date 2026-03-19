@@ -17,6 +17,7 @@ const RegisterPage = () => {
     });
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [registered, setRegistered] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,16 +33,8 @@ const RegisterPage = () => {
         setError(null);
 
         try {
-            // Register user
             await authAPI.register(formData);
-
-            // Auto-login
-            const loginData = await authAPI.login({
-                email: formData.email,
-                password: formData.password
-            });
-            await login(loginData.access_token)
-            navigate("/dashboard");
+            setRegistered(true);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registration failed');
         } finally {
@@ -60,6 +53,52 @@ const RegisterPage = () => {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (registered) {
+        return (
+            <div className="login-page">
+                <div className="login-left">
+                    <div className="login-brand">
+                        <div className="login-brand-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                        </div>
+                        <span className="login-brand-name">Checkly</span>
+                    </div>
+                    <div className="login-card">
+                        <h2 className="login-card-title">Check your email</h2>
+                        <p className="login-card-subtitle">
+                            We sent a verification link to <strong>{formData.email}</strong>.
+                            Click it to activate your account.
+                        </p>
+                        <p style={{ marginTop: '24px', fontSize: '14px', color: 'var(--text-muted, #6b7280)' }}>
+                            Didn't receive it?{' '}
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await authAPI.resendVerification(formData.email);
+                                    } catch { /* silent */ }
+                                }}
+                                style={{ background: 'none', border: 'none', color: '#f97316', cursor: 'pointer', padding: 0, fontSize: '14px' }}
+                            >
+                                Resend email
+                            </button>
+                        </p>
+                        <p style={{ marginTop: '16px', fontSize: '14px' }}>
+                            <a href="/login" style={{ color: '#f97316' }}>Back to sign in</a>
+                        </p>
+                    </div>
+                </div>
+                <div className="login-right">
+                    <div className="login-right-text">
+                        <h3>Start building better habits</h3>
+                        <p>Track your progress, stay accountable, and achieve your goals.</p>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (

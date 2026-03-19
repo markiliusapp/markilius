@@ -79,6 +79,20 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
+    verifyEmail: async (token: string) => {
+        const response = await fetch(`${API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`, {
+            method: 'POST',
+        });
+        return handleResponse(response);
+    },
+    resendVerification: async (email: string) => {
+        const response = await fetch(`${API_URL}/auth/resend-verification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        return handleResponse(response);
+    },
     updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string }) => {
         const response = await fetch(`${API_URL}/auth/me`, {
             method: 'PUT',

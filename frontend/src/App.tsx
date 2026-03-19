@@ -9,6 +9,7 @@ import MonthPage from './pages/month/MonthPage';
 import YearPage from './pages/year/YearPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ArenasPage from './pages/arenas/ArenasPage';
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardPage />

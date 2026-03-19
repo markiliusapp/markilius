@@ -16,6 +16,7 @@ class UserResponse(BaseModel):
     last_name: str
     email: str
     created_at: datetime
+    is_verified: bool
 
     class Config:
         from_attributes = True  # Allows SQLAlchemy model conversion
@@ -40,6 +41,10 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
 
 
 class UserUpdate(BaseModel):
