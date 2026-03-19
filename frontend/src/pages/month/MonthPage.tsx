@@ -112,13 +112,14 @@ const MonthPage = () => {
             <div className="month-page">
                 {/* Header */}
                 <div className="month-header">
-                    <h1>Current Month</h1>
                     <div className="month-nav">
                         <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
                         <span className="month-name">{getMonthName()}</span>
                         <button onClick={handleNextMonth} aria-label="Next month">→</button>
                     </div>
-                    <AddTaskButton onClick={() => setShowTaskInput(true)} />
+                    <div className="header-actions">
+                        <AddTaskButton onClick={() => setShowTaskInput(true)} />
+                    </div>
                 </div>
 
                 {showTaskInput && (

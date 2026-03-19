@@ -166,7 +166,6 @@ const YearPage = () => {
             <div className="year-page">
                 {/* Header */}
                 <div className="year-header">
-                    <h1>Current Year</h1>
                     <div className="year-nav center-button">
                         <button onClick={handlePrevYear} aria-label="Previous year">←</button>
                         <span className="year-name">{currentYear}</span>

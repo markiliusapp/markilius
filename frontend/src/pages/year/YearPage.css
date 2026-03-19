@@ -5,19 +5,16 @@
 /* Header */
 .year-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    position: relative;
     margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 16px;
 }
 
-.year-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text);
+.year-header .header-actions {
+    position: absolute;
+    right: 0;
 }
-
 
 .year-nav {
     display: flex;
@@ -290,12 +287,6 @@
     }
 }
 @media (max-width: 768px) {
-    .year-header {
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-    }
-
     .year-overview {
         grid-template-columns: 1fr;
     }

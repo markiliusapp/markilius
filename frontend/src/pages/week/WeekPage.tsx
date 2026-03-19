@@ -146,7 +146,6 @@ const WeekPage = () => {
             <div className="week-page">
                 {/* Header */}
                 <div className="week-header">
-                    <h1>Current Week</h1>
                     <div className="week-nav">
                         <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
                         <span className="week-range">

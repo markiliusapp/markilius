@@ -5,17 +5,15 @@
 
 .dashboard-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    position: relative;
     margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 16px;
 }
 
-.dashboard-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--color-text);
+.dashboard-header .header-actions {
+    position: absolute;
+    right: 0;
 }
 
 /* Date navigation */
@@ -193,25 +191,6 @@
 
 /* Tablet and below (< 768px) - Stack panes vertically */
 @media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .dashboard-header h1 {
-        font-size: 24px;
-    }
-
-    .date-nav {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .btn-add-task {
-        width: 100%;
-        justify-content: center;
-    }
-
     /* Stack panes vertically */
     .panes {
         grid-template-columns: 1fr;
@@ -234,10 +213,6 @@
 
 /* Small mobile (< 480px) */
 @media (max-width: 480px) {
-    .dashboard-header h1 {
-        font-size: 22px;
-    }
-
     .date-nav input[type="date"] {
         font-size: 13px;
         padding: 6px 8px;

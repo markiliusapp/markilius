@@ -83,8 +83,6 @@ const DashboardPage = () => {
             <div className="dashboard-today">
                 {/* Header */}
                 <div className="dashboard-header">
-                    <h1>Today</h1>
-
                     <div className="date-nav">
                         <button onClick={handlePrevDay} aria-label="Previous day">←</button>
                         <input
