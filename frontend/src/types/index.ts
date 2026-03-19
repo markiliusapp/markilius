@@ -166,11 +166,20 @@ export interface User {
     createdAt: string;
 }
 
-export interface AuthContextType { 
+export interface UserUpdate {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    current_password?: string;
+    new_password?: string;
+}
+
+export interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (token: string) => Promise<void>;
     logout: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 

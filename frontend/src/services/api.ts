@@ -79,7 +79,18 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
-} 
+    updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string }) => {
+        const response = await fetch(`${API_URL}/auth/me`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify(data)
+        });
+        return handleResponse(response);
+    },
+}
 
 
 // Task endpoints

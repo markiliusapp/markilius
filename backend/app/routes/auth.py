@@ -8,6 +8,7 @@ from app.schemas.user import (
     Token,
     ForgotPasswordRequest,
     ResetPasswordRequest,
+    UserUpdate,
 )
 from app.models.arena import Arena
 from app.models.user import User
@@ -102,6 +103,35 @@ def login(user_input: UserLogin, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+def update_current_user(
+    user_update: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if user_update.email and user_update.email != current_user.email:
+        existing = db.query(User).filter(User.email == user_update.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        current_user.email = user_update.email
+
+    if user_update.first_name:
+        current_user.first_name = user_update.first_name
+    if user_update.last_name:
+        current_user.last_name = user_update.last_name
+
+    if user_update.new_password:
+        if not user_update.current_password:
+            raise HTTPException(status_code=400, detail="Current password required")
+        if not verify_password(user_update.current_password, current_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        current_user.hashed_password = hash_password(user_update.new_password)
+
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 

@@ -9,6 +9,8 @@ import MonthPage from './pages/month/MonthPage';
 import YearPage from './pages/year/YearPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ProfilePage from './pages/profile/ProfilePage';
+import ArenasPage from './pages/arenas/ArenasPage';
 
 
 
@@ -39,6 +41,16 @@ function App() {
           <Route path="dashboard/year" element={
             <ProtectedRoute>
               <YearPage />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/arenas" element={
+            <ProtectedRoute>
+              <ArenasPage />
             </ProtectedRoute>
           } />
           <Route path="/" element={<Navigate to="/dashboard" />} />

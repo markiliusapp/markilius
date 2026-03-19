@@ -52,8 +52,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate('/login');
     };
 
+    const refreshUser = async () => {
+        try {
+            const userData = await authAPI.getMe();
+            setAuthState(prev => ({ ...prev, user: userData }));
+        } catch (err) {
+            // silently fail
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user: authState.user, loading: authState.loading, login, logout }}>
+        <AuthContext.Provider value={{ user: authState.user, loading: authState.loading, login, logout, refreshUser }}>
             {authState.loading ? null : children}
         </AuthContext.Provider>
     );

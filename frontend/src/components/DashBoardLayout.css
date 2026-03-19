@@ -83,13 +83,83 @@
 }
 
 /* User section */
+.sidebar-footer-wrapper {
+    margin-top: auto;
+    position: relative;
+}
+
 .sidebar-footer {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px;
     border-top: 1px solid var(--color-border);
-    margin-top: auto;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.sidebar-footer:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.sidebar-footer-chevron {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* User menu popup */
+.user-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    z-index: 200;
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: none;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    text-align: left;
+}
+
+.user-menu-item:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.user-menu-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 4px 0;
+}
+
+.user-menu-item--danger {
+    color: var(--color-error);
+}
+
+.user-menu-item--danger:hover {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
 }
 
 .sidebar-user {
@@ -136,25 +206,6 @@
     white-space: nowrap;
 }
 
-.sidebar-logout {
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--color-border);
-    background-color: var(--color-bg);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-secondary);
-    transition: var(--transition);
-    flex-shrink: 0;
-}
-
-.sidebar-logout:hover {
-    background-color: var(--color-bg-subtle);
-    color: var(--color-error);
-    border-color: var(--color-error);
-}
 
 /* ================================
    MAIN CONTENT

@@ -1,0 +1,333 @@
+.arenas-page {
+    max-width: 680px;
+}
+
+.arenas-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.arenas-add-btn:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.arenas-error {
+    padding: 10px 14px;
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--color-error);
+    margin-bottom: 16px;
+}
+
+/* Cards */
+.arenas-card {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+}
+
+.arenas-card--muted {
+    background-color: var(--color-bg-subtle);
+}
+
+.arenas-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.arenas-add-form {
+    margin-bottom: 20px;
+}
+
+/* Add Form */
+.arenas-inline-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.arenas-inline-form-fields {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.arenas-input {
+    flex: 1;
+    padding: 10px 13px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+    transition: var(--transition);
+    font-family: var(--font-sans);
+}
+
+.arenas-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.arenas-input:focus {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.arenas-input--inline {
+    flex: 1;
+}
+
+.arenas-color-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.arenas-color-input {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 2px;
+    cursor: pointer;
+    background-color: var(--color-bg-subtle);
+}
+
+.arenas-color-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.arenas-inline-form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Buttons */
+.arenas-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: var(--font-sans);
+}
+
+.arenas-btn--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.arenas-btn--primary:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.arenas-btn--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.arenas-btn--ghost {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.arenas-btn--ghost:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.arenas-btn--sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* List */
+.arenas-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 16px;
+}
+
+.arenas-list--archived {
+    margin-top: 12px;
+}
+
+.arenas-list-item {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.arenas-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.arenas-item-row:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.arenas-item-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.arenas-color-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.arenas-color-swatch--faded {
+    opacity: 0.5;
+}
+
+.arenas-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.arenas-item-name--archived {
+    color: var(--color-text-muted);
+}
+
+.arenas-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.arenas-icon-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.arenas-icon-btn:hover {
+    background-color: var(--color-bg-muted);
+    color: var(--color-text);
+}
+
+.arenas-icon-btn--danger:hover {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+/* Edit Row */
+.arenas-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: var(--color-bg-subtle);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.arenas-edit-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+/* Empty state */
+.arenas-empty {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    padding: 12px 0 4px;
+}
+
+/* Archived toggle */
+.arenas-archived-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font-sans);
+}
+
+.arenas-archived-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-muted);
+}
+
+.arenas-count {
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--color-bg-muted);
+    color: var(--color-text-secondary);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+@media (max-width: 480px) {
+    .arenas-page {
+        max-width: 100%;
+    }
+
+    .arenas-inline-form-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .arenas-edit-row {
+        flex-wrap: wrap;
+    }
+}
