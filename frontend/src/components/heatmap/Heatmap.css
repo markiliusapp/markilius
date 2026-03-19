@@ -192,7 +192,8 @@
 
     .heatmap-cell-today {
         border-color: transparent;
-        transform: scale(1.18);
+        outline: 2px solid var(--today-border-color, var(--color-primary));
+        outline-offset: 1px;
         z-index: 1;
     }
 
