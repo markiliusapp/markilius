@@ -35,11 +35,11 @@
 }
 
 [data-theme="dark"] {
-  --color-bg: #111111;
-  --color-bg-subtle: #1a1a1a;
-  --color-bg-muted: #222222;
-  --color-border: #2a2a2a;
-  --color-text: #f5f5f5;
+  --color-bg: #1e1e1e;
+  --color-bg-subtle: #262626;
+  --color-bg-muted: #2e2e2e;
+  --color-border: #3a3a3a;
+  --color-text: #f0f0f0;
   --color-text-secondary: #a1a1aa;
   --color-text-muted: #71717a;
   color-scheme: dark;
