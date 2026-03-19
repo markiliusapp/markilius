@@ -192,9 +192,18 @@
 
     .heatmap-cell-today {
         border-color: transparent;
-        outline: 2px solid var(--today-border-color, var(--color-primary));
-        outline-offset: 1px;
-        z-index: 1;
+    }
+
+    .heatmap-cell-today .heatmap-cell-day {
+        background-color: var(--today-border-color, var(--color-primary));
+        color: #ffffff;
+        border-radius: 50%;
+        width: 1.3rem;
+        height: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
     }
 
     .heatmap-cell-today .heatmap-cell-day {
