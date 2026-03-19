@@ -34,7 +34,7 @@
 }
 
 .mab-left {
-    width: 100px;
+    width: 90px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -46,9 +46,8 @@
 }
 
 .mab-big-pct {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 800;
-    letter-spacing: -1.5px;
     line-height: 1;
 }
 
@@ -74,13 +73,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.mab-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
 }
 
 .mab-name {

@@ -206,14 +206,6 @@
     letter-spacing: 0.5px;
 }
 
-.day-tasks-count {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background-color: var(--color-bg-subtle);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
 
 .day-tasks-list {
     display: flex;

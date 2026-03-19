@@ -39,7 +39,6 @@ const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
                     </div>
                     <div className="mab-right">
                         <div className="mab-name-row">
-                            <span className="mab-dot" style={{ backgroundColor: 'var(--color-primary)' }} />
                             <span className="mab-name" style={{ fontWeight: 600 }}>Overall</span>
                             <div className="mab-meta">
                                 {overallDelta && (
@@ -83,10 +82,6 @@ const ArenaBreakdown = ({ arenas, prevArenas }: ArenaBreakdownProps) => {
                                 </div>
                                 <div className="mab-right">
                                     <div className="mab-name-row">
-                                        <span
-                                            className="mab-dot"
-                                            style={{ backgroundColor: arena.arena_color }}
-                                        />
                                         <span className="mab-name">{arena.arena_name}</span>
                                         <div className="mab-meta">
                                             {delta && (
