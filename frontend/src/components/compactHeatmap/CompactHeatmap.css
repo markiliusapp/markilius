@@ -94,21 +94,6 @@
     background-color: #e5e7eb;
 }
 
-.compact-cell-today {
-    position: relative;
-}
-
-.compact-cell-today::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: var(--color-text);
-}
 
 .compact-cell-outside {
     min-width: 14px;
