@@ -81,7 +81,10 @@
     transform: none;
 }
 
-.heatmap-cell-day,
+.heatmap-cell-day {
+    opacity: 1;
+}
+
 .heatmap-cell-percentage {
     opacity: 0;
     transition: opacity 0.15s ease;
