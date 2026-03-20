@@ -1,5 +1,4 @@
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from pydantic import EmailStr
+import resend
 from datetime import date
 from typing import List
 import os
@@ -7,24 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-conf = ConnectionConfig(
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
-    MAIL_FROM=os.getenv("MAIL_FROM"),
-    MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
-    MAIL_SERVER=os.getenv("MAIL_SERVER"),
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-)
 
-fm = FastMail(conf)
+def _init():
+    resend.api_key = os.getenv("RESEND_API_KEY")
+    return os.getenv("MAIL_FROM", "noreply@markilius.com")
 
 
-async def send_password_reset_email(email: EmailStr, reset_token: str):
-    """
-    Send password reset email with reset link
-    """
+async def send_password_reset_email(email: str, reset_token: str):
+    MAIL_FROM = _init()
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
 
@@ -35,40 +24,23 @@ async def send_password_reset_email(email: EmailStr, reset_token: str):
                 <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                     <h1 style="color: white; margin: 0;">Markilius</h1>
                 </div>
-                
                 <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
                     <h2 style="color: #333; margin-top: 0;">Reset Your Password</h2>
-                    
                     <p>You requested to reset your password. Click the button below to set a new password:</p>
-                    
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="{reset_link}" 
-                           style="background-color: #f97316; 
-                                  color: white; 
-                                  padding: 12px 30px; 
-                                  text-decoration: none; 
-                                  border-radius: 6px; 
-                                  display: inline-block;
-                                  font-weight: 500;">
+                        <a href="{reset_link}"
+                           style="background-color: #f97316; color: white; padding: 12px 30px;
+                                  text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
                             Reset Password
                         </a>
                     </div>
-                    
                     <p style="color: #666; font-size: 14px;">
                         Or copy and paste this link into your browser:<br>
                         <a href="{reset_link}" style="color: #f97316;">{reset_link}</a>
                     </p>
-                    
-                    <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                        This link will expire in 5 minutes.
-                    </p>
-                    
-                    <p style="color: #666; font-size: 14px;">
-                        If you didn't request this, you can safely ignore this email.
-                    </p>
-                    
+                    <p style="color: #666; font-size: 14px; margin-top: 30px;">This link will expire in 5 minutes.</p>
+                    <p style="color: #666; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                    
                     <p style="color: #999; font-size: 12px; text-align: center;">
                         This email was sent from Markilius. Please do not reply to this email.
                     </p>
@@ -78,17 +50,16 @@ async def send_password_reset_email(email: EmailStr, reset_token: str):
     </html>
     """
 
-    message = MessageSchema(
-        subject="Reset Your Markilius Password",
-        recipients=[email],
-        body=html_body,
-        subtype="html",
-    )
-
-    await fm.send_message(message)
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Reset Your Markilius Password",
+        "html": html_body,
+    })
 
 
-async def send_verification_email(email: EmailStr, verification_token: str):
+async def send_verification_email(email: str, verification_token: str):
+    MAIL_FROM = _init()
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     verify_link = f"{frontend_url}/verify-email?token={verification_token}"
 
@@ -104,13 +75,8 @@ async def send_verification_email(email: EmailStr, verification_token: str):
                     <p>Thanks for signing up! Click the button below to verify your email address:</p>
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="{verify_link}"
-                           style="background-color: #f97316;
-                                  color: white;
-                                  padding: 12px 30px;
-                                  text-decoration: none;
-                                  border-radius: 6px;
-                                  display: inline-block;
-                                  font-weight: 500;">
+                           style="background-color: #f97316; color: white; padding: 12px 30px;
+                                  text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
                             Verify Email
                         </a>
                     </div>
@@ -118,12 +84,8 @@ async def send_verification_email(email: EmailStr, verification_token: str):
                         Or copy and paste this link into your browser:<br>
                         <a href="{verify_link}" style="color: #f97316;">{verify_link}</a>
                     </p>
-                    <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                        This link will expire in 24 hours.
-                    </p>
-                    <p style="color: #666; font-size: 14px;">
-                        If you didn't create a Markilius account, you can safely ignore this email.
-                    </p>
+                    <p style="color: #666; font-size: 14px; margin-top: 30px;">This link will expire in 24 hours.</p>
+                    <p style="color: #666; font-size: 14px;">If you didn't create a Markilius account, you can safely ignore this email.</p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     <p style="color: #999; font-size: 12px; text-align: center;">
                         This email was sent from Markilius. Please do not reply to this email.
@@ -134,18 +96,16 @@ async def send_verification_email(email: EmailStr, verification_token: str):
     </html>
     """
 
-    message = MessageSchema(
-        subject="Verify Your Markilius Email",
-        recipients=[email],
-        body=html_body,
-        subtype="html",
-    )
-
-    await fm.send_message(message)
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Verify Your Markilius Email",
+        "html": html_body,
+    })
 
 
 async def send_weekly_summary_email(
-    email: EmailStr,
+    email: str,
     first_name: str,
     start_date: date,
     end_date: date,
@@ -155,8 +115,8 @@ async def send_weekly_summary_email(
     total_hours: float,
     arenas: List[dict],
 ):
+    MAIL_FROM = _init()
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-
     week_label = f"{start_date.strftime('%b %d')} – {end_date.strftime('%b %d, %Y')}"
 
     arena_rows = ""
@@ -189,15 +149,11 @@ async def send_weekly_summary_email(
                     <h1 style="color: white; margin: 0; font-size: 24px;">Markilius</h1>
                     <p style="color: rgba(255,255,255,0.85); margin: 4px 0 0; font-size: 14px;">Weekly Summary</p>
                 </div>
-
                 <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #eee; border-top: none;">
                     <p style="margin-top: 0;">Hi {first_name},</p>
                     <p>Here's how your week looked: <strong>{week_label}</strong></p>
-
                     {no_task_msg}
-
                     {"" if total_tasks == 0 else f'''
-                    <!-- Stats row -->
                     <div style="display:flex; gap:16px; margin: 24px 0; text-align:center;">
                         <div style="flex:1; background:#fff; border:1px solid #eee; border-radius:8px; padding:16px;">
                             <div style="font-size:32px; font-weight:700; color:#f97316;">{completion_percentage}%</div>
@@ -212,27 +168,19 @@ async def send_weekly_summary_email(
                             <div style="font-size:12px; color:#888; margin-top:4px;">Hours Tracked</div>
                         </div>
                     </div>
-
                     {"" if not arenas else f"""
                     <h3 style="font-size:14px; font-weight:600; color:#555; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Arena Breakdown</h3>
                     <table style="width:100%; border-collapse:collapse; font-size:14px;">
                         {arena_rows}
                     </table>"""}
                     '''}
-
                     <div style="text-align: center; margin: 32px 0 16px;">
                         <a href="{frontend_url}"
-                           style="background-color: #f97316;
-                                  color: white;
-                                  padding: 12px 30px;
-                                  text-decoration: none;
-                                  border-radius: 6px;
-                                  display: inline-block;
-                                  font-weight: 500;">
+                           style="background-color: #f97316; color: white; padding: 12px 30px;
+                                  text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
                             Plan Your Week
                         </a>
                     </div>
-
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
                         You're receiving this because weekly summaries are enabled in your Markilius account.<br>
@@ -244,11 +192,9 @@ async def send_weekly_summary_email(
     </html>
     """
 
-    message = MessageSchema(
-        subject=f"Your Markilius Week in Review · {week_label}",
-        recipients=[email],
-        body=html_body,
-        subtype="html",
-    )
-
-    await fm.send_message(message)
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": f"Your Markilius Week in Review · {week_label}",
+        "html": html_body,
+    })

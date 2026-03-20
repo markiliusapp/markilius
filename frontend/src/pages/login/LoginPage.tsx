@@ -95,18 +95,19 @@ const Login = () => {
 
                     {/* Unverified email banner */}
                     {unverifiedEmail && !resendSent && (
-                        <div className="login-error" style={{ borderColor: '#f97316', backgroundColor: '#fff7ed' }}>
+                        <div className="login-warning">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
-                            <p style={{ color: '#92400e' }}>
+                            <p>
                                 Email not verified.{' '}
                                 <button
+                                    type="button"
+                                    className="login-resend-btn"
                                     onClick={async () => {
                                         try { await authAPI.resendVerification(unverifiedEmail) } catch { /* silent */ }
                                         setResendSent(true)
                                     }}
-                                    style={{ background: 'none', border: 'none', color: '#f97316', cursor: 'pointer', padding: 0, fontSize: 'inherit', textDecoration: 'underline' }}
                                 >
                                     Resend verification email
                                 </button>
@@ -115,15 +116,15 @@ const Login = () => {
                     )}
 
                     {resendSent && (
-                        <div className="login-error" style={{ borderColor: '#10b981', backgroundColor: '#f0fdf4' }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
+                        <div className="login-success">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="2">
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
-                            <p style={{ color: '#065f46' }}>Verification email sent. Check your inbox.</p>
+                            <p>Verification email sent. Check your inbox.</p>
                         </div>
                     )}
 
-                    <div style={{ marginTop: '16px' }}>
+                    <div className="login-google-wrapper">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => setError('Google login failed')}

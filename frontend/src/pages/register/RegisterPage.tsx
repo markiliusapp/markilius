@@ -18,6 +18,7 @@ const RegisterPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [registered, setRegistered] = useState(false);
+    const [resendSent, setResendSent] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,19 +74,28 @@ const RegisterPage = () => {
                             We sent a verification link to <strong>{formData.email}</strong>.
                             Click it to activate your account.
                         </p>
-                        <p style={{ marginTop: '24px', fontSize: '14px', color: 'var(--text-muted, #6b7280)' }}>
-                            Didn't receive it?{' '}
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        await authAPI.resendVerification(formData.email);
-                                    } catch { /* silent */ }
-                                }}
-                                style={{ background: 'none', border: 'none', color: '#f97316', cursor: 'pointer', padding: 0, fontSize: '14px' }}
-                            >
-                                Resend email
-                            </button>
-                        </p>
+                        {!resendSent ? (
+                            <p className="login-resend-hint">
+                                Didn't receive it?{' '}
+                                <button
+                                    type="button"
+                                    className="login-resend-btn"
+                                    onClick={async () => {
+                                        try { await authAPI.resendVerification(formData.email); } catch { /* silent */ }
+                                        setResendSent(true);
+                                    }}
+                                >
+                                    Resend email
+                                </button>
+                            </p>
+                        ) : (
+                            <div className="login-success">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="2">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                <p>Verification email sent. Check your inbox.</p>
+                            </div>
+                        )}
                         <p style={{ marginTop: '16px', fontSize: '14px' }}>
                             <a href="/login" style={{ color: '#f97316' }}>Back to sign in</a>
                         </p>

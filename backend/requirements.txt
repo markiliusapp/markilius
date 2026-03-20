@@ -25,7 +25,7 @@ ecdsa==0.19.1
 email-validator==2.3.0
 exchange_calendars==4.11.3
 fastapi==0.120.4
-fastapi-mail==1.6.2
+resend==2.25.0
 flake8==7.1.1
 frozendict==2.4.7
 frozenlist==1.8.0
