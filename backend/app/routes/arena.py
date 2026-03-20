@@ -2,14 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.arena import Arena
 from app.models.user import User
-from app.schemas.arena import ArenaResponse, ArenaCreate, ArenaUpdate, ArenaColorUpdate
+from app.schemas.arena import (
+    ArenaResponse,
+    ArenaCreate,
+    ArenaUpdate,
+    ArenaColorUpdate,
+)
 from app.database import get_db
 from .auth import get_current_user
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 
 router = APIRouter(prefix="/arenas", tags=["arenas"])
 
-ARENA_LIMIT = 10
+ARENA_LIMIT = 8
 
 
 @router.get("/", response_model=list[ArenaResponse])
@@ -23,7 +28,9 @@ def get_arenas(
     try:
         arenas = (
             db.query(Arena)
-            .filter(Arena.user_id == current_user.id, Arena.is_archived == False)
+            .filter(
+                Arena.user_id == current_user.id, Arena.is_archived == False
+            )
             .order_by(Arena.created_at)
             .all()
         )
@@ -52,7 +59,9 @@ def get_archived_arenas(
     try:
         arenas = (
             db.query(Arena)
-            .filter(Arena.user_id == current_user.id, Arena.is_archived == True)
+            .filter(
+                Arena.user_id == current_user.id, Arena.is_archived == True
+            )
             .order_by(Arena.created_at)
             .all()
         )

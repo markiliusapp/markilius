@@ -1,0 +1,41 @@
+.auth-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 28px;
+    left: 80px;
+}
+
+.auth-header-icon {
+    width: 32px;
+    height: 32px;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-header-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.5px;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    .auth-header {
+        top: 24px;
+        left: 24px;
+    }
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    .auth-header {
+        top: 32px;
+        left: 60px;
+    }
+}

@@ -137,8 +137,8 @@ async def send_weekly_summary_email(
     no_task_msg = ""
     if total_tasks == 0:
         no_task_msg = """
-        <p style="color:#888; font-size:14px; text-align:center; margin: 20px 0;">
-            No tasks were scheduled this week. Add some tasks to start tracking your progress!
+        <p style="color:#888; font-size:14px; margin: 20px 0;">
+            No tasks this week. Your record stays honest.
         </p>"""
 
     html_body = f"""
@@ -178,7 +178,7 @@ async def send_weekly_summary_email(
                         <a href="{frontend_url}"
                            style="background-color: #f97316; color: white; padding: 12px 30px;
                                   text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
-                            Plan Your Week
+                            View your record
                         </a>
                     </div>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
@@ -195,6 +195,6 @@ async def send_weekly_summary_email(
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
-        "subject": f"Your Markilius Week in Review · {week_label}",
+        "subject": f"Week Summary — {week_label}",
         "html": html_body,
     })

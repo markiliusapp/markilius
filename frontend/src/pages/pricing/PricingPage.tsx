@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { paymentAPI } from '../../services/api';
 import { useAuth } from '../../context/authContext';
-import BrandLogo from '../../components/brandLogo/BrandLogo';
 import './Pricing.css';
 
 const PLANS = [
@@ -98,7 +97,12 @@ const PricingPage = () => {
             {/* Header */}
             <div className="pricing-header">
                 <div className="pricing-brand">
-                    <BrandLogo size="md" />
+                    <div className="pricing-brand-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </div>
+                    <span className="pricing-brand-name">Markilius</span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     {(isActive || isLifetime) && (

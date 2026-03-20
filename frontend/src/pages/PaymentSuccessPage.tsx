@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import AuthHeader from '../components/authHeader/AuthHeader';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { paymentAPI } from '../services/api';
@@ -24,14 +25,7 @@ const PaymentSuccessPage = () => {
     return (
         <div className="login-page">
             <div className="login-left">
-                <div className="login-brand">
-                    <div className="login-brand-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </div>
-                    <span className="login-brand-name">Markilius</span>
-                </div>
+                <AuthHeader />
                 <div className="login-card">
                     <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                         <div style={{
