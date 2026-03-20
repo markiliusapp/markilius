@@ -87,6 +87,7 @@ const PublicProfilePage = () => {
                             data={yearlyData.daily_breakdown}
                             arenas={arenas}
                         />
+
                     )}
                 </div>
 

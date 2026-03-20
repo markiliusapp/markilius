@@ -8,8 +8,6 @@
 }
 
 .public-container {
-    width: 100%;
-    max-width: 900px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -47,6 +45,7 @@
     color: var(--color-text-secondary, #6b7280);
     margin: 2px 0 0;
 }
+
 
 .public-heatmap-card {
     background-color: var(--color-bg, #fff);
