@@ -33,7 +33,7 @@ async def send_password_reset_email(email: EmailStr, reset_token: str):
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0;">Checkly</h1>
+                    <h1 style="color: white; margin: 0;">Markilius</h1>
                 </div>
                 
                 <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
@@ -70,7 +70,7 @@ async def send_password_reset_email(email: EmailStr, reset_token: str):
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     
                     <p style="color: #999; font-size: 12px; text-align: center;">
-                        This email was sent from Checkly. Please do not reply to this email.
+                        This email was sent from Markilius. Please do not reply to this email.
                     </p>
                 </div>
             </div>
@@ -79,7 +79,7 @@ async def send_password_reset_email(email: EmailStr, reset_token: str):
     """
 
     message = MessageSchema(
-        subject="Reset Your Checkly Password",
+        subject="Reset Your Markilius Password",
         recipients=[email],
         body=html_body,
         subtype="html",
@@ -97,7 +97,7 @@ async def send_verification_email(email: EmailStr, verification_token: str):
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0;">Checkly</h1>
+                    <h1 style="color: white; margin: 0;">Markilius</h1>
                 </div>
                 <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
                     <h2 style="color: #333; margin-top: 0;">Verify Your Email</h2>
@@ -122,11 +122,11 @@ async def send_verification_email(email: EmailStr, verification_token: str):
                         This link will expire in 24 hours.
                     </p>
                     <p style="color: #666; font-size: 14px;">
-                        If you didn't create a Checkly account, you can safely ignore this email.
+                        If you didn't create a Markilius account, you can safely ignore this email.
                     </p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     <p style="color: #999; font-size: 12px; text-align: center;">
-                        This email was sent from Checkly. Please do not reply to this email.
+                        This email was sent from Markilius. Please do not reply to this email.
                     </p>
                 </div>
             </div>
@@ -135,7 +135,7 @@ async def send_verification_email(email: EmailStr, verification_token: str):
     """
 
     message = MessageSchema(
-        subject="Verify Your Checkly Email",
+        subject="Verify Your Markilius Email",
         recipients=[email],
         body=html_body,
         subtype="html",
@@ -186,7 +186,7 @@ async def send_weekly_summary_email(
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin:0; padding:0;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0; font-size: 24px;">Checkly</h1>
+                    <h1 style="color: white; margin: 0; font-size: 24px;">Markilius</h1>
                     <p style="color: rgba(255,255,255,0.85); margin: 4px 0 0; font-size: 14px;">Weekly Summary</p>
                 </div>
 
@@ -235,7 +235,7 @@ async def send_weekly_summary_email(
 
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-                        You're receiving this because weekly summaries are enabled in your Checkly account.<br>
+                        You're receiving this because weekly summaries are enabled in your Markilius account.<br>
                         <a href="{frontend_url}/profile" style="color: #f97316;">Manage preferences</a>
                     </p>
                 </div>
@@ -245,7 +245,7 @@ async def send_weekly_summary_email(
     """
 
     message = MessageSchema(
-        subject=f"Your Checkly Week in Review · {week_label}",
+        subject=f"Your Markilius Week in Review · {week_label}",
         recipients=[email],
         body=html_body,
         subtype="html",

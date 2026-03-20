@@ -65,7 +65,7 @@ const RegisterPage = () => {
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
                         </div>
-                        <span className="login-brand-name">Checkly</span>
+                        <span className="login-brand-name">Markilius</span>
                     </div>
                     <div className="login-card">
                         <h2 className="login-card-title">Check your email</h2>
@@ -114,13 +114,13 @@ const RegisterPage = () => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <span className="login-brand-name">Checkly</span>
+                    <span className="login-brand-name">Markilius</span>
                 </div>
 
                 {/* Card */}
                 <div className="login-card">
                     <h2 className="login-card-title">Create your account</h2>
-                    <p className="login-card-subtitle">Get started with Checkly</p>
+                    <p className="login-card-subtitle">Get started with Markilius</p>
 
                     {/* Error */}
                     {error && (

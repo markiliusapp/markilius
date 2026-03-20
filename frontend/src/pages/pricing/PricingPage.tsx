@@ -101,7 +101,7 @@ const PricingPage = () => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <span className="pricing-brand-name">Checkly</span>
+                    <span className="pricing-brand-name">Markilius</span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     {(isActive || isLifetime) && (

@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
 
 
-app = FastAPI(title="Checkly Backend", lifespan=lifespan)
+app = FastAPI(title="Markilius Backend", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,7 +34,7 @@ app.include_router(payments.router)
 
 @app.get("/")
 def root():
-    return {"message": "Checkly API is running!"}
+    return {"message": "Markilius API is running!"}
 
 
 @app.get("/health")

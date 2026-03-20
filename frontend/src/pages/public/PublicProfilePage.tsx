@@ -61,7 +61,7 @@ const PublicProfilePage = () => {
                     </div>
                     <div>
                         <h1 className="public-name">{firstName}'s Productivity</h1>
-                        <p className="public-sub">checkly</p>
+                        <p className="public-sub">markilius</p>
                     </div>
                 </div>
 
@@ -92,7 +92,7 @@ const PublicProfilePage = () => {
                 </div>
 
                 <div className="public-footer">
-                    <a href="/" className="public-footer-link">Powered by Checkly</a>
+                    <a href="/" className="public-footer-link">Powered by Markilius</a>
                 </div>
             </div>
         </div>

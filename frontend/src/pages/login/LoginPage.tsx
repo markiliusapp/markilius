@@ -75,7 +75,7 @@ const Login = () => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <span className="login-brand-name">Checkly</span>
+                    <span className="login-brand-name">Markilius</span>
                 </div>
 
                 {/* Card */}

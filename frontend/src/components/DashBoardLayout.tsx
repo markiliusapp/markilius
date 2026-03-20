@@ -160,7 +160,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <span className="sidebar-brand-name">Checkly</span>
+                    <span className="sidebar-brand-name">Markilius</span>
                 </div>
 
                 {/* Navigation */}

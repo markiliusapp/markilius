@@ -30,7 +30,7 @@ const PaymentSuccessPage = () => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <span className="login-brand-name">Checkly</span>
+                    <span className="login-brand-name">Markilius</span>
                 </div>
                 <div className="login-card">
                     <div style={{ textAlign: 'center', marginBottom: '16px' }}>
@@ -44,7 +44,7 @@ const PaymentSuccessPage = () => {
                             </svg>
                         </div>
                         <h2 className="login-card-title">Payment successful!</h2>
-                        <p className="login-card-subtitle">Welcome to Checkly. Taking you to your dashboard...</p>
+                        <p className="login-card-subtitle">Welcome to Markilius. Taking you to your dashboard...</p>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <div className="spinner" />
