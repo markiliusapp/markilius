@@ -34,6 +34,12 @@ def create_checkout_session(
     if not price_id:
         raise HTTPException(status_code=500, detail="Plan not configured")
 
+    # Block already-subscribed users
+    if current_user.subscription_status == "lifetime":
+        raise HTTPException(status_code=400, detail="You already have a lifetime plan")
+    if current_user.subscription_status == "active":
+        raise HTTPException(status_code=400, detail="You already have an active subscription. Use the billing portal to manage it.")
+
     # Create or reuse Stripe customer
     if current_user.stripe_customer_id:
         customer_id = current_user.stripe_customer_id
@@ -56,6 +62,40 @@ def create_checkout_session(
         client_reference_id=str(current_user.id),
         success_url=f"{FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{FRONTEND_URL}/pricing",
+    )
+
+    return {"url": session.url}
+
+
+@router.post("/upgrade-to-lifetime")
+def upgrade_to_lifetime(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.subscription_status == "lifetime":
+        raise HTTPException(status_code=400, detail="You already have a lifetime plan")
+    if current_user.subscription_status != "active":
+        raise HTTPException(status_code=400, detail="No active subscription to upgrade from")
+
+    price_id = PRICE_IDS["lifetime"]
+    if not price_id:
+        raise HTTPException(status_code=500, detail="Lifetime plan not configured")
+
+    # Cancel existing subscription at period end so they keep access until expiry
+    if current_user.stripe_subscription_id:
+        stripe.Subscription.modify(
+            current_user.stripe_subscription_id,
+            cancel_at_period_end=True,
+        )
+
+    session = stripe.checkout.Session.create(
+        customer=current_user.stripe_customer_id,
+        payment_method_types=["card"],
+        line_items=[{"price": price_id, "quantity": 1}],
+        mode="payment",
+        client_reference_id=str(current_user.id),
+        success_url=f"{FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{FRONTEND_URL}/dashboard/profile",
     )
 
     return {"url": session.url}
