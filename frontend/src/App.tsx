@@ -1,7 +1,7 @@
-import {BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/RegisterPage';
-import { AuthProvider } from './context/authContext';
+import { AuthProvider, useAuth } from './context/authContext';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import WeekPage from './pages/week/WeekPage';
@@ -15,14 +15,21 @@ import ArenasPage from './pages/arenas/ArenasPage';
 import PublicProfilePage from './pages/public/PublicProfilePage';
 import PricingPage from './pages/pricing/PricingPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import LandingPage from './pages/landing/LandingPage';
 
-
+const RootRoute = () => {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  const isSubscribed = user?.subscription_status === 'active' || user?.subscription_status === 'lifetime';
+  return isSubscribed ? <Navigate to="/dashboard" /> : <LandingPage />;
+};
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -34,7 +41,7 @@ function App() {
             <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
-          }/>
+          } />
           <Route path="dashboard/week" element={
             <ProtectedRoute>
               <WeekPage />
@@ -61,9 +68,8 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/u/:publicId" element={<PublicProfilePage />} />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
-      </AuthProvider>    
+      </AuthProvider>
     </BrowserRouter>
   );
 }
