@@ -39,7 +39,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authAPI.getMe()
             setAuthState({ user: userData, loading: false })
-            navigate("/dashboard")
+            const isSubscribed = userData.subscription_status === 'active' || userData.subscription_status === 'lifetime';
+            navigate(isSubscribed ? "/dashboard" : "/pricing")
         } catch (err) {
             localStorage.removeItem('token');
             throw err;

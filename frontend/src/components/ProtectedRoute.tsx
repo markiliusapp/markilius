@@ -19,6 +19,12 @@ export const ProtectedRoute = ({children}: {children: React.ReactNode}) => {
     if (!user) {
         return <Navigate to="/login" replace />
     }
+
+    const isSubscribed = user.subscription_status === 'active' || user.subscription_status === 'lifetime';
+    if (!isSubscribed) {
+        return <Navigate to="/pricing" replace />
+    }
+
     return (
         <>{children}</>
     )

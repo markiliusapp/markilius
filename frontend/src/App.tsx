@@ -12,6 +12,9 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ArenasPage from './pages/arenas/ArenasPage';
+import PublicProfilePage from './pages/public/PublicProfilePage';
+import PricingPage from './pages/pricing/PricingPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 
 
@@ -25,6 +28,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardPage />
@@ -55,6 +60,7 @@ function App() {
               <ArenasPage />
             </ProtectedRoute>
           } />
+          <Route path="/u/:publicId" element={<PublicProfilePage />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>    
