@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import BrandLogo from '../../components/brandLogo/BrandLogo';
 import './LandingPage.css';
 
 const FEATURES = [
@@ -73,7 +74,7 @@ const LandingPage = () => {
         <div className="landing">
             {/* Nav */}
             <nav className="landing-nav">
-                <span className="landing-nav-brand">Markilius</span>
+                <BrandLogo size="sm" />
                 <div className="landing-nav-links">
                     <a href="#how-it-works" className="landing-nav-link">How it works</a>
                     <button className="landing-nav-link" onClick={() => navigate('/pricing')}>Pricing</button>
@@ -222,7 +223,7 @@ const LandingPage = () => {
 
             {/* Footer */}
             <footer className="landing-footer">
-                <span className="landing-footer-brand">Markilius</span>
+                <BrandLogo size="sm" />
                 <div className="landing-footer-links">
                     <button onClick={() => navigate('/login')}>Log in</button>
                     <button onClick={() => navigate('/register')}>Register</button>

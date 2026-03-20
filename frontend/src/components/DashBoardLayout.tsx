@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
 import { useTheme } from '../context/themeContext';
 import { NavLink } from 'react-router-dom';
+import BrandLogo from './brandLogo/BrandLogo';
 import './DashboardLayout.css';
 
 interface DashboardLayoutProps {
@@ -155,12 +156,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
                 {/* Brand */}
                 <div className="sidebar-brand">
-                    <div className="sidebar-brand-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </div>
-                    <span className="sidebar-brand-name">Markilius</span>
+                    <BrandLogo size="md" />
                 </div>
 
                 {/* Navigation */}
