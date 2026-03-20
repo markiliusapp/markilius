@@ -36,6 +36,7 @@ const FEATURES = [
     'Unlimited tasks',
     'Recurring tasks',
     'Productivity stats (daily, weekly, monthly, yearly)',
+    'Heatmaps',
     'Streak tracking',
     'Weekly email summaries',
     'Public profile',
