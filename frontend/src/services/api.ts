@@ -104,17 +104,6 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
-    togglePublicProfile: async (enabled: boolean) => {
-        const response = await fetch(`${API_URL}/auth/me/public-profile`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`,
-            },
-            body: JSON.stringify({ enabled }),
-        });
-        return handleResponse(response);
-    },
 }
 
 
@@ -304,6 +293,13 @@ export const arenaAPI = {
 export const paymentAPI = {
     createCheckoutSession: async (plan: 'monthly' | 'yearly' | 'lifetime'): Promise<{ url: string }> => {
         const response = await fetch(`${API_URL}/payments/checkout?plan=${plan}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    upgradeToLifetime: async (): Promise<{ url: string }> => {
+        const response = await fetch(`${API_URL}/payments/upgrade-to-lifetime`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });

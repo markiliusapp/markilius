@@ -164,7 +164,6 @@ export interface User {
     last_name: string;
     email: string;
     createdAt: string;
-    public_profile_enabled: boolean;
     public_id: string | null;
     weekly_email: boolean;
     timezone: string;

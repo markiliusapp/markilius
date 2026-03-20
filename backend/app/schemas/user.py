@@ -17,7 +17,6 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
     is_verified: bool
-    public_profile_enabled: bool
     public_id: Optional[str] = None
     weekly_email: bool
     timezone: str
@@ -63,5 +62,3 @@ class UserUpdate(BaseModel):
     timezone: Optional[str] = None
 
 
-class PublicProfileToggle(BaseModel):
-    enabled: bool

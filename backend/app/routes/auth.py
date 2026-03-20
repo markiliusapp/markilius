@@ -10,7 +10,6 @@ from app.schemas.user import (
     ResetPasswordRequest,
     ResendVerificationRequest,
     UserUpdate,
-    PublicProfileToggle,
 )
 import uuid
 from app.models.arena import Arena
@@ -68,6 +67,7 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
         is_verified=False,
         verification_token=verification_token,
         verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=24),
+        public_id=str(uuid.uuid4()),
     )
     db.add(new_user)
     db.commit()
@@ -118,7 +118,11 @@ def login(user_input: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user_info(current_user: User = Depends(get_current_user)):
+def get_current_user_info(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not current_user.public_id:
+        current_user.public_id = str(uuid.uuid4())
+        db.commit()
+        db.refresh(current_user)
     return current_user
 
 
@@ -155,22 +159,6 @@ def update_current_user(
     db.refresh(current_user)
     return current_user
 
-
-@router.put("/me/public-profile", response_model=UserResponse)
-def toggle_public_profile(
-    body: PublicProfileToggle,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    if body.enabled:
-        if not current_user.public_id:
-            current_user.public_id = str(uuid.uuid4())
-        current_user.public_profile_enabled = True
-    else:
-        current_user.public_profile_enabled = False
-    db.commit()
-    db.refresh(current_user)
-    return current_user
 
 
 @router.post("/google", response_model=Token)

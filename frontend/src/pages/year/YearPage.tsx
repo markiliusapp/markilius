@@ -16,6 +16,7 @@ import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
 import type { StreakResponse } from '@/types';
 import Streaks from '@/components/streaks/Streaks';
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
+import { useAuth } from '@/context/authContext';
 
 const YearChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) return null
@@ -40,6 +41,7 @@ const YearChartTooltip = ({ active, payload, label }: any) => {
 
 const YearPage = () => {
     const navigate = useNavigate()
+    const { user } = useAuth()
     const [yearData, setYearData] = useState<YearlyProductivity | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -48,6 +50,15 @@ const YearPage = () => {
     const [compactView, setCompactView] = useState(false)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedChartArenaId, setSelectedChartArenaId] = useState<number | null>(null)
+    const [copied, setCopied] = useState(false)
+
+    const handleShare = () => {
+        if (!user?.public_id) return;
+        const url = `${window.location.origin}/u/${user.public_id}`;
+        navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
     
 
 
@@ -173,6 +184,24 @@ const YearPage = () => {
                         <button onClick={handleNextYear} aria-label="Next year">→</button>
                     </div>
                     <div className="header-actions">
+                        {user?.public_id && (
+                            <button
+                                className="compact-toggle"
+                                onClick={handleShare}
+                                title="Share your compact heatmap"
+                            >
+                                {copied ? (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                ) : (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                    </svg>
+                                )}
+                            </button>
+                        )}
                         <button className={`compact-toggle ${compactView ? 'active' : ''}`} onClick={() => setCompactView(!compactView)} title={compactView ? 'Expand' : 'Compact'}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 {compactView ? (

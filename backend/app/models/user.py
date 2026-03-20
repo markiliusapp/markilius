@@ -26,7 +26,6 @@ class User(Base):
     verification_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
 
     # Public profile fields
-    public_profile_enabled = Column(Boolean, nullable=False, default=False)
     public_id = Column(String(36), nullable=True, unique=True, index=True)
 
     # Email preferences

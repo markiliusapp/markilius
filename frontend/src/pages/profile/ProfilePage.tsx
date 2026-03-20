@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/authContext';
-import { authAPI } from '@/services/api';
+import { authAPI, paymentAPI } from '@/services/api';
 import DashboardLayout from '@/components/DashBoardLayout';
 import './ProfilePage.css';
 
@@ -29,9 +29,8 @@ const ProfilePage = () => {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    const [publicLoading, setPublicLoading] = useState(false);
-    const [publicError, setPublicError] = useState('');
-    const [copied, setCopied] = useState(false);
+    const [billingLoading, setBillingLoading] = useState(false);
+    const [billingError, setBillingError] = useState('');
 
     const [weeklyEmail, setWeeklyEmail] = useState(user?.weekly_email ?? true);
     const [prefLoading, setPrefLoading] = useState(false);
@@ -58,24 +57,15 @@ const ProfilePage = () => {
         }
     };
 
-    const handlePublicToggle = async () => {
-        setPublicLoading(true);
-        setPublicError('');
+    const handleManageBilling = async () => {
+        setBillingLoading(true);
+        setBillingError('');
         try {
-            await authAPI.togglePublicProfile(!user?.public_profile_enabled);
-            await refreshUser();
+            const { url } = await paymentAPI.createPortalSession();
+            window.location.href = url;
         } catch (err: unknown) {
-            setPublicError(err instanceof Error ? err.message : 'Failed to update public profile.');
-        } finally {
-            setPublicLoading(false);
-        }
-    };
-
-    const handleCopyLink = () => {
-        if (user?.public_id) {
-            navigator.clipboard.writeText(`${window.location.origin}/u/${user.public_id}`);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+            setBillingError(err instanceof Error ? err.message : 'Failed to open billing portal.');
+            setBillingLoading(false);
         }
     };
 
@@ -288,47 +278,44 @@ const ProfilePage = () => {
                         </div>
                     </div>
 
-                    {/* Public Profile */}
+                    {/* Billing */}
                     <div className="profile-card">
-                        <h2 className="profile-card-title">Public Profile</h2>
-                        <p className="profile-card-subtitle">Share a link to your productivity heatmap. No login required for viewers.</p>
+                        <h2 className="profile-card-title">Billing</h2>
+                        <p className="profile-card-subtitle">Manage your subscription and billing details.</p>
 
-                        {publicError && <div className="profile-error">{publicError}</div>}
+                        {billingError && <div className="profile-error">{billingError}</div>}
 
-                        <div className="public-profile-row">
-                            <div className="public-profile-info">
-                                <span className="public-profile-label">
-                                    {user?.public_profile_enabled ? 'Public profile is enabled' : 'Public profile is disabled'}
+                        <div className="billing-row">
+                            <div className="billing-plan-info">
+                                <span className="billing-plan-label">
+                                    {user?.subscription_tier === 'monthly' && 'Monthly Plan'}
+                                    {user?.subscription_tier === 'yearly' && 'Yearly Plan'}
+                                    {user?.subscription_tier === 'lifetime' && 'Lifetime Plan'}
+                                </span>
+                                <span className={`billing-status-badge billing-status-badge--${user?.subscription_status}`}>
+                                    {user?.subscription_status === 'lifetime' ? 'Lifetime' : 'Active'}
                                 </span>
                             </div>
-                            <button
-                                className={`toggle-btn ${user?.public_profile_enabled ? 'toggle-btn--on' : ''}`}
-                                onClick={handlePublicToggle}
-                                disabled={publicLoading}
-                                type="button"
-                            >
-                                <span className="toggle-thumb" />
-                            </button>
-                        </div>
 
-                        {user?.public_profile_enabled && user?.public_id && (
-                            <div className="public-profile-link-row">
-                                <input
-                                    type="text"
-                                    readOnly
-                                    value={`${window.location.origin}/u/${user.public_id}`}
-                                    className="public-profile-link-input"
-                                />
+                            {user?.subscription_status !== 'lifetime' && (
                                 <button
                                     type="button"
-                                    className="profile-btn profile-btn--primary"
-                                    onClick={handleCopyLink}
+                                    className="profile-btn profile-btn--secondary"
+                                    onClick={handleManageBilling}
+                                    disabled={billingLoading}
                                 >
-                                    {copied ? 'Copied!' : 'Copy link'}
+                                    {billingLoading ? <><span className="spinner" />Loading...</> : 'Manage Billing'}
                                 </button>
-                            </div>
+                            )}
+                        </div>
+
+                        {user?.subscription_status !== 'lifetime' && (
+                            <p className="billing-hint">
+                                Update your payment method, view invoices, or cancel your subscription via the billing portal.
+                            </p>
                         )}
                     </div>
+
                 </div>
             </div>
         </DashboardLayout>
