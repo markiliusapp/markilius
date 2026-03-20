@@ -104,6 +104,17 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
+    togglePublicProfile: async (enabled: boolean) => {
+        const response = await fetch(`${API_URL}/auth/me/public-profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify({ enabled }),
+        });
+        return handleResponse(response);
+    },
 }
 
 
@@ -286,6 +297,41 @@ export const arenaAPI = {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });
+        return handleResponse(response);
+    },
+};
+
+export const paymentAPI = {
+    createCheckoutSession: async (plan: 'monthly' | 'yearly' | 'lifetime'): Promise<{ url: string }> => {
+        const response = await fetch(`${API_URL}/payments/checkout?plan=${plan}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    verifySession: async (sessionId: string): Promise<{ status: string }> => {
+        const response = await fetch(`${API_URL}/payments/verify-session?session_id=${encodeURIComponent(sessionId)}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    createPortalSession: async (): Promise<{ url: string }> => {
+        const response = await fetch(`${API_URL}/payments/portal`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+};
+
+export const publicAPI = {
+    getProfile: async (publicId: string) => {
+        const response = await fetch(`${API_URL}/public/${publicId}`);
+        return handleResponse(response);
+    },
+    getYearlyProductivity: async (publicId: string, year: number) => {
+        const response = await fetch(`${API_URL}/public/${publicId}/productivity/year?year=${year}`);
         return handleResponse(response);
     },
 };
