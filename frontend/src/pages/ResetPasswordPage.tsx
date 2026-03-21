@@ -43,7 +43,6 @@ const ResetPasswordPage = () => {
 
         try {
             await authAPI.resetPassword(token, password);
-            alert('Password reset successful! Please log in.');
             navigate('/login');
         } catch (err: any) {
             setError(err.message || 'Failed to reset password');
@@ -117,17 +116,9 @@ const ResetPasswordPage = () => {
             </div>
 
             <div className="login-right">
-                <div className="login-preview">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
-                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                        <line x1="8" y1="21" x2="16" y2="21" />
-                        <line x1="12" y1="17" x2="12" y2="21" />
-                    </svg>
-                    <p>App preview goes here</p>
-                </div>
                 <div className="login-right-text">
-                    <h3>Choose a strong password</h3>
-                    <p>Make sure it's at least 8 characters long.</p>
+                    <p className="login-right-quote">"Confine yourself to the present."</p>
+                    <span className="login-right-cite">— Marcus Aurelius</span>
                 </div>
             </div>
         </div>

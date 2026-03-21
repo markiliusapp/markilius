@@ -38,7 +38,7 @@ const FEATURES = [
     'Recurring tasks',
     'Productivity stats (daily, weekly, monthly, yearly)',
     'Heatmaps',
-    'Streak tracking',
+    'Consistency tracking',
     'Weekly email summaries',
     'Public profile',
 ];
@@ -114,7 +114,7 @@ const PricingPage = () => {
 
             <div className="pricing-content">
                 <h1 className="pricing-title">
-                    {isActive || isLifetime ? 'Manage your plan' : 'Start building better habits'}
+                    {isActive || isLifetime ? 'Manage your plan' : 'The gap between who you are and who you intend to be.'}
                 </h1>
                 <p className="pricing-subtitle">
                     {isActive || isLifetime ? 'You can upgrade your plan below.' : 'Choose a plan that works for you. Cancel anytime.'}

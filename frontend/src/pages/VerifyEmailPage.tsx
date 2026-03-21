@@ -72,8 +72,8 @@ const VerifyEmailPage = () => {
 
             <div className="login-right">
                 <div className="login-right-text">
-                    <h3>Start building better habits</h3>
-                    <p>Track your progress, stay accountable, and achieve your goals.</p>
+                    <p className="login-right-quote">This is your record. It starts today.</p>
+                    <span className="login-right-cite">— Markilius</span>
                 </div>
             </div>
         </div>

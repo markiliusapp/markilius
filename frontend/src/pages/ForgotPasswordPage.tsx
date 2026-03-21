@@ -84,17 +84,9 @@ const ForgotPasswordPage = () => {
             </div>
 
             <div className="login-right">
-                <div className="login-preview">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
-                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                        <line x1="8" y1="21" x2="16" y2="21" />
-                        <line x1="12" y1="17" x2="12" y2="21" />
-                    </svg>
-                    <p>App preview goes here</p>
-                </div>
                 <div className="login-right-text">
-                    <h3>Reset your password</h3>
-                    <p>We'll send you a link to reset your password safely.</p>
+                    <p className="login-right-quote">"Confine yourself to the present."</p>
+                    <span className="login-right-cite">— Marcus Aurelius</span>
                 </div>
             </div>
         </div>

@@ -37,8 +37,8 @@ const PaymentSuccessPage = () => {
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
                         </div>
-                        <h2 className="login-card-title">Payment successful!</h2>
-                        <p className="login-card-subtitle">Welcome to Markilius. Taking you to your dashboard...</p>
+                        <h2 className="login-card-title">You're in.</h2>
+                        <p className="login-card-subtitle">Taking you to your dashboard...</p>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <div className="spinner" />
@@ -47,8 +47,8 @@ const PaymentSuccessPage = () => {
             </div>
             <div className="login-right">
                 <div className="login-right-text">
-                    <h3>You're all set</h3>
-                    <p>Start building habits that stick.</p>
+                    <p className="login-right-quote">This is your record. It starts today.</p>
+                    <span className="login-right-cite">— Markilius</span>
                 </div>
             </div>
         </div>

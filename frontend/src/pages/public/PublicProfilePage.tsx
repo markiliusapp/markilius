@@ -60,7 +60,7 @@ const PublicProfilePage = () => {
                         {firstName?.[0]?.toUpperCase()}
                     </div>
                     <div>
-                        <h1 className="public-name">{firstName}'s Productivity</h1>
+                        <h1 className="public-name">{firstName} on Markilius</h1>
                         <p className="public-sub">markilius</p>
                     </div>
                 </div>

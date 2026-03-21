@@ -218,12 +218,6 @@ year page
 - Intensity = consistency level for that day
 - Empty cells are visible — grey is not invisible, it is meaningful
 
-#### Monthly Review
-- Auto-generated from real data only
-- One honest sentence about the month — derived from stats, not AI tone
-- Best week, worst week, top arena, completion rate
-- Designed to be screenshotted and shared
-
 ### 8.6 Motion & Interaction
 
 - **No celebration animations** — no confetti, no streak flames, no level-up sounds
@@ -283,8 +277,8 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 ### Data Points to Surface
 
 - Overall consistency % for the month
-- Best week (date range + %)
-- Worst week (date range + %)
+- Best week (date range + %) based on percentage completion then highest time spent on tasks
+- Worst week (date range + %) based on percentage completion then highest time spent on tasks
 - Most completed arena
 - Most neglected arena
 - Total tasks completed
@@ -319,6 +313,7 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 - Tasks completed vs tasks created
 - Arenas shown up for
 - Arenas missed entirely
+- Best day, worst day. based on percentage completion then highest time spent on tasks
 - Time logged
 - One plain sentence — derived from the data, not written by AI
 
