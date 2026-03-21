@@ -115,11 +115,12 @@ const makeGroupedShape = (
     sortOrder: SortOrder
 ) =>
     (props: any) => {
-        const { x, width, background, payload } = props
-        if (!background || yMax <= 0) return <g />
+        // props.y and props.height come from Recharts' layout engine for dataKey="_yAnchor"
+        // which always equals yMax, so height = full chart inner height and y = chart top
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
 
-        const chartHeight = background.height
-        const chartBottom = background.y + chartHeight
+        const chartBottom = chartTop + chartHeight
 
         const activeArenas = sortArenas(
             visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
@@ -161,11 +162,10 @@ const makeStackedShape = (
     sortOrder: SortOrder
 ) =>
     (props: any) => {
-        const { x, width, background, payload } = props
-        if (!background || yMax <= 0) return <g />
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
 
-        const chartHeight = background.height
-        const chartBottom = background.y + chartHeight
+        const chartBottom = chartTop + chartHeight
 
         const activeArenas = sortArenas(
             visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
@@ -246,7 +246,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
     })
 
     // Build chart data
-    const chartData: WeekDataPoint[] = Array.from(weeks.entries()).map(([weekNum, days]) => {
+    const baseChartData: WeekDataPoint[] = Array.from(weeks.entries()).map(([weekNum, days]) => {
         const point: WeekDataPoint = { week: `Week ${weekNum}`, total: 0 }
         allArenas.forEach(arena => {
             const hours = days.reduce((sum, day) => {
@@ -261,17 +261,20 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
     })
 
     const displayAverage = selectedArenaId
-        ? chartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / chartData.length
-        : chartData.reduce((sum, d) => sum + d.total, 0) / chartData.length
+        ? baseChartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / baseChartData.length
+        : baseChartData.reduce((sum, d) => sum + d.total, 0) / baseChartData.length
 
     const visibleMax = selectedArenaId
-        ? Math.max(...chartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
-        : Math.max(...chartData.map(d => d.total), displayAverage)
+        ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
+        : Math.max(...baseChartData.map(d => d.total), displayAverage)
 
     const tickCount = 3
     const tickInterval = Math.ceil(visibleMax / tickCount)
     const ticks = Array.from({ length: tickCount + 1 }, (_, i) => i * tickInterval)
     const yMax = ticks[ticks.length - 1]
+
+    // _yAnchor = yMax on every point so Recharts computes props.height = full chart height
+    const chartData = baseChartData.map(p => ({ ...p, _yAnchor: yMax }))
 
     const weekCount = chartData.length
     const barSize = layout === 'stacked'
@@ -389,6 +392,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                         />
                         <YAxis
                             ticks={ticks}
+                            domain={[0, yMax]}
                             tickFormatter={(v) => `${v}h`}
                             tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
                             axisLine={false}
@@ -414,7 +418,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                             />
                         )}
                         <Bar
-                            dataKey="total"
+                            dataKey="_yAnchor"
                             shape={layout === 'grouped' ? groupedShape : stackedShape}
                         />
                     </BarChart>

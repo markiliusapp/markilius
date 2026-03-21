@@ -116,11 +116,10 @@ const makeGroupedShape = (
     sortOrder: SortOrder
 ) =>
     (props: any) => {
-        const { x, width, background, payload } = props
-        if (!background || yMax <= 0) return <g />
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
 
-        const chartHeight = background.height
-        const chartBottom = background.y + chartHeight
+        const chartBottom = chartTop + chartHeight
 
         const activeArenas = sortArenas(
             visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
@@ -162,11 +161,10 @@ const makeStackedShape = (
     sortOrder: SortOrder
 ) =>
     (props: any) => {
-        const { x, width, background, payload } = props
-        if (!background || yMax <= 0) return <g />
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
 
-        const chartHeight = background.height
-        const chartBottom = background.y + chartHeight
+        const chartBottom = chartTop + chartHeight
 
         const activeArenas = sortArenas(
             visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
@@ -251,7 +249,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
         : allArenas
 
     // Build chart data
-    const chartData: ChartDataPoint[] = dailyBreakdown.map(day => {
+    const baseChartData: ChartDataPoint[] = dailyBreakdown.map(day => {
         const [y, m, d] = day.date.toString().split('-').map(Number)
         const dateObj = new Date(y, m - 1, d)
         const dayLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
@@ -271,15 +269,18 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
     })
 
     const displayAverage = selectedArenaId
-        ? chartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / chartData.length
+        ? baseChartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / baseChartData.length
         : averageDuration
 
     const visibleMax = selectedArenaId
-        ? Math.max(...chartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
-        : Math.max(...chartData.map(d => d.total), averageDuration)
+        ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
+        : Math.max(...baseChartData.map(d => d.total), averageDuration)
 
     const ticks = Array.from({ length: Math.ceil(visibleMax) + 1 }, (_, i) => i)
     const yMax = Math.ceil(visibleMax)
+
+    // _yAnchor = yMax on every point so Recharts computes props.height = full chart height
+    const chartData = baseChartData.map(p => ({ ...p, _yAnchor: yMax }))
 
     const barSize = layout === 'stacked'
         ? Math.max(28, Math.min(80, Math.floor(280 / chartData.length)))
@@ -379,6 +380,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                         />
                         <YAxis
                             ticks={ticks}
+                            domain={[0, yMax]}
                             tickFormatter={(v) => `${v}h`}
                             tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
                             axisLine={false}
@@ -404,7 +406,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                             />
                         )}
                         <Bar
-                            dataKey="total"
+                            dataKey="_yAnchor"
                             shape={layout === 'grouped' ? groupedShape : stackedShape}
                         />
                     </BarChart>
