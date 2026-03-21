@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         localStorage.removeItem('token');
         setAuthState({ user: null, loading: false })
-        navigate('/login');
+        navigate('/');
     };
 
     const refreshUser = async () => {
