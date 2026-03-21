@@ -10,7 +10,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from 'recharts'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 interface MonthlyArenaChartProps {
     dailyBreakdown: DailyProductivityResponse[]
@@ -24,21 +24,27 @@ interface WeekDataPoint {
     [key: string]: any
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null
-    const total = payload.reduce((sum: number, p: any) => sum + (p.value || 0), 0)
+const CustomTooltip = ({ active, payload, label, visibleArenas }: any) => {
+    if (!active || !payload?.length) return null
+    const dataPoint = payload[0]?.payload
+    if (!dataPoint) return null
+
+    const arenaData = (visibleArenas as ArenaBreakdown[])
+        .map(a => ({ arena: a, value: dataPoint[`arena_${a.arena_id}`] || 0 }))
+        .filter(({ value }) => value > 0)
+
+    const total = arenaData.reduce((sum, { value }) => sum + value, 0)
+
     return (
         <div className="mac-tooltip">
             <p className="mac-tooltip-label">{label}</p>
-            {payload.map((p: any) =>
-                p.value > 0 ? (
-                    <div key={p.dataKey} className="mac-tooltip-row">
-                        <span className="mac-tooltip-dot" style={{ backgroundColor: p.fill }} />
-                        <span className="mac-tooltip-name">{p.name}</span>
-                        <span className="mac-tooltip-val">{p.value.toFixed(1)}h</span>
-                    </div>
-                ) : null
-            )}
+            {arenaData.map(({ arena, value }) => (
+                <div key={arena.arena_id} className="mac-tooltip-row">
+                    <span className="mac-tooltip-dot" style={{ backgroundColor: arena.arena_color }} />
+                    <span className="mac-tooltip-name">{arena.arena_name}</span>
+                    <span className="mac-tooltip-val">{value.toFixed(1)}h</span>
+                </div>
+            ))}
             <div className="mac-tooltip-total">
                 <span>Total</span>
                 <span>{total.toFixed(1)}h</span>
@@ -75,10 +81,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
 
     // Build chart data
     const chartData: WeekDataPoint[] = Array.from(weeks.entries()).map(([weekNum, days]) => {
-        const point: WeekDataPoint = {
-            week: `Week ${weekNum}`,
-            total: 0,
-        }
+        const point: WeekDataPoint = { week: `Week ${weekNum}`, total: 0 }
         allArenas.forEach(arena => {
             const hours = days.reduce((sum, day) => {
                 const a = day.arenas.find(a => a.arena_id === arena.arena_id)
@@ -103,8 +106,50 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
     const tickCount = 3
     const tickInterval = Math.ceil(maxHours / tickCount)
     const ticks = Array.from({ length: tickCount + 1 }, (_, i) => i * tickInterval)
+    const yMax = ticks[ticks.length - 1]
     const weekCount = chartData.length
-    const barSize = Math.max(24, Math.min(64, Math.floor(320 / weekCount)))
+    const barSize = Math.max(40, Math.min(120, Math.floor(380 / weekCount)))
+
+    // Custom shape renders only arenas with non-zero values, packed together with no gaps
+    const groupBarShape = useMemo(() => (props: any) => {
+        const { x, width, background, payload } = props
+        if (!background || yMax <= 0) return <g />
+
+        const chartHeight = background.height
+        const chartBottom = background.y + chartHeight
+
+        const activeArenas = visibleArenas.filter(
+            a => (payload[`arena_${a.arena_id}`] || 0) > 0
+        )
+        if (activeArenas.length === 0) return <g />
+
+        const gap = 2
+        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
+        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
+        const totalW = activeArenas.length * barW + totalGap
+        const startX = Math.round(x + (width - totalW) / 2)
+        const r = Math.min(3, barW / 2)
+
+        return (
+            <g>
+                {activeArenas.map((arena, i) => {
+                    const value = payload[`arena_${arena.arena_id}`] || 0
+                    const barH = Math.max(0, (value / yMax) * chartHeight)
+                    if (barH < 1) return null
+                    const barX = startX + i * (barW + gap)
+                    const barY = chartBottom - barH
+
+                    return (
+                        <path
+                            key={arena.arena_id}
+                            d={`M ${barX + r} ${barY} h ${barW - 2 * r} q ${r} 0 ${r} ${r} v ${barH - r} h ${-barW} v ${-(barH - r)} q 0 ${-r} ${r} ${-r} z`}
+                            fill={arena.arena_color}
+                        />
+                    )
+                })}
+            </g>
+        )
+    }, [visibleArenas, yMax])
 
     if (allArenas.length === 0) {
         return (
@@ -157,7 +202,6 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                         margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
                         barSize={barSize}
                         barCategoryGap="30%"
-                        barGap={2}
                     >
                         <XAxis
                             dataKey="week"
@@ -173,7 +217,10 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                             tickLine={false}
                             width={32}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={false} />
+                        <Tooltip
+                            content={(props) => <CustomTooltip {...props} visibleArenas={visibleArenas} />}
+                            cursor={false}
+                        />
                         {displayAverage > 0 && (
                             <ReferenceLine
                                 y={displayAverage}
@@ -188,15 +235,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                                 }}
                             />
                         )}
-                        {visibleArenas.map((arena) => (
-                            <Bar
-                                key={arena.arena_id}
-                                dataKey={`arena_${arena.arena_id}`}
-                                name={arena.arena_name}
-                                fill={arena.arena_color}
-                                radius={[4, 4, 0, 0]}
-                            />
-                        ))}
+                        <Bar dataKey="total" shape={groupBarShape} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
