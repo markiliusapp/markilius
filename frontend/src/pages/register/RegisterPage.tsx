@@ -7,10 +7,11 @@ import { GoogleLogin } from "@react-oauth/google";
 import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
 import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import '../login/Login.css';
+import './Register.css';
 import { useAuth } from "@/context/authContext";
 
 const RightPanel = () => (
-    <div className="login-right">
+    <div className="register-right">
         <div className="heatmap-wrapper">
             <HeatmapMock
                 title="Your record"
@@ -62,6 +63,7 @@ const RegisterPage = () => {
             setLoading(false);
         }
     }
+
     const handleGoogleSuccess = async (credentialResponse: any) => {
         setLoading(true);
         setError(null);
@@ -78,9 +80,9 @@ const RegisterPage = () => {
 
     if (registered) {
         return (
-            <div className="login-page">
-                <AuthHeader />
-                <div className="login-left">
+            <div className="register-page">
+                <div className="register-left">
+                    <AuthHeader />
                     <div className="login-card">
                         <h2 className="login-card-title">Check your email</h2>
                         <p className="login-card-subtitle">
@@ -120,20 +122,13 @@ const RegisterPage = () => {
     }
 
     return (
-        <div className="login-page">
-
-            {/* LEFT — Register form */}
-            <div className="login-left">
-
-                {/* Brand */}
+        <div className="register-page">
+            <div className="register-left">
                 <AuthHeader />
-
-                {/* Card */}
                 <div className="login-card">
                     <h2 className="login-card-title">Create your account</h2>
                     <p className="login-card-subtitle">Get started with Markilius</p>
 
-                    {/* Error */}
                     {error && (
                         <div className="login-error">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
@@ -144,7 +139,8 @@ const RegisterPage = () => {
                             <p>{error}</p>
                         </div>
                     )}
-                    <div style={{ marginTop: '16px' }}>
+
+                    <div className="login-google-wrapper">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => setError('Google login failed')}
@@ -156,7 +152,7 @@ const RegisterPage = () => {
                             width="100%"
                         />
                     </div>
-                    {/* Form */}
+
                     <form onSubmit={handleSubmit} className="login-form">
 
                         <div className="form-field">
@@ -228,11 +224,9 @@ const RegisterPage = () => {
                         <a href="/login">Sign in</a>
                     </p>
                 </div>
-
             </div>
 
             <RightPanel />
-
         </div>
     );
 };
