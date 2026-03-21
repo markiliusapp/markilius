@@ -47,7 +47,7 @@
     .register-right {
         width: 50%;
         min-height: 100vh;
-        padding: 64px;
+        padding: 128px;
         border-top: none;
         border-left: 1px solid var(--color-border);
         position: sticky;
