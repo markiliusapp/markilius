@@ -126,8 +126,8 @@ const RegisterPage = () => {
             <div className="register-left">
                 <AuthHeader />
                 <div className="login-card">
-                    <h2 className="login-card-title">Create your account</h2>
-                    <p className="login-card-subtitle">Get started with Markilius</p>
+                    <h2 className="login-card-title">Start your record.</h2>
+                    <p className="login-card-subtitle">Your record starts the moment you do.</p>
 
                     {error && (
                         <div className="login-error">
@@ -161,7 +161,7 @@ const RegisterPage = () => {
                                 id="first_name"
                                 name="first_name"
                                 type="text"
-                                placeholder="John"
+                                placeholder="Marcus"
                                 value={formData.first_name}
                                 onChange={handleChange}
                                 required
@@ -174,7 +174,7 @@ const RegisterPage = () => {
                                 id="last_name"
                                 name="last_name"
                                 type="text"
-                                placeholder="Doe"
+                                placeholder="Aurelius"
                                 value={formData.last_name}
                                 onChange={handleChange}
                                 required

@@ -73,7 +73,7 @@ const Login = () => {
                 {/* Card */}
                 <div className="login-card">
                     <h2 className="login-card-title">Welcome back</h2>
-                    <p className="login-card-subtitle">Sign in to your account to continue</p>
+                    <p className="login-card-subtitle">Your record is waiting.</p>
 
                     {/* Error */}
                     {error && (
