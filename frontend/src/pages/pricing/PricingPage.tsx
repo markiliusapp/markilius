@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { paymentAPI } from '../../services/api';
 import { useAuth } from '../../context/authContext';
+import BrandLogo from '../../components/brandLogo/BrandLogo';
 import './Pricing.css';
 
 const PLANS = [
@@ -43,10 +44,16 @@ const FEATURES = [
 ];
 
 const PricingPage = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, loading } = useAuth();
     const navigate = useNavigate();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    if (loading) return (
+        <div className="pricing-loading">
+            <div className="spinner pricing-spinner" />
+        </div>
+    );
 
     const currentTier = user?.subscription_tier;
     const isActive = user?.subscription_status === 'active';
@@ -96,14 +103,7 @@ const PricingPage = () => {
         <div className="pricing-page">
             {/* Header */}
             <div className="pricing-header">
-                <div className="pricing-brand">
-                    <div className="pricing-brand-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </div>
-                    <span className="pricing-brand-name">Markilius</span>
-                </div>
+                <BrandLogo size="sm" />
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     {(isActive || isLifetime) && (
                         <button className="pricing-logout" onClick={() => navigate('/dashboard')}>Go to dashboard</button>

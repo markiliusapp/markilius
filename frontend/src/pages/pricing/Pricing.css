@@ -6,6 +6,22 @@
     flex-direction: column;
 }
 
+.pricing-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg);
+}
+
+.pricing-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+    border-color: var(--color-border);
+    border-top-color: var(--color-primary);
+}
+
 .pricing-header {
     display: flex;
     align-items: center;
