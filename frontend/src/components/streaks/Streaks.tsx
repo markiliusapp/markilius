@@ -6,12 +6,6 @@ interface StreaksProps {
     streaks: StreakResponse;
 }
 
-const FlameIcon = ({ size = 16, color = 'var(--color-primary)' }: { size?: number; color?: string }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none">
-        <path d="M12 2C12 2 6 8 6 13a6 6 0 0 0 12 0C18 8 12 2 12 2zm0 15a3 3 0 0 1-3-3c0-2 3-6 3-6s3 4 3 6a3 3 0 0 1-3 3z" />
-    </svg>
-)
-
 const RING_SIZE = 48
 const STROKE_WIDTH = 4.5
 const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2
@@ -84,7 +78,6 @@ const Streaks = ({ streaks }: StreaksProps) => {
                 <div className="streak-panel-head">
                     <div className="streak-panel-meta">
                         <div className="streak-panel-top">
-                            <FlameIcon size={12} />
                             <span className="streak-panel-eyebrow">Current Streak</span>
                         </div>
                         <div className="streak-panel-main">
