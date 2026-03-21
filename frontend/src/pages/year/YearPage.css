@@ -193,15 +193,60 @@
 
 .year-chart-header {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.year-chart-title-row {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 8px;
 }
 
 .year-chart-header h2 {
     margin-bottom: 0;
+}
+
+.year-chart-control-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.year-chart-control-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--color-border);
+    margin: 0 2px;
+}
+
+.year-chart-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.year-chart-icon-btn:hover {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+}
+
+.year-chart-icon-btn.active {
+    border-color: var(--color-primary);
+    background: var(--color-bg-muted);
+    color: var(--color-primary);
 }
 
 .year-chart-legend {

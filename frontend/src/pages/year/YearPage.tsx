@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
 import type { YearlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
@@ -18,17 +18,145 @@ import Streaks from '@/components/streaks/Streaks';
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 import { useAuth } from '@/context/authContext';
 
-const YearChartTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null
-    const total = payload.reduce((sum: number, p: any) => sum + (p.value || 0), 0)
+type ChartLayout = 'grouped' | 'stacked'
+type ChartSortOrder = 'asc' | 'desc' | null
+
+const IconGrouped = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="6" width="3" height="9" rx="1" />
+        <rect x="6" y="2" width="3" height="13" rx="1" />
+        <rect x="11" y="9" width="3" height="6" rx="1" />
+    </svg>
+)
+const IconStacked = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="4" y="10" width="8" height="5" rx="0" />
+        <rect x="4" y="5.5" width="8" height="4" rx="0" opacity="0.65" />
+        <rect x="4" y="1" width="8" height="4" rx="1" opacity="0.35" />
+    </svg>
+)
+const IconSortAsc = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="11" width="3" height="4" rx="1" />
+        <rect x="6" y="7" width="3" height="8" rx="1" />
+        <rect x="11" y="3" width="3" height="12" rx="1" />
+    </svg>
+)
+const IconSortDesc = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="3" width="3" height="12" rx="1" />
+        <rect x="6" y="7" width="3" height="8" rx="1" />
+        <rect x="11" y="11" width="3" height="4" rx="1" />
+    </svg>
+)
+
+const sortChartArenas = (
+    arenas: ArenaBreakdownType[],
+    payload: Record<string, any>,
+    sortOrder: ChartSortOrder
+): ArenaBreakdownType[] => {
+    if (!sortOrder) return arenas
+    return [...arenas].sort((a, b) => {
+        const va = payload[`arena_${a.arena_id}`] || 0
+        const vb = payload[`arena_${b.arena_id}`] || 0
+        return sortOrder === 'asc' ? va - vb : vb - va
+    })
+}
+
+const makeYearGroupedShape = (
+    visibleArenas: ArenaBreakdownType[],
+    yMax: number,
+    sortOrder: ChartSortOrder
+) =>
+    (props: any) => {
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
+        const chartBottom = chartTop + chartHeight
+        const activeArenas = sortChartArenas(
+            visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
+            payload, sortOrder
+        )
+        if (activeArenas.length === 0) return <g />
+        const gap = 2
+        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
+        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
+        const totalW = activeArenas.length * barW + totalGap
+        const startX = Math.round(x + (width - totalW) / 2)
+        const r = Math.min(3, barW / 2)
+        return (
+            <g>
+                {activeArenas.map((arena, i) => {
+                    const value = payload[`arena_${arena.arena_id}`] || 0
+                    const barH = Math.max(0, (value / yMax) * chartHeight)
+                    if (barH < 1) return null
+                    const barX = startX + i * (barW + gap)
+                    const barY = chartBottom - barH
+                    return (
+                        <path key={arena.arena_id}
+                            d={`M ${barX + r} ${barY} h ${barW - 2 * r} q ${r} 0 ${r} ${r} v ${barH - r} h ${-barW} v ${-(barH - r)} q 0 ${-r} ${r} ${-r} z`}
+                            fill={arena.arena_color}
+                        />
+                    )
+                })}
+            </g>
+        )
+    }
+
+const makeYearStackedShape = (
+    visibleArenas: ArenaBreakdownType[],
+    yMax: number,
+    sortOrder: ChartSortOrder
+) =>
+    (props: any) => {
+        const { x, y: chartTop, width, height: chartHeight, payload } = props
+        if (!chartHeight || yMax <= 0) return <g />
+        const chartBottom = chartTop + chartHeight
+        const activeArenas = sortChartArenas(
+            visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
+            payload, sortOrder
+        )
+        if (activeArenas.length === 0) return <g />
+        const r = 3
+        let currentBottom = chartBottom
+        return (
+            <g>
+                {activeArenas.map((arena, i) => {
+                    const value = payload[`arena_${arena.arena_id}`] || 0
+                    const segH = Math.max(0, (value / yMax) * chartHeight)
+                    if (segH < 1) return null
+                    const segY = currentBottom - segH
+                    currentBottom -= segH
+                    const isTop = i === activeArenas.length - 1
+                    if (isTop) {
+                        return (
+                            <path key={arena.arena_id}
+                                d={`M ${x + r} ${segY} h ${width - 2 * r} q ${r} 0 ${r} ${r} v ${segH - r} h ${-width} v ${-(segH - r)} q 0 ${-r} ${r} ${-r} z`}
+                                fill={arena.arena_color}
+                            />
+                        )
+                    }
+                    return <rect key={arena.arena_id} x={x} y={segY} width={width} height={segH} fill={arena.arena_color} />
+                })}
+            </g>
+        )
+    }
+
+const YearChartTooltip = ({ active, payload, label, visibleArenas }: any) => {
+    if (!active || !payload?.length) return null
+    const dataPoint = payload[0]?.payload
+    if (!dataPoint) return null
+    const arenaData = (visibleArenas as ArenaBreakdownType[])
+        .map(a => ({ arena: a, value: dataPoint[`arena_${a.arena_id}`] || 0 }))
+        .filter(({ value }) => value > 0)
+    const total = arenaData.reduce((sum, { value }) => sum + value, 0)
     return (
         <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '10px 14px', fontSize: '12px' }}>
             <p style={{ marginBottom: 6, fontWeight: 600, color: 'var(--color-text)' }}>{label}</p>
-            {payload.map((p: any) => p.value > 0 && (
-                <div key={p.dataKey} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: p.fill, flexShrink: 0 }} />
-                    <span style={{ color: 'var(--color-text-secondary)', flex: 1 }}>{p.name}</span>
-                    <span style={{ color: 'var(--color-text)', fontWeight: 500 }}>{p.value.toFixed(1)}h</span>
+            {arenaData.map(({ arena, value }) => (
+                <div key={arena.arena_id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: arena.arena_color, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--color-text-secondary)', flex: 1 }}>{arena.arena_name}</span>
+                    <span style={{ color: 'var(--color-text)', fontWeight: 500 }}>{value.toFixed(1)}h</span>
                 </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border)', marginTop: 6, paddingTop: 6, fontWeight: 600, color: 'var(--color-text)' }}>
@@ -50,6 +178,9 @@ const YearPage = () => {
     const [compactView, setCompactView] = useState(false)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedChartArenaId, setSelectedChartArenaId] = useState<number | null>(null)
+    const [chartLayout, setChartLayout] = useState<ChartLayout>('grouped')
+    const [chartSortOrder, setChartSortOrder] = useState<ChartSortOrder>(null)
+    const effectiveChartSortOrder: ChartSortOrder = selectedChartArenaId ? null : chartSortOrder
     const [copied, setCopied] = useState(false)
 
     const handleShare = () => {
@@ -131,16 +262,45 @@ const YearPage = () => {
         return yearData.months.map(m => {
             const point: Record<string, any> = {
                 month: new Date(currentYear, m.month - 1).toLocaleDateString('en-US', { month: 'short' }),
+                total: 0,
             }
             arenaList.forEach(arena => {
                 const a = m.arenas.find(a => a.arena_id === arena.arena_id)
-                point[`arena_${arena.arena_id}`] = a?.total_hours ?? 0
+                const hours = a?.total_hours ?? 0
+                point[`arena_${arena.arena_id}`] = hours
+                point.total += hours
             })
             return point
         })
     }
 
     const handleDayClick = (date: string) => navigate(`/dashboard?date=${date}`);
+
+    // Computed before early returns so hooks are never called conditionally
+    const arenas = getArenas()
+    const monthlyChartData = getMonthlyChartData()
+    const visibleChartArenas = selectedChartArenaId
+        ? arenas.filter(a => a.arena_id === selectedChartArenaId)
+        : arenas
+    const chartAverage = selectedChartArenaId
+        ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedChartArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
+        : monthlyChartData.reduce((sum, d) => sum + (d.total || 0), 0) / (monthlyChartData.length || 1)
+    const chartVisibleMax = selectedChartArenaId
+        ? Math.max(...monthlyChartData.map(d => d[`arena_${selectedChartArenaId}`] || 0), chartAverage)
+        : Math.max(...monthlyChartData.map(d => d.total || 0), chartAverage)
+    const chartYMax = chartVisibleMax > 0 ? Math.ceil(chartVisibleMax) : 1
+    const chartDataWithAnchor = monthlyChartData.map(p => ({ ...p, _yAnchor: chartYMax }))
+    const chartGroupedShape = useMemo(
+        () => makeYearGroupedShape(visibleChartArenas, chartYMax, effectiveChartSortOrder),
+        [visibleChartArenas, chartYMax, effectiveChartSortOrder]
+    )
+    const chartStackedShape = useMemo(
+        () => makeYearStackedShape(visibleChartArenas, chartYMax, effectiveChartSortOrder),
+        [visibleChartArenas, chartYMax, effectiveChartSortOrder]
+    )
+    const chartBarSize = chartLayout === 'stacked'
+        ? Math.max(12, Math.min(40, Math.floor(200 / (monthlyChartData.length || 12))))
+        : Math.max(20, Math.min(64, Math.floor(320 / (monthlyChartData.length || 12))))
 
     if (loading) {
         return (
@@ -161,17 +321,8 @@ const YearPage = () => {
         );
     }
 
-    const arenas = getArenas()
-    const monthlyChartData = getMonthlyChartData()
     const selectedArena = arenas.find(a => a.arena_id === selectedArenaId)
     const rgbColor = selectedArena ? hexToRgb(selectedArena.arena_color) : undefined
-    const visibleChartArenas = selectedChartArenaId
-        ? arenas.filter(a => a.arena_id === selectedChartArenaId)
-        : arenas
-    const chartAverage = selectedChartArenaId
-        ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedChartArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
-        : monthlyChartData.reduce((sum, d) => sum + arenas.reduce((s, a) => s + (d[`arena_${a.arena_id}`] || 0), 0), 0) / (monthlyChartData.length || 1)
-
 
     return (
         <DashboardLayout>
@@ -268,11 +419,48 @@ const YearPage = () => {
                 {/* Monthly Arena Chart */}
                 <div className="year-chart-section year-chart-section--standalone">
                     <div className="year-chart-header">
-                        <h2>Monthly Hours by Arena</h2>
+                        <div className="year-chart-title-row">
+                            <h2>Monthly Hours by Arena</h2>
+                            <div className="year-chart-control-group">
+                                {!selectedChartArenaId && (
+                                    <>
+                                        <button
+                                            className={`year-chart-icon-btn ${effectiveChartSortOrder === 'asc' ? 'active' : ''}`}
+                                            onClick={() => setChartSortOrder(s => s === 'asc' ? null : 'asc')}
+                                            title="Sort ascending"
+                                        >
+                                            <IconSortAsc />
+                                        </button>
+                                        <button
+                                            className={`year-chart-icon-btn ${effectiveChartSortOrder === 'desc' ? 'active' : ''}`}
+                                            onClick={() => setChartSortOrder(s => s === 'desc' ? null : 'desc')}
+                                            title="Sort descending"
+                                        >
+                                            <IconSortDesc />
+                                        </button>
+                                        <div className="year-chart-control-divider" />
+                                    </>
+                                )}
+                                <button
+                                    className={`year-chart-icon-btn ${chartLayout === 'grouped' ? 'active' : ''}`}
+                                    onClick={() => setChartLayout('grouped')}
+                                    title="Grouped"
+                                >
+                                    <IconGrouped />
+                                </button>
+                                <button
+                                    className={`year-chart-icon-btn ${chartLayout === 'stacked' ? 'active' : ''}`}
+                                    onClick={() => setChartLayout('stacked')}
+                                    title="Stacked"
+                                >
+                                    <IconStacked />
+                                </button>
+                            </div>
+                        </div>
                         <div className="mac-legend">
                             <button
                                 className={`mac-pill ${!selectedChartArenaId ? 'active' : ''}`}
-                                onClick={() => setSelectedChartArenaId(null)}
+                                onClick={() => { setSelectedChartArenaId(null); setChartSortOrder(null) }}
                             >
                                 All
                             </button>
@@ -285,7 +473,10 @@ const YearPage = () => {
                                         backgroundColor: selectedChartArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
                                         color: selectedChartArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
                                     }}
-                                    onClick={() => setSelectedChartArenaId(selectedChartArenaId === arena.arena_id ? null : arena.arena_id)}
+                                    onClick={() => {
+                                        setSelectedChartArenaId(selectedChartArenaId === arena.arena_id ? null : arena.arena_id)
+                                        setChartSortOrder(null)
+                                    }}
                                 >
                                     {arena.arena_name}
                                 </button>
@@ -304,7 +495,7 @@ const YearPage = () => {
                     <div className="year-bar-chart">
                         <div className="year-bar-chart-inner">
                         <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={monthlyChartData} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%" barGap={2} barSize={8}>
+                            <BarChart data={chartDataWithAnchor} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%" barSize={chartBarSize}>
                                 <XAxis
                                     dataKey="month"
                                     tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
@@ -312,13 +503,14 @@ const YearPage = () => {
                                     tickLine={false}
                                 />
                                 <YAxis
+                                    domain={[0, chartYMax]}
                                     tickFormatter={(v) => `${v}h`}
                                     tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }}
                                     axisLine={false}
                                     tickLine={false}
                                     width={35}
                                 />
-                                <Tooltip content={<YearChartTooltip />} cursor={false} />
+                                <Tooltip content={(props) => <YearChartTooltip {...props} visibleArenas={visibleChartArenas} />} cursor={false} />
                                 {chartAverage > 0 && (
                                     <ReferenceLine
                                         y={chartAverage}
@@ -333,15 +525,10 @@ const YearPage = () => {
                                         }}
                                     />
                                 )}
-                                {visibleChartArenas.map(arena => (
-                                    <Bar
-                                        key={arena.arena_id}
-                                        dataKey={`arena_${arena.arena_id}`}
-                                        name={arena.arena_name}
-                                        fill={arena.arena_color}
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                ))}
+                                <Bar
+                                    dataKey="_yAnchor"
+                                    shape={chartLayout === 'grouped' ? chartGroupedShape : chartStackedShape}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                         </div>
