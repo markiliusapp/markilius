@@ -87,7 +87,7 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
                             id="title"
                             name="title"
                             type="text"
-                            placeholder="What do you need to do?"
+                            placeholder="What are you committing to?"
                             value={formData.title}
                             onChange={handleChange}
                             required
