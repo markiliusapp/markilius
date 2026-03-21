@@ -206,7 +206,8 @@ Arena colours are the **only colour system in the app**. No other decorative col
 - Copy is always left-aligned — never centered in data views
 
 ### 8.4 Layout
-
+- **4 main pages** — Dashboard page (today page), week page, month page, and 
+year page
 - **Year heatmap view** — full width, dominant, above the fold
 - **Arena breakdown** — supports the heatmap, never competes with it
 
@@ -215,7 +216,6 @@ Arena colours are the **only colour system in the app**. No other decorative col
 #### Heatmap Cell
 - Size consistent across all views
 - Intensity = consistency level for that day
-- Colour = arena colour when filtering, neutral green when viewing overall
 - Empty cells are visible — grey is not invisible, it is meaningful
 
 #### Monthly Review
@@ -258,101 +258,74 @@ The empty heatmap is not a failure state. It is a blank canvas. The copy here ma
 ✅ This is your record. It starts today.
 ```
 
----
-
 ## 10. The Monthly Review
-
-The monthly review is **the feature Marcus screenshots and shares**. It must be:
-
+ 
+The monthly review is Marcus's record for the month — delivered by email on the 1st of every month, and always available as a shareable card inside the app.
+ 
+It is not a notification. It is not a nudge. It is a delivery of his own data.
+ 
+### Delivery
+ 
+- **Delivered by email** on the 1st of every month — not a push notification, not an in-app alert
+- **Also accessible in-app** as a shareable card — designed to be screenshotted and shared
+- **Sent from** `noreply@markilius.com` via Resend
+- **Subject line:** `Your Month — March 2026` — no emoji, no exclamation marks
+- **Opt-out available** — Marcus can turn it off, but it is on by default
+- **Not sent** if the user logged zero activity that month — silence is more honest than an empty report
+ 
+### Rules
+ 
 - **Auto-generated** — no manual input required
 - **Stats-only** — no AI-generated insight, no motivational language
 - **Honest** — if March was bad, say so plainly
-- **Shareable** — designed as a card, screenshot-friendly
-
+- **One CTA only** — link back to the full heatmap, no upsells
+ 
 ### Data Points to Surface
-
+ 
 - Overall consistency % for the month
 - Best week (date range + %)
 - Worst week (date range + %)
 - Most completed arena
 - Most neglected arena
 - Total tasks completed
-- How much time spent overall and on each arena
+- Time logged overall and per arena
 - One plain sentence — derived from the data, not written by AI
-
-### Example Output
-
-```
-March 2026
-Consistency: 61%
-Best week: Mar 3–9 (86%)
-Worst week: Mar 24–30 (28%)
-Showed up most for: Fitness
-Disappeared from: Learning
-Tasks completed: 47
-Time logged: 38h total — Fitness 14h · Work 12h · Learning 4h · Other 8h
-
-You showed up when it mattered. The last week tells a different story.
-```
-
----
-
+ 
+ 
 ## 11. The Weekly Review
-
-The weekly review is a **summary email sent to Marcus every Sunday morning** — his record from the previous week, returned to him before the new one begins.
-
+ 
+The weekly review is Marcus's record for the week — delivered by email every Sunday morning, before the new week begins.
+ 
 It is not a notification. It is not a nudge. It is a delivery of his own data.
-
-### Rules
-
-- **Delivered by email** — not a push notification, not an in-app alert
-- **Sent Sunday morning** — looking back at the week just finished, before the new one starts
-- **Auto-generated from real data** — no AI tone, no motivational language
+ 
+### Delivery
+ 
+- **Delivered by email** every Sunday morning — not a push notification, not an in-app alert
+- **Sent from** `noreply@markilius.com` via Resend
+- **Subject line:** `Your Week — Mar 17–23` — no emoji, no exclamation marks
 - **Opt-out available** — Marcus can turn it off, but it is on by default
-- **Plain and honest** — same voice as the monthly review, just shorter
-
+- **Not sent** if the user logged zero activity that week — silence is more honest than an empty report
+ 
+### Rules
+ 
+- **Auto-generated** — no manual input required
+- **Stats-only** — no AI-generated insight, no motivational language
+- **Honest** — if the week was bad, say so plainly
+- **One CTA only** — link back to the full heatmap, no upsells
+ 
 ### Data Points to Surface
-
-- Week date range
+ 
 - Overall consistency % for the week
 - Tasks completed vs tasks created
 - Arenas shown up for
 - Arenas missed entirely
-- Time spent
-- One plain sentence — derived from the data
-
-### Example Output
-
-```
-Week of Mar 17–23
-Consistency: 71%
-Tasks completed: 12 of 17
-Time logged: 9h
-Showed up for: Fitness, Work
-Missed entirely: Learning, Creativity
-
-4 out of 5 days. One arena went dark. You know which one.
-```
-
-### What It Is Not
-
-- Not a reminder to complete tasks
-- Not a "you're doing great" email
-- Not a re-engagement campaign
-- Not sent if the user logged zero activity that week — silence is more honest than an empty report
-
-### Email Format
-
-- Sent from `noreply@markilius.com` via Resend
-- Subject line: `Week Summary — Mar 17–23` — no emoji, no exclamation marks
-- Plain, minimal design — matches the app aesthetic
-- One CTA only: link back to the full heatmap, no upsells
-
----
+- Time logged
+- One plain sentence — derived from the data, not written by AI
+ 
 
 ## 12. Public Profile
 
-- Optional shareable link: `markilius.com/u/username`
+- Optional shareable link: `markilius.com/u/uuid`
 - Shows the user's heatmap — year view, read-only
 - Arena breakdown visible if user opts in
 - No follower counts, no social mechanics
@@ -385,6 +358,7 @@ The name is not explained in the UI. It does not need to be. The product tells t
 - Domain: `markilius.com`
 - GitHub: `github.com/markiliusapp`
 - Email: `support@markilius.com`
+
 
 ---
 
