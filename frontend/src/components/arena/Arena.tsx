@@ -219,7 +219,7 @@ const Arena = ({ selectedArenaId, onSelect, onArenaChange }: ArenaProps) => {
                     ))}
 
                     {/* New arena row */}
-                    {arenas.length < 10 && (
+                    {arenas.length < 8 && (
                         <div className="arena-manager-item">
                             <div className="arena-manager-row">
                                 <button
