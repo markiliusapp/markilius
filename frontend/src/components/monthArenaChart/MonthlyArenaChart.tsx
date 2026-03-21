@@ -24,6 +24,45 @@ interface WeekDataPoint {
     [key: string]: any
 }
 
+type Layout = 'grouped' | 'stacked'
+type SortOrder = 'asc' | 'desc' | null
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+const IconGrouped = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="6" width="3" height="9" rx="1" />
+        <rect x="6" y="2" width="3" height="13" rx="1" />
+        <rect x="11" y="9" width="3" height="6" rx="1" />
+    </svg>
+)
+
+const IconStacked = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="4" y="10" width="8" height="5" rx="0" />
+        <rect x="4" y="5.5" width="8" height="4" rx="0" opacity="0.65" />
+        <rect x="4" y="1" width="8" height="4" rx="1" opacity="0.35" />
+    </svg>
+)
+
+const IconSortAsc = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="11" width="3" height="4" rx="1" />
+        <rect x="6"  y="7"  width="3" height="8" rx="1" />
+        <rect x="11" y="3"  width="3" height="12" rx="1" />
+    </svg>
+)
+
+const IconSortDesc = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="3"  width="3" height="12" rx="1" />
+        <rect x="6"  y="7"  width="3" height="8" rx="1" />
+        <rect x="11" y="11" width="3" height="4" rx="1" />
+    </svg>
+)
+
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
+
 const CustomTooltip = ({ active, payload, label, visibleArenas }: any) => {
     if (!active || !payload?.length) return null
     const dataPoint = payload[0]?.payload
@@ -53,8 +92,135 @@ const CustomTooltip = ({ active, payload, label, visibleArenas }: any) => {
     )
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const sortArenas = (
+    arenas: ArenaBreakdown[],
+    payload: Record<string, any>,
+    sortOrder: SortOrder
+): ArenaBreakdown[] => {
+    if (!sortOrder) return arenas
+    return [...arenas].sort((a, b) => {
+        const va = payload[`arena_${a.arena_id}`] || 0
+        const vb = payload[`arena_${b.arena_id}`] || 0
+        return sortOrder === 'asc' ? va - vb : vb - va
+    })
+}
+
+// ─── Custom bar shapes ────────────────────────────────────────────────────────
+
+const makeGroupedShape = (
+    visibleArenas: ArenaBreakdown[],
+    yMax: number,
+    sortOrder: SortOrder
+) =>
+    (props: any) => {
+        const { x, width, background, payload } = props
+        if (!background || yMax <= 0) return <g />
+
+        const chartHeight = background.height
+        const chartBottom = background.y + chartHeight
+
+        const activeArenas = sortArenas(
+            visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
+            payload,
+            sortOrder
+        )
+        if (activeArenas.length === 0) return <g />
+
+        const gap = 2
+        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
+        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
+        const totalW = activeArenas.length * barW + totalGap
+        const startX = Math.round(x + (width - totalW) / 2)
+        const r = Math.min(3, barW / 2)
+
+        return (
+            <g>
+                {activeArenas.map((arena, i) => {
+                    const value = payload[`arena_${arena.arena_id}`] || 0
+                    const barH = Math.max(0, (value / yMax) * chartHeight)
+                    if (barH < 1) return null
+                    const barX = startX + i * (barW + gap)
+                    const barY = chartBottom - barH
+                    return (
+                        <path
+                            key={arena.arena_id}
+                            d={`M ${barX + r} ${barY} h ${barW - 2 * r} q ${r} 0 ${r} ${r} v ${barH - r} h ${-barW} v ${-(barH - r)} q 0 ${-r} ${r} ${-r} z`}
+                            fill={arena.arena_color}
+                        />
+                    )
+                })}
+            </g>
+        )
+    }
+
+const makeStackedShape = (
+    visibleArenas: ArenaBreakdown[],
+    yMax: number,
+    sortOrder: SortOrder
+) =>
+    (props: any) => {
+        const { x, width, background, payload } = props
+        if (!background || yMax <= 0) return <g />
+
+        const chartHeight = background.height
+        const chartBottom = background.y + chartHeight
+
+        const activeArenas = sortArenas(
+            visibleArenas.filter(a => (payload[`arena_${a.arena_id}`] || 0) > 0),
+            payload,
+            sortOrder
+        )
+        if (activeArenas.length === 0) return <g />
+
+        const r = 3
+        let currentBottom = chartBottom
+
+        return (
+            <g>
+                {activeArenas.map((arena, i) => {
+                    const value = payload[`arena_${arena.arena_id}`] || 0
+                    const segH = Math.max(0, (value / yMax) * chartHeight)
+                    if (segH < 1) return null
+
+                    const segY = currentBottom - segH
+                    currentBottom -= segH
+                    const isTop = i === activeArenas.length - 1
+
+                    if (isTop) {
+                        return (
+                            <path
+                                key={arena.arena_id}
+                                d={`M ${x + r} ${segY} h ${width - 2 * r} q ${r} 0 ${r} ${r} v ${segH - r} h ${-width} v ${-(segH - r)} q 0 ${-r} ${r} ${-r} z`}
+                                fill={arena.arena_color}
+                            />
+                        )
+                    }
+                    return (
+                        <rect
+                            key={arena.arena_id}
+                            x={x}
+                            y={segY}
+                            width={width}
+                            height={segH}
+                            fill={arena.arena_color}
+                        />
+                    )
+                })}
+            </g>
+        )
+    }
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartProps) => {
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
+    const [layout, setLayout] = useState<Layout>('grouped')
+    const [sortOrder, setSortOrder] = useState<SortOrder>(null)
+
+    // Sort within each week is only meaningful when showing multiple arenas
+    const effectiveSortOrder: SortOrder = selectedArenaId ? null : sortOrder
 
     // Collect all unique arenas
     const arenaMap = new Map<number, ArenaBreakdown>()
@@ -102,54 +268,29 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
         ? Math.max(...chartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
         : Math.max(...chartData.map(d => d.total), displayAverage)
 
-    const maxHours = visibleMax
     const tickCount = 3
-    const tickInterval = Math.ceil(maxHours / tickCount)
+    const tickInterval = Math.ceil(visibleMax / tickCount)
     const ticks = Array.from({ length: tickCount + 1 }, (_, i) => i * tickInterval)
     const yMax = ticks[ticks.length - 1]
+
     const weekCount = chartData.length
-    const barSize = Math.max(40, Math.min(120, Math.floor(380 / weekCount)))
+    const barSize = layout === 'stacked'
+        ? Math.max(28, Math.min(80, Math.floor(280 / weekCount)))
+        : Math.max(40, Math.min(120, Math.floor(380 / weekCount)))
 
-    // Custom shape renders only arenas with non-zero values, packed together with no gaps
-    const groupBarShape = useMemo(() => (props: any) => {
-        const { x, width, background, payload } = props
-        if (!background || yMax <= 0) return <g />
+    const groupedShape = useMemo(
+        () => makeGroupedShape(visibleArenas, yMax, effectiveSortOrder),
+        [visibleArenas, yMax, effectiveSortOrder]
+    )
+    const stackedShape = useMemo(
+        () => makeStackedShape(visibleArenas, yMax, effectiveSortOrder),
+        [visibleArenas, yMax, effectiveSortOrder]
+    )
 
-        const chartHeight = background.height
-        const chartBottom = background.y + chartHeight
-
-        const activeArenas = visibleArenas.filter(
-            a => (payload[`arena_${a.arena_id}`] || 0) > 0
-        )
-        if (activeArenas.length === 0) return <g />
-
-        const gap = 2
-        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
-        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
-        const totalW = activeArenas.length * barW + totalGap
-        const startX = Math.round(x + (width - totalW) / 2)
-        const r = Math.min(3, barW / 2)
-
-        return (
-            <g>
-                {activeArenas.map((arena, i) => {
-                    const value = payload[`arena_${arena.arena_id}`] || 0
-                    const barH = Math.max(0, (value / yMax) * chartHeight)
-                    if (barH < 1) return null
-                    const barX = startX + i * (barW + gap)
-                    const barY = chartBottom - barH
-
-                    return (
-                        <path
-                            key={arena.arena_id}
-                            d={`M ${barX + r} ${barY} h ${barW - 2 * r} q ${r} 0 ${r} ${r} v ${barH - r} h ${-barW} v ${-(barH - r)} q 0 ${-r} ${r} ${-r} z`}
-                            fill={arena.arena_color}
-                        />
-                    )
-                })}
-            </g>
-        )
-    }, [visibleArenas, yMax])
+    const handleArenaClick = (arenaId: number) => {
+        setSelectedArenaId(prev => prev === arenaId ? null : arenaId)
+        setSortOrder(null)
+    }
 
     if (allArenas.length === 0) {
         return (
@@ -171,11 +312,48 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
     return (
         <div className="mac-wrapper">
             <div className="mac-header">
-                <h2>Time by Arena</h2>
+                <div className="mac-title-row">
+                    <h2>Time by Arena</h2>
+                    <div className="mac-control-group">
+                        {!selectedArenaId && (
+                            <>
+                                <button
+                                    className={`mac-icon-btn ${effectiveSortOrder === 'asc' ? 'active' : ''}`}
+                                    onClick={() => setSortOrder(s => s === 'asc' ? null : 'asc')}
+                                    title="Sort ascending"
+                                >
+                                    <IconSortAsc />
+                                </button>
+                                <button
+                                    className={`mac-icon-btn ${effectiveSortOrder === 'desc' ? 'active' : ''}`}
+                                    onClick={() => setSortOrder(s => s === 'desc' ? null : 'desc')}
+                                    title="Sort descending"
+                                >
+                                    <IconSortDesc />
+                                </button>
+                                <div className="mac-control-divider" />
+                            </>
+                        )}
+                        <button
+                            className={`mac-icon-btn ${layout === 'grouped' ? 'active' : ''}`}
+                            onClick={() => setLayout('grouped')}
+                            title="Grouped"
+                        >
+                            <IconGrouped />
+                        </button>
+                        <button
+                            className={`mac-icon-btn ${layout === 'stacked' ? 'active' : ''}`}
+                            onClick={() => setLayout('stacked')}
+                            title="Stacked"
+                        >
+                            <IconStacked />
+                        </button>
+                    </div>
+                </div>
                 <div className="mac-legend">
                     <button
                         className={`mac-pill ${!selectedArenaId ? 'active' : ''}`}
-                        onClick={() => setSelectedArenaId(null)}
+                        onClick={() => { setSelectedArenaId(null); setSortOrder(null) }}
                     >
                         All
                     </button>
@@ -188,7 +366,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                                 backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
                                 color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
                             }}
-                            onClick={() => setSelectedArenaId(selectedArenaId === arena.arena_id ? null : arena.arena_id)}
+                            onClick={() => handleArenaClick(arena.arena_id)}
                         >
                             {arena.arena_name}
                         </button>
@@ -196,7 +374,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                 </div>
             </div>
             <div className="mac-chart-container">
-                <ResponsiveContainer width="100%" height='100%'>
+                <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
                         margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
@@ -235,7 +413,10 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                                 }}
                             />
                         )}
-                        <Bar dataKey="total" shape={groupBarShape} />
+                        <Bar
+                            dataKey="total"
+                            shape={layout === 'grouped' ? groupedShape : stackedShape}
+                        />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
