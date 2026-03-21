@@ -107,7 +107,47 @@ Before shipping any copy, ask:
 
 ---
 
-## 6. The Arena System
+## 6. Task Locking
+
+Once a task's deadline passes, **that task is permanently locked**. It cannot be completed, edited, or deleted.
+
+This is not a technical constraint. It is a philosophical one.
+
+### Why It Exists
+
+Marcus Aurelius did not rewrite his past. The Meditations were honest precisely because they could not be revised after the fact. Markilius applies the same principle: your record is your record. You cannot go back and complete something you failed to do. You cannot quietly delete the evidence.
+
+This is the accountability layer. Not from the app — from yourself.
+
+### Rules
+
+- A task locks **the moment its deadline passes** — no grace period
+- Locked tasks are **visible in the heatmap** as missed — they contribute to your consistency score
+- Locked tasks **cannot be completed, edited, or deleted** — by anyone, including the account owner
+- Locked tasks are **permanent in your history** — archived but always present in past data
+- The UI makes locked tasks visually distinct — they are not hidden, not faded into nothing
+
+### Copy for Locked State
+
+```
+❌ This task has expired. Complete it to keep your streak!
+✅ This task is locked. The deadline passed.
+```
+
+No explanation needed beyond that. Marcus knows what he set and what he didn't do.
+
+### What This Feature Is Not
+
+- Not a punishment — it is a mirror
+- Not designed to make Marcus feel bad — it is designed to make him honest
+- Not overridable by an admin setting or premium tier — the lock is absolute
+
+### Design Treatment
+
+- Locked task cards show a subtle lock indicator — not dramatic, not punishing
+---
+
+## 7. The Arena System
 
 Arenas are life pillars — the categories that give a task meaning beyond just "done."
 
@@ -117,6 +157,7 @@ Arenas are life pillars — the categories that give a task meaning beyond just 
 - Arenas are **renamable, recolorable, and archivable** at any time
 - **Archived arenas keep their historical data** — Marcus can see he was a runner in 2024 even if he's moved on
 - Arenas should feel like a discovery, not a commitment
+- The user cannot have more than 8 arenas at the same time
 
 ### Default Suggested Arenas
 
@@ -127,16 +168,16 @@ Miscellaneous · Fitness · Learning · Work · Creativity · Mindfulness
 These are suggestions only. Marcus can pick any, edit the names, add his.
 
 ### Arena Colours
-In addition to the brand color: #f97316
-Arena colours are the **only colour system in the app**. They appear as:
 
-No other decorative colour should exist in the UI. Colour = arena. Always.
+In addition to the brand color: `#f97316`
+
+Arena colours are the **only colour system in the app**. No other decorative colour should exist in the UI. Colour = arena. Always.
 
 ---
 
-## 7. Design Principles
+## 8. Design Principles
 
-### 7.1 Visual Direction
+### 8.1 Visual Direction
 
 **Clean and minimal.** Reference: Notion, Linear, Vercel.
 
@@ -145,7 +186,7 @@ No other decorative colour should exist in the UI. Colour = arena. Always.
 - Typography does the heavy lifting
 - The heatmap grid is the only complex visual element — everything else is simple
 
-### 7.2 Colour
+### 8.2 Colour
 
 | Use | Rule |
 |---|---|
@@ -153,23 +194,23 @@ No other decorative colour should exist in the UI. Colour = arena. Always.
 | Background | Near-black or off-white — no pure #000 or #fff |
 | Text | High contrast, minimal hierarchy levels |
 | Accent | Derived from arena colour of the active context |
-| Status (success/error) | green/red 
+| Status (success/error) | green/red |
 
 **Do not** introduce colours outside the arena system for decorative purposes.
 
-### 7.3 Typography
+### 8.3 Typography
 
 - One typeface family throughout
 - Weight variation over size variation for hierarchy
 - No decorative or display fonts in the app UI (landing page is a separate context)
 - Copy is always left-aligned — never centered in data views
 
-### 7.4 Layout
+### 8.4 Layout
 
 - **Year heatmap view** — full width, dominant, above the fold
 - **Arena breakdown** — supports the heatmap, never competes with it
 
-### 7.5 Components
+### 8.5 Components
 
 #### Heatmap Cell
 - Size consistent across all views
@@ -183,7 +224,7 @@ No other decorative colour should exist in the UI. Colour = arena. Always.
 - Best week, worst week, top arena, completion rate
 - Designed to be screenshotted and shared
 
-### 7.6 Motion & Interaction
+### 8.6 Motion & Interaction
 
 - **No celebration animations** — no confetti, no streak flames, no level-up sounds
 - **Subtle transitions only** — the app is calm and honest
@@ -192,7 +233,7 @@ No other decorative colour should exist in the UI. Colour = arena. Always.
 
 ---
 
-## 8. Onboarding
+## 9. Onboarding
 
 ### The One Question
 
@@ -219,7 +260,7 @@ The empty heatmap is not a failure state. It is a blank canvas. The copy here ma
 
 ---
 
-## 9. The Monthly Review
+## 10. The Monthly Review
 
 The monthly review is **the feature Marcus screenshots and shares**. It must be:
 
@@ -236,16 +277,27 @@ The monthly review is **the feature Marcus screenshots and shares**. It must be:
 - Most completed arena
 - Most neglected arena
 - Total tasks completed
+- How much time spent overall and on each arena
 - One plain sentence — derived from the data, not written by AI
-- How much time spend overall and on each arena
 
+### Example Output
+
+```
+March 2026
+Consistency: 61%
+Best week: Mar 3–9 (86%)
+Worst week: Mar 24–30 (28%)
+Showed up most for: Fitness
+Disappeared from: Learning
+Tasks completed: 47
+Time logged: 38h total — Fitness 14h · Work 12h · Learning 4h · Other 8h
 
 You showed up when it mattered. The last week tells a different story.
 ```
 
 ---
 
-## 10. The Weekly Review
+## 11. The Weekly Review
 
 The weekly review is a **summary email sent to Marcus every Sunday morning** — his record from the previous week, returned to him before the new one begins.
 
@@ -269,6 +321,17 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 - Time spent
 - One plain sentence — derived from the data
 
+### Example Output
+
+```
+Week of Mar 17–23
+Consistency: 71%
+Tasks completed: 12 of 17
+Time logged: 9h
+Showed up for: Fitness, Work
+Missed entirely: Learning, Creativity
+
+4 out of 5 days. One arena went dark. You know which one.
 ```
 
 ### What It Is Not
@@ -276,6 +339,7 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 - Not a reminder to complete tasks
 - Not a "you're doing great" email
 - Not a re-engagement campaign
+- Not sent if the user logged zero activity that week — silence is more honest than an empty report
 
 ### Email Format
 
@@ -286,7 +350,7 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 
 ---
 
-## 11. Public Profile
+## 12. Public Profile
 
 - Optional shareable link: `markilius.com/u/username`
 - Shows the user's heatmap — year view, read-only
@@ -296,7 +360,7 @@ It is not a notification. It is not a nudge. It is a delivery of his own data.
 
 ---
 
-## 12. What We Do Not Build
+## 13. What We Do Not Build
 
 These are explicit non-goals. If a feature request touches one of these, return to this document first.
 
@@ -312,7 +376,7 @@ These are explicit non-goals. If a feature request touches one of these, return 
 
 ---
 
-## 13. The Name
+## 14. The Name
 
 **Markilius** = Marcus + Aurelius, compressed into one word.
 
@@ -320,7 +384,7 @@ The name is not explained in the UI. It does not need to be. The product tells t
 
 - Domain: `markilius.com`
 - GitHub: `github.com/markiliusapp`
-- Email: `hello@markilius.com`
+- Email: `support@markilius.com`
 
 ---
 

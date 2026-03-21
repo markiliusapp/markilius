@@ -16,6 +16,9 @@ import PublicProfilePage from './pages/public/PublicProfilePage';
 import PricingPage from './pages/pricing/PricingPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import LandingPage from './pages/landing/LandingPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
+import AboutPage from './pages/legal/AboutPage';
+import ContactPage from './pages/legal/ContactPage';
 
 const RootRoute = () => {
   const { user, isLoading } = useAuth();
@@ -68,6 +71,9 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/u/:publicId" element={<PublicProfilePage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

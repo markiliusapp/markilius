@@ -190,6 +190,9 @@ const LandingPage = () => {
                     <button onClick={() => navigate('/login')}>Log in</button>
                     <button onClick={() => navigate('/register')}>Register</button>
                     <button onClick={() => navigate('/pricing')}>Pricing</button>
+                    <button onClick={() => navigate('/about')}>About</button>
+                    <button onClick={() => navigate('/privacy')}>Privacy</button>
+                    <button onClick={() => navigate('/contact')}>Contact</button>
                 </div>
                 <p className="landing-footer-copy">© {new Date().getFullYear()} Markilius. All rights reserved.</p>
             </footer>
