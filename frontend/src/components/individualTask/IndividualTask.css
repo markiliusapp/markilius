@@ -103,6 +103,11 @@
     color: var(--color-text);
 }
 
+.task-menu-btn--locked {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 .task-actions-menu {
     position: absolute;
     top: 100%;

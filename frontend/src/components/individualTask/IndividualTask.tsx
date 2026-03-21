@@ -38,8 +38,6 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
     }
 
     const handleDelete = async () => {
-        if (task.is_locked) { alert('Cannot delete a locked task'); return; }
-        if (!confirm('Delete this task?')) return;
         try {
             await taskAPI.delete(task.id)
             onToggle()
@@ -49,13 +47,11 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
     }
 
     const handleEditClick = () => {
-        if (task.is_locked) { alert('This task is locked and cannot be edited'); return; }
         setEditMode(true)
         setShowActions(false)
     }
+
     const handleDeleteSeries = async () => {
-        if (task.is_locked) { alert('Cannot delete a locked task'); return; }
-        if (!confirm('Delete all upcoming incomplete tasks in this series?')) return;
         try {
             await taskAPI.deleteSeries(task.id)
             onToggle()
@@ -120,11 +116,24 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
                                     </svg>
                                 </span>
                             ) : (!compact || expanded) && (
-                                <button onClick={e => { e.stopPropagation(); setShowActions(!showActions); }} className="task-menu-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
-                                    </svg>
-                                </button>
+                                task.is_locked ? (
+                                    <button
+                                        className="task-menu-btn task-menu-btn--locked"
+                                        title="This task is locked. The deadline passed."
+                                        disabled
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <button onClick={e => { e.stopPropagation(); setShowActions(!showActions); }} className="task-menu-btn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />
+                                        </svg>
+                                    </button>
+                                )
                             )}
 
                             {(!compact || expanded) && showActions && (
