@@ -152,6 +152,8 @@ def update_current_user(
 
     if user_update.weekly_email is not None:
         current_user.weekly_email = user_update.weekly_email
+    if user_update.monthly_email is not None:
+        current_user.monthly_email = user_update.monthly_email
     if user_update.timezone:
         current_user.timezone = user_update.timezone
 

@@ -32,7 +32,8 @@ const ProfilePage = () => {
     const [billingLoading, setBillingLoading] = useState(false);
     const [billingError, setBillingError] = useState('');
 
-    const [weeklyEmail, setWeeklyEmail] = useState(user?.weekly_email ?? true);
+    const [weeklyEmail, setWeeklyEmail] = useState(user?.weekly_email ?? true)
+    const [monthlyEmail, setMonthlyEmail] = useState(user?.monthly_email ?? true);
     const [prefLoading, setPrefLoading] = useState(false);
     const [prefSuccess, setPrefSuccess] = useState('');
     const [prefError, setPrefError] = useState('');
@@ -74,7 +75,7 @@ const ProfilePage = () => {
         setPrefSuccess('');
         setPrefError('');
         try {
-            await authAPI.updateMe({ weekly_email: weeklyEmail, timezone: detectedTimezone });
+            await authAPI.updateMe({ weekly_email: weeklyEmail, monthly_email: monthlyEmail, timezone: detectedTimezone });
             await refreshUser();
             setPrefSuccess('Preferences saved.');
         } catch (err: unknown) {
@@ -260,6 +261,19 @@ const ProfilePage = () => {
                             <button
                                 className={`toggle-btn ${weeklyEmail ? 'toggle-btn--on' : ''}`}
                                 onClick={() => setWeeklyEmail(v => !v)}
+                                type="button"
+                            >
+                                <span className="toggle-thumb" />
+                            </button>
+                        </div>
+                        <div className="pref-row">
+                            <div className="pref-info">
+                                <span className="pref-label">Monthly Summary Email</span>
+                                <span className="pref-desc">Sent on the 1st of every month · {detectedTimezone}</span>
+                            </div>
+                            <button
+                                className={`toggle-btn ${monthlyEmail ? 'toggle-btn--on' : ''}`}
+                                onClick={() => setMonthlyEmail(v => !v)}
                                 type="button"
                             >
                                 <span className="toggle-thumb" />

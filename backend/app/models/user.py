@@ -30,8 +30,10 @@ class User(Base):
 
     # Email preferences
     weekly_email = Column(Boolean, nullable=False, default=True)
+    monthly_email = Column(Boolean, nullable=False, default=True)
     timezone = Column(String(100), nullable=False, default="UTC")
     last_weekly_email_sent = Column(TIMESTAMP(timezone=True), nullable=True)
+    last_monthly_email_sent = Column(TIMESTAMP(timezone=True), nullable=True)
 
     # Subscription fields
     subscription_status = Column(String(20), nullable=False, default="inactive")  # inactive | active | lifetime

@@ -19,6 +19,7 @@ class UserResponse(BaseModel):
     is_verified: bool
     public_id: Optional[str] = None
     weekly_email: bool
+    monthly_email: bool
     timezone: str
     subscription_status: str
     subscription_tier: Optional[str] = None
@@ -59,6 +60,7 @@ class UserUpdate(BaseModel):
     current_password: Optional[str] = None
     new_password: Optional[str] = None
     weekly_email: Optional[bool] = None
+    monthly_email: Optional[bool] = None
     timezone: Optional[str] = None
 
 

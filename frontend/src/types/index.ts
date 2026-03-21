@@ -166,6 +166,7 @@ export interface User {
     createdAt: string;
     public_id: string | null;
     weekly_email: boolean;
+    monthly_email: boolean;
     timezone: string;
     subscription_status: 'inactive' | 'active' | 'lifetime';
     subscription_tier: 'monthly' | 'yearly' | 'lifetime' | null;
@@ -178,6 +179,7 @@ export interface UserUpdate {
     current_password?: string;
     new_password?: string;
     weekly_email?: boolean;
+    monthly_email?: boolean;
     timezone?: string;
 }
 
