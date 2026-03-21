@@ -1,0 +1,88 @@
+.heatmap-mock {
+    width: 100%;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.07);
+}
+
+.heatmap-mock-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.heatmap-mock-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.heatmap-mock-sub {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.heatmap-mock-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 4px;
+    padding: 16px 18px;
+}
+
+.heatmap-mock-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+}
+
+.heatmap-mock-arenas {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 10px 18px 16px;
+    border-top: 1px solid var(--color-border);
+}
+
+.heatmap-mock-arena-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.heatmap-mock-arena-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.heatmap-mock-arena-name {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    width: 72px;
+    flex-shrink: 0;
+}
+
+.heatmap-mock-arena-track {
+    flex: 1;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.heatmap-mock-arena-fill {
+    height: 100%;
+    border-radius: 99px;
+}
+
+.heatmap-mock-arena-pct {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}

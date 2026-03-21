@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import BrandLogo from '../../components/brandLogo/BrandLogo';
+import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
+import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import './LandingPage.css';
 
 const FEATURES = [
@@ -54,17 +56,6 @@ const STEPS = [
     },
 ];
 
-// Simulate a heatmap grid: 7 rows × 15 cols of cells
-const HEATMAP_CELLS = (() => {
-    const intensities = [0, 0, 0.2, 0.4, 0, 0.6, 0.8, 1, 0.4, 0, 0.2, 0.6, 0, 0.8, 0.4,
-                         0.6, 0, 1, 0.2, 0.8, 0, 0.4, 0.6, 0.2, 0, 1, 0.4, 0.8, 0, 0.2,
-                         0, 0.4, 0.6, 0.8, 0.2, 0.6, 0, 1, 0.4, 0, 0.8, 0.2, 0.4, 0, 0.6,
-                         0.2, 0.8, 0, 0.4, 0.6, 0, 1, 0.2, 0.8, 0.4, 0, 0.6, 0.2, 0.8, 0,
-                         0.8, 0.2, 0.4, 0, 1, 0.6, 0.2, 0.8, 0, 0.4, 0.6, 0.8, 0.2, 0, 0.4,
-                         0, 0.6, 0.8, 0.2, 0.4, 1, 0, 0.6, 0.2, 0.8, 0.4, 0, 0.6, 0.2, 0.8,
-                         0.4, 0, 1, 0.6, 0.2, 0, 0.8, 0.4, 0.6, 0.2, 0.8, 0, 0.4, 0.6, 0.2];
-    return intensities;
-})();
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -111,41 +102,12 @@ const LandingPage = () => {
                 </div>
 
                 <div className="landing-hero-visual">
-                    <div className="landing-mock">
-                        <div className="landing-mock-bar">
-                            <span className="landing-mock-title">March 2026</span>
-                            <span className="landing-mock-sub">68% consistent</span>
-                        </div>
-                        <div className="landing-mock-heatmap">
-                            {HEATMAP_CELLS.map((intensity, i) => (
-                                <div
-                                    key={i}
-                                    className="landing-mock-cell"
-                                    style={{
-                                        opacity: intensity === 0 ? 0.12 : 0.2 + intensity * 0.8,
-                                        background: intensity === 0 ? 'var(--color-text-muted)' : '#f97316',
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <div className="landing-mock-arenas">
-                            {[
-                                { label: 'Work', color: '#8b5cf6', pct: '80%' },
-                                { label: 'Fitness', color: '#f97316', pct: '71%' },
-                                { label: 'Learning', color: '#3b82f6', pct: '57%' },
-                                { label: 'Mindfulness', color: '#10b981', pct: '43%' },
-                            ].map(a => (
-                                <div key={a.label} className="landing-mock-arena-row">
-                                    <span className="landing-mock-arena-dot" style={{ background: a.color }} />
-                                    <span className="landing-mock-arena-name">{a.label}</span>
-                                    <div className="landing-mock-arena-bar-track">
-                                        <div className="landing-mock-arena-bar-fill" style={{ width: a.pct, background: a.color }} />
-                                    </div>
-                                    <span className="landing-mock-arena-pct">{a.pct}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <HeatmapMock
+                        title="March 2026"
+                        subtitle="68% consistent"
+                        cells={MOCK_CELLS}
+                        arenas={MOCK_ARENAS}
+                    />
                 </div>
             </section>
 

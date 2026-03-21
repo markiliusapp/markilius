@@ -4,8 +4,27 @@ import { authAPI } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import type { RegisterUser} from "@/types";
 import { GoogleLogin } from "@react-oauth/google";
-import '../login/Login.css'; // Reuse same CSS
+import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
+import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
+import '../login/Login.css';
 import { useAuth } from "@/context/authContext";
+
+const RightPanel = () => (
+    <div className="login-right">
+        <div className="heatmap-wrapper">
+            <HeatmapMock
+                title="Your record"
+                subtitle="starts today"
+                cells={MOCK_CELLS}
+                arenas={MOCK_ARENAS}
+            />
+        </div>
+        <div className="login-right-text">
+            <p className="login-right-quote">This is your record. It starts today.</p>
+            <span className="login-right-cite">— Markilius</span>
+        </div>
+    </div>
+);
 
 
 const RegisterPage = () => {
@@ -60,8 +79,8 @@ const RegisterPage = () => {
     if (registered) {
         return (
             <div className="login-page">
+                <AuthHeader />
                 <div className="login-left">
-                    <AuthHeader />
                     <div className="login-card">
                         <h2 className="login-card-title">Check your email</h2>
                         <p className="login-card-subtitle">
@@ -95,12 +114,7 @@ const RegisterPage = () => {
                         </p>
                     </div>
                 </div>
-                <div className="login-right">
-                    <div className="login-right-text">
-                        <h3>Start building better habits</h3>
-                        <p>Track your progress, stay accountable, and achieve your goals.</p>
-                    </div>
-                </div>
+                <RightPanel />
             </div>
         );
     }
@@ -217,24 +231,7 @@ const RegisterPage = () => {
 
             </div>
 
-            {/* RIGHT — App preview */}
-            <div className="login-right">
-                <div className="login-preview">
-                    <div className="login-preview-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
-                            <rect x="2" y="3" width="20" height="14" rx="2" />
-                            <line x1="8" y1="21" x2="16" y2="21" />
-                            <line x1="12" y1="17" x2="12" y2="21" />
-                        </svg>
-                    </div>
-                    <p>App preview goes here</p>
-                </div>
-
-                <div className="login-right-text">
-                    <h3>Start building better habits</h3>
-                    <p>Track your progress, stay accountable, and achieve your goals.</p>
-                </div>
-            </div>
+            <RightPanel />
 
         </div>
     );

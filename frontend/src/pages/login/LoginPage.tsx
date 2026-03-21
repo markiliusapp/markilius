@@ -4,8 +4,8 @@ import { authAPI } from '../../services/api'
 import type { LoginUser } from "@/types";
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-
-
+import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
+import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import './Login.css'
 import { useAuth } from "@/context/authContext";
 
@@ -65,13 +65,11 @@ const Login = () => {
 
     return (
         <div className="login-page">
+            {/* Brand */}
+            <AuthHeader />
 
             {/* LEFT — Login form */}
             <div className="login-left">
-
-                {/* Brand */}
-                <AuthHeader />
-
                 {/* Card */}
                 <div className="login-card">
                     <h2 className="login-card-title">Welcome back</h2>
@@ -184,20 +182,19 @@ const Login = () => {
 
             </div>
 
-            {/* RIGHT — App preview */}
+            {/* RIGHT */}
             <div className="login-right">
-                <div className="login-preview">
-                    <div className="login-preview-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
-                            <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
-                        </svg>
-                    </div>
-                    <p>App preview goes here</p>
+                <div className="heatmap-wrapper">
+                    <HeatmapMock
+                        title="March 2026"
+                        subtitle="74% consistent"
+                        cells={MOCK_CELLS}
+                        arenas={MOCK_ARENAS}
+                    />
                 </div>
-
                 <div className="login-right-text">
-                    <h3>Stay on top of your day</h3>
-                    <p>Simple, focused task management. No clutter, no courses needed.</p>
+                    <p className="login-right-quote">"You have power over your mind — not outside events. Realise this, and you will find strength."</p>
+                    <span className="login-right-cite">— Marcus Aurelius</span>
                 </div>
             </div>
 
