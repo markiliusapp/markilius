@@ -242,7 +242,10 @@
     justify-content: center;
     align-items: center;
     padding: 64px;
+}
 
+.heatmap-wrapper {
+    width: 100%;
 }
 
 .login-right-text {
