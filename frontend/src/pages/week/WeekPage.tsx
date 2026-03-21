@@ -121,6 +121,11 @@ const WeekPage = () => {
         return parseInt(dateStr.split('-')[2])
     }
 
+    const formatNavDate = (dateStr: string, options: Intl.DateTimeFormatOptions) => {
+        const [year, month, day] = dateStr.split('-').map(Number)
+        return new Date(year, month - 1, day).toLocaleDateString('en-US', options)
+    }
+
     if (loading) {
         return (
             <DashboardLayout>
@@ -150,7 +155,7 @@ const WeekPage = () => {
                     <div className="week-nav">
                         <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
                         <span className="week-range">
-                            {new Date(weekData.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(weekData.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {formatNavDate(weekData.start_date, { month: 'short', day: 'numeric' })} - {formatNavDate(weekData.end_date, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                         <button onClick={handleNextWeek} aria-label="Next week">→</button>
                     </div>
