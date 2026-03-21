@@ -1,5 +1,6 @@
 import os
 import stripe
+from stripe import InvalidRequestError, SignatureVerificationError
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -108,7 +109,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, WEBHOOK_SECRET)
-    except stripe.errors.SignatureVerificationError:
+    except SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     if event["type"] == "checkout.session.completed":
@@ -159,7 +160,7 @@ def verify_session(
 ):
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-    except stripe.errors.InvalidRequestError:
+    except InvalidRequestError:
         raise HTTPException(status_code=400, detail="Invalid session")
 
     if session.get("client_reference_id") != str(current_user.id):
