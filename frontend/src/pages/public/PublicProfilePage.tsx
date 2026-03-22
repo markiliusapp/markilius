@@ -24,7 +24,7 @@ const PublicProfilePage = () => {
     const [firstName, setFirstName] = useState<string | null>(null);
     const [yearlyData, setYearlyData] = useState<YearlyProductivity | null>(null);
     const [monthlyData, setMonthlyData] = useState<MonthlyProductivity | null>(null);
-    const [year, setYear] = useState(new Date().getFullYear());
+    const [year] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
 
@@ -86,17 +86,18 @@ const PublicProfilePage = () => {
                 <div className="public-container public-container--month">
                     <div className="public-header">
                         <div>
-                            <h1 className="public-name">{firstName} on Markilius</h1>
-                            <p className="public-sub">{MONTH_NAMES[m - 1]} {y}</p>
+                            <h1 className="public-name">{firstName}</h1>
+                            <p className="public-sub">Proof of work</p>
                         </div>
                     </div>
                     {filteredArena && (
-                        <div className="public-arena-badge" style={{ borderColor: `${filteredArena.arena_color}60`, backgroundColor: `${filteredArena.arena_color}12` }}>
+                        <div className="public-arena-badge">
                             <span className="public-arena-dot" style={{ backgroundColor: filteredArena.arena_color }} />
-                            <span style={{ color: filteredArena.arena_color }}>{filteredArena.arena_name}</span>
+                            <span className="public-arena-name">{filteredArena.arena_name}</span>
+                            <span className="public-arena-period">· {MONTH_NAMES[m - 1]} {y}</span>
                         </div>
                     )}
-                    <div className="public-heatmap-card public-heatmap-card--month">
+                    <div className="public-heatmap-card">
                         <Heatmap
                             year={y}
                             month={m}
@@ -106,9 +107,9 @@ const PublicProfilePage = () => {
                         />
                         <HeatmapLegend color={legendColor} />
                     </div>
-                    <div className="public-footer">
-                        <a href="/" className="public-footer-link">Powered by Markilius</a>
-                    </div>
+                </div>
+                <div className="public-footer">
+                    <a href="/" className="public-footer-link">Track yours at markilius.com</a>
                 </div>
             </div>
         );
@@ -125,19 +126,13 @@ const PublicProfilePage = () => {
             <div className="public-container">
                 <div className="public-header">
                     <div>
-                        <h1 className="public-name">{firstName} on Markilius</h1>
-                        <p className="public-sub">markilius</p>
+                        <h1 className="public-name">{firstName}</h1>
+                        <p className="public-sub">Proof of work</p>
                     </div>
                 </div>
-
                 <div className="public-heatmap-card">
                     <div className="public-heatmap-header">
-                        <span className="public-heatmap-title">Activity in {year}</span>
-                        <div className="public-year-nav">
-                            <button className="public-year-btn" onClick={() => setYear(y => y - 1)}>&#8249;</button>
-                            <span className="public-year-label">{year}</span>
-                            <button className="public-year-btn" onClick={() => setYear(y => y + 1)} disabled={year >= new Date().getFullYear()}>&#8250;</button>
-                        </div>
+                        <span className="public-heatmap-title">{year}</span>
                     </div>
                     {yearlyData && (
                         <CompactHeatmap
@@ -148,10 +143,9 @@ const PublicProfilePage = () => {
                         />
                     )}
                 </div>
-
-                <div className="public-footer">
-                    <a href="/" className="public-footer-link">Powered by Markilius</a>
-                </div>
+            </div>
+            <div className="public-footer">
+                <a href="/" className="public-footer-link">Track yours at markilius.com</a>
             </div>
         </div>
     );
