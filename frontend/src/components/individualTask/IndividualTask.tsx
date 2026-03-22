@@ -75,7 +75,6 @@ const IndividualTask = ({ task, onToggle, compact }: IndividualTaskProps) => {
                 className={`individual-task ${task.is_locked ? 'task-locked' : ''} ${task.is_completed ? 'task-completed' : ''} ${compact ? 'task-compact' : ''} ${compact && expanded ? 'task-compact-expanded' : ''}`}
                 style={{
                     '--arena-color': task.arena?.color,
-                    backgroundColor: task.arena ? `${task.arena.color}12` : undefined,
                 } as React.CSSProperties}
                 onClick={compact ? () => setExpanded(v => !v) : undefined}
             >
