@@ -83,27 +83,28 @@ const PublicProfilePage = () => {
         return (
             <div className="public-page">
                 <AuthHeader />
-                <div className="public-container">
+                <div className="public-container public-container--month">
                     <div className="public-header">
-                        <div className="public-avatar">{firstName?.[0]?.toUpperCase()}</div>
                         <div>
                             <h1 className="public-name">{firstName} on Markilius</h1>
-                            <p className="public-sub">
-                                {filteredArena ? filteredArena.arena_name : `${MONTH_NAMES[m - 1]} ${y}`}
-                            </p>
+                            <p className="public-sub">{MONTH_NAMES[m - 1]} {y}</p>
                         </div>
                     </div>
-                    <div className="public-heatmap-card">
-                        <div style={{ maxWidth: 420, margin: '0 auto' }}>
-                            <Heatmap
-                                year={y}
-                                month={m}
-                                data={monthlyData.daily_breakdown}
-                                completion={completion}
-                                selectedArenaId={filteredArenaId}
-                            />
-                            <HeatmapLegend color={legendColor} />
+                    {filteredArena && (
+                        <div className="public-arena-badge" style={{ borderColor: `${filteredArena.arena_color}60`, backgroundColor: `${filteredArena.arena_color}12` }}>
+                            <span className="public-arena-dot" style={{ backgroundColor: filteredArena.arena_color }} />
+                            <span style={{ color: filteredArena.arena_color }}>{filteredArena.arena_name}</span>
                         </div>
+                    )}
+                    <div className="public-heatmap-card public-heatmap-card--month">
+                        <Heatmap
+                            year={y}
+                            month={m}
+                            data={monthlyData.daily_breakdown}
+                            completion={completion}
+                            selectedArenaId={filteredArenaId}
+                        />
+                        <HeatmapLegend color={legendColor} />
                     </div>
                     <div className="public-footer">
                         <a href="/" className="public-footer-link">Powered by Markilius</a>
@@ -123,9 +124,6 @@ const PublicProfilePage = () => {
             <AuthHeader />
             <div className="public-container">
                 <div className="public-header">
-                    <div className="public-avatar">
-                        {firstName?.[0]?.toUpperCase()}
-                    </div>
                     <div>
                         <h1 className="public-name">{firstName} on Markilius</h1>
                         <p className="public-sub">markilius</p>
@@ -136,16 +134,9 @@ const PublicProfilePage = () => {
                     <div className="public-heatmap-header">
                         <span className="public-heatmap-title">Activity in {year}</span>
                         <div className="public-year-nav">
-                            <button
-                                className="public-year-btn"
-                                onClick={() => setYear(y => y - 1)}
-                            >&#8249;</button>
+                            <button className="public-year-btn" onClick={() => setYear(y => y - 1)}>&#8249;</button>
                             <span className="public-year-label">{year}</span>
-                            <button
-                                className="public-year-btn"
-                                onClick={() => setYear(y => y + 1)}
-                                disabled={year >= new Date().getFullYear()}
-                            >&#8250;</button>
+                            <button className="public-year-btn" onClick={() => setYear(y => y + 1)} disabled={year >= new Date().getFullYear()}>&#8250;</button>
                         </div>
                     </div>
                     {yearlyData && (
