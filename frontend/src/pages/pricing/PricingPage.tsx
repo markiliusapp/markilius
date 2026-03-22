@@ -4,6 +4,7 @@ import { paymentAPI } from '../../services/api';
 import { useAuth } from '../../context/authContext';
 import BrandLogo from '../../components/brandLogo/BrandLogo';
 import './Pricing.css';
+import Footer from '../../components/footer/Footer';
 
 const PLANS = [
     {
@@ -168,6 +169,7 @@ const PricingPage = () => {
                     </ul>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

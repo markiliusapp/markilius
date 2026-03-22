@@ -8,6 +8,7 @@ import AuthHeader from '@/components/authHeader/AuthHeader';
 import { hexToRgb } from '@/services/colorIntensity';
 import type { YearlyProductivity, MonthlyProductivity } from '@/types';
 import './PublicProfilePage.css';
+import Footer from '@/components/footer/Footer';
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -108,9 +109,7 @@ const PublicProfilePage = () => {
                         <HeatmapLegend color={legendColor} />
                     </div>
                 </div>
-                <div className="public-footer">
-                    <a href="/" className="public-footer-link">Track yours at markilius.com</a>
-                </div>
+                <Footer />
             </div>
         );
     }
@@ -144,9 +143,7 @@ const PublicProfilePage = () => {
                     )}
                 </div>
             </div>
-            <div className="public-footer">
-                <a href="/" className="public-footer-link">Track yours at markilius.com</a>
-            </div>
+            <Footer />
         </div>
     );
 };

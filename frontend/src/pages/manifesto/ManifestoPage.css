@@ -1,0 +1,136 @@
+.manifesto-page {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background: var(--color-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero */
+.mf-hero {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 96px 24px 80px;
+}
+
+.mf-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    margin: 0 0 24px;
+}
+
+.mf-headline {
+    font-size: clamp(44px, 8vw, 80px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.05;
+    color: var(--color-text);
+    margin: 0 0 32px;
+}
+
+.mf-subhead {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.mf-divider {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Sections */
+.mf-section {
+    padding: 72px 24px;
+}
+
+.mf-section--highlight {
+    background: var(--color-bg-subtle);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mf-inner {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.mf-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin: 0 0 28px;
+}
+
+.mf-statement {
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    line-height: 1.25;
+    color: var(--color-text);
+    margin: 0 0 28px;
+}
+
+.mf-body {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    margin: 0 0 18px;
+    max-width: 620px;
+}
+
+.mf-body:last-child {
+    margin-bottom: 0;
+}
+
+.mf-body--accent {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.mf-body em {
+    font-style: italic;
+    color: var(--color-text);
+}
+
+.mf-inline-question {
+    display: block;
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--color-text);
+    margin-top: 12px;
+    line-height: 1.3;
+}
+
+.mf-section-cta {
+    margin-top: 36px;
+    font-size: 15px;
+    padding: 12px 28px;
+}
+
+
+/* Responsive */
+@media (max-width: 640px) {
+    .mf-hero {
+        padding: 64px 20px 56px;
+    }
+
+    .mf-headline {
+        letter-spacing: -1px;
+    }
+
+    .mf-section {
+        padding: 52px 20px;
+    }
+
+}

@@ -4,6 +4,7 @@ import BrandLogo from '../../components/brandLogo/BrandLogo';
 import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
 import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import './LandingPage.css';
+import Footer from '../../components/footer/Footer';
 
 const FEATURES = [
     {
@@ -68,6 +69,7 @@ const LandingPage = () => {
                 <BrandLogo size="sm" />
                 <div className="landing-nav-links">
                     <a href="#how-it-works" className="landing-nav-link">How it works</a>
+                    <button className="landing-nav-link" onClick={() => navigate('/manifesto')}>Who it's for</button>
                     <button className="landing-nav-link" onClick={() => navigate('/pricing')}>Pricing</button>
                     {user ? (
                         <button className="landing-btn-primary" onClick={() => navigate('/dashboard')}>Go to app</button>
@@ -183,19 +185,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="landing-footer">
-                <BrandLogo size="sm" />
-                <div className="landing-footer-links">
-                    <button onClick={() => navigate('/login')}>Log in</button>
-                    <button onClick={() => navigate('/register')}>Register</button>
-                    <button onClick={() => navigate('/pricing')}>Pricing</button>
-                    <button onClick={() => navigate('/about')}>About</button>
-                    <button onClick={() => navigate('/privacy')}>Privacy</button>
-                    <button onClick={() => navigate('/contact')}>Contact</button>
-                </div>
-                <p className="landing-footer-copy">© {new Date().getFullYear()} Markilius. All rights reserved.</p>
-            </footer>
+            <Footer />
         </div>
     );
 };

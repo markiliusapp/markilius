@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import BrandLogo from '@/components/brandLogo/BrandLogo';
 import './LegalPage.css';
+import Footer from '@/components/footer/Footer';
 
 const ContactPage = () => {
     const navigate = useNavigate();
@@ -43,15 +44,7 @@ const ContactPage = () => {
                 </section>
             </div>
 
-            <footer className="legal-footer">
-                <div onClick={() => navigate('/')} style={{ cursor: 'pointer' }}><BrandLogo size="sm" /></div>
-                <span>·</span>
-                <a href="/about">About</a>
-                <span>·</span>
-                <a href="/privacy">Privacy</a>
-                <span>·</span>
-                <a href="/contact">Contact</a>
-            </footer>
+            <Footer />
         </div>
     );
 };
