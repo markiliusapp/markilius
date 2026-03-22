@@ -23,7 +23,7 @@ const VerifyEmailPage = () => {
         authAPI.verifyEmail(token)
             .then(async (data) => {
                 await login(data.access_token);
-                navigate('/dashboard');
+                navigate('/pricing');
             })
             .catch((err: Error) => {
                 setStatus('error');

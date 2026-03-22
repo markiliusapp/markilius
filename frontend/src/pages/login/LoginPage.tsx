@@ -37,7 +37,7 @@ const Login = () => {
         try {
             const data = await authAPI.login(formData)
             await login(data.access_token)
-            navigate("/dashboard")
+            navigate("/dashboard/year")
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Login failed'
             if (message.includes('Email not verified')) {
@@ -55,7 +55,7 @@ const Login = () => {
         try {
             const data = await authAPI.googleLogin(credentialResponse.credential);
             await login(data.access_token)
-            navigate("/dashboard");
+            navigate("/dashboard/year");
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Google login failed');
         } finally {

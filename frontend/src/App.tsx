@@ -16,15 +16,16 @@ import PublicProfilePage from './pages/public/PublicProfilePage';
 import PricingPage from './pages/pricing/PricingPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import LandingPage from './pages/landing/LandingPage';
+import OnboardingPage from './pages/onboarding/OnboardingPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import AboutPage from './pages/legal/AboutPage';
 import ContactPage from './pages/legal/ContactPage';
 
 const RootRoute = () => {
-  const { user, isLoading } = useAuth();
-  if (isLoading) return null;
+  const { user, loading } = useAuth();
+  if (loading) return null;
   const isSubscribed = user?.subscription_status === 'active' || user?.subscription_status === 'lifetime';
-  return isSubscribed ? <Navigate to="/dashboard" /> : <LandingPage />;
+  return isSubscribed ? <Navigate to="/dashboard/year" /> : <LandingPage />;
 };
 
 function App() {
@@ -38,6 +39,11 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/onboarding" element={
+            <ProtectedRoute>
+              <OnboardingPage />
+            </ProtectedRoute>
+          } />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/dashboard" element={

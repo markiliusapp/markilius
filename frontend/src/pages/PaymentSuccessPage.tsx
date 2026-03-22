@@ -17,7 +17,7 @@ const PaymentSuccessPage = () => {
                 await paymentAPI.verifySession(sessionId);
             }
             await refreshUser();
-            navigate('/dashboard');
+            navigate('/onboarding');
         };
         activate();
     }, []);
@@ -38,7 +38,7 @@ const PaymentSuccessPage = () => {
                             </svg>
                         </div>
                         <h2 className="login-card-title">You're in.</h2>
-                        <p className="login-card-subtitle">Taking you to your dashboard...</p>
+                        <p className="login-card-subtitle">Setting up your arenas...</p>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <div className="spinner" />

@@ -2,12 +2,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import auth, tasks, productivity, arena, public, payments
-from app.services.scheduler import scheduler, send_weekly_summaries
+from app.services.scheduler import scheduler, send_weekly_summaries, send_monthly_summaries
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.add_job(send_weekly_summaries, "interval", hours=1, id="weekly_summary")
+    scheduler.add_job(send_monthly_summaries, "interval", hours=1, id="monthly_summary")
     scheduler.start()
     yield
     scheduler.shutdown()

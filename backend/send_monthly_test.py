@@ -11,7 +11,7 @@ from app.services.email import send_monthly_summary_email
 from sqlalchemy.orm import contains_eager
 
 YEAR = 2026
-MONTH = 3
+MONTH = 2
 USER_ID = 16
 
 
