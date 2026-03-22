@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { publicAPI } from '@/services/api';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
+import AuthHeader from '@/components/authHeader/AuthHeader';
 import type { YearlyProductivity } from '@/types';
 import './PublicProfilePage.css';
 
@@ -37,6 +38,7 @@ const PublicProfilePage = () => {
     if (loading) {
         return (
             <div className="public-page">
+                <AuthHeader />
                 <div className="public-loading">Loading...</div>
             </div>
         );
@@ -45,6 +47,7 @@ const PublicProfilePage = () => {
     if (notFound) {
         return (
             <div className="public-page">
+                <AuthHeader />
                 <div className="public-not-found">
                     <h2>Profile not found</h2>
                     <p>This profile doesn't exist or has been made private.</p>
@@ -60,6 +63,7 @@ const PublicProfilePage = () => {
 
     return (
         <div className="public-page">
+            <AuthHeader />
             <div className="public-container">
                 <div className="public-header">
                     <div className="public-avatar">
