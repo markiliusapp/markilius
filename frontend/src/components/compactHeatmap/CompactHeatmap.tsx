@@ -124,19 +124,22 @@ interface CompactHeatmapProps {
     year: number;
     data: DailyProductivityResponse[];
     arenas: ArenaBreakdown[];
+    showOverall?: boolean;
 }
 
-const CompactHeatmap = ({ year, data, arenas }: CompactHeatmapProps) => {
+const CompactHeatmap = ({ year, data, arenas, showOverall = true }: CompactHeatmapProps) => {
     return (
         <div className="compact-heatmap">
-            <CompactHeatmapRow
-                label="Overall"
-                year={year}
-                data={data}
-                getPercentage={(day) => day.completion_percentage}
-                showMonthLabels={true}
-            />
-            {arenas.map((arena, idx) => (
+            {showOverall && (
+                <CompactHeatmapRow
+                    label="Overall"
+                    year={year}
+                    data={data}
+                    getPercentage={(day) => day.completion_percentage}
+                    showMonthLabels={true}
+                />
+            )}
+            {arenas.map((arena) => (
                 <CompactHeatmapRow
                     key={arena.arena_id}
                     label={arena.arena_name}
@@ -144,6 +147,7 @@ const CompactHeatmap = ({ year, data, arenas }: CompactHeatmapProps) => {
                     color={hexToRgb(arena.arena_color)}
                     year={year}
                     data={data}
+                    showMonthLabels={!showOverall && arenas.indexOf(arena) === 0}
                     getPercentage={(day) => {
                         const a = day.arenas.find(a => a.arena_id === arena.arena_id);
                         return a?.completion_percentage ?? 0;

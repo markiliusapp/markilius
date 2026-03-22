@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
 import type { YearlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
@@ -182,14 +182,28 @@ const YearPage = () => {
     const [chartSortOrder, setChartSortOrder] = useState<ChartSortOrder>(null)
     const effectiveChartSortOrder: ChartSortOrder = selectedChartArenaId ? null : chartSortOrder
     const [copied, setCopied] = useState(false)
+    const [shareOpen, setShareOpen] = useState(false)
+    const shareRef = useRef<HTMLDivElement>(null)
 
-    const handleShare = () => {
-        if (!user?.public_id) return;
-        const url = `${window.location.origin}/u/${user.public_id}`;
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    useEffect(() => {
+        if (!shareOpen) return
+        const handler = (e: MouseEvent) => {
+            if (shareRef.current && !shareRef.current.contains(e.target as Node))
+                setShareOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [shareOpen])
+
+    const handleShareArena = (arenaId: number | null) => {
+        if (!user?.public_id) return
+        const base = `${window.location.origin}/u/${user.public_id}`
+        const url = arenaId ? `${base}?arena=${arenaId}` : base
+        navigator.clipboard.writeText(url)
+        setCopied(true)
+        setShareOpen(false)
+        setTimeout(() => setCopied(false), 2000)
+    }
     
 
 
@@ -336,22 +350,37 @@ const YearPage = () => {
                     </div>
                     <div className="header-actions">
                         {user?.public_id && (
-                            <button
-                                className="compact-toggle"
-                                onClick={handleShare}
-                                title="Share your compact heatmap"
-                            >
-                                {copied ? (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                ) : (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                                    </svg>
+                            <div className="share-dropdown-wrapper" ref={shareRef}>
+                                <button
+                                    className={`compact-toggle ${shareOpen ? 'active' : ''}`}
+                                    onClick={() => setShareOpen(o => !o)}
+                                    title="Share heatmap"
+                                >
+                                    {copied ? (
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    ) : (
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                        </svg>
+                                    )}
+                                </button>
+                                {shareOpen && (
+                                    <div className="share-dropdown">
+                                        <button className="share-dropdown-item" onClick={() => handleShareArena(null)}>
+                                            All arenas
+                                        </button>
+                                        {arenas.map(arena => (
+                                            <button key={arena.arena_id} className="share-dropdown-item" onClick={() => handleShareArena(arena.arena_id)}>
+                                                <span className="share-dropdown-dot" style={{ backgroundColor: arena.arena_color }} />
+                                                {arena.arena_name}
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
-                            </button>
+                            </div>
                         )}
                         <button className={`compact-toggle ${compactView ? 'active' : ''}`} onClick={() => setCompactView(!compactView)} title={compactView ? 'Expand' : 'Compact'}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

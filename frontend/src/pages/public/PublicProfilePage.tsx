@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { publicAPI } from '@/services/api';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
 import type { YearlyProductivity } from '@/types';
@@ -7,6 +7,9 @@ import './PublicProfilePage.css';
 
 const PublicProfilePage = () => {
     const { publicId } = useParams<{ publicId: string }>();
+    const [searchParams] = useSearchParams();
+    const arenaIdParam = searchParams.get('arena');
+    const filteredArenaId = arenaIdParam ? parseInt(arenaIdParam) : null;
     const [firstName, setFirstName] = useState<string | null>(null);
     const [yearlyData, setYearlyData] = useState<YearlyProductivity | null>(null);
     const [year, setYear] = useState(new Date().getFullYear());
@@ -50,7 +53,10 @@ const PublicProfilePage = () => {
         );
     }
 
-    const arenas = yearlyData?.summary?.arenas ?? [];
+    const allArenas = yearlyData?.summary?.arenas ?? [];
+    const arenas = filteredArenaId
+        ? allArenas.filter(a => a.arena_id === filteredArenaId)
+        : allArenas;
 
     return (
         <div className="public-page">
@@ -86,6 +92,7 @@ const PublicProfilePage = () => {
                             year={year}
                             data={yearlyData.daily_breakdown}
                             arenas={arenas}
+                            showOverall={!filteredArenaId}
                         />
 
                     )}
