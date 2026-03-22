@@ -338,31 +338,21 @@ async def send_weekly_summary_email(
 
     # ── arena breakdown ───────────────────────────────────────────────────────
     def _arena_row_w(name: str, color: str, pct: int, hours: float, completed: int, total: int, is_last: bool, is_overall: bool = False) -> str:
-        border    = "" if is_last else f"border-bottom:1px solid {BORDER};"
-        bar_w     = max(pct, 2) if pct > 0 else 0
-        missed    = total == 0
-        name_col  = SECONDARY if missed else TEXT
-        pct_col   = MUTED if missed else color
-        bar_dim   = "opacity:0.25;" if missed else ""
-
-        name_w    = "font-weight:700;" if is_overall else "font-weight:600;"
+        row_border = "" if is_last else f"border-bottom:1px solid {BORDER};"
+        bar_w      = max(pct, 12) if pct > 0 else 0
+        missed     = total == 0
+        fill_color = MUTED if is_overall else color
+        fill_dim   = "opacity:0.3;" if missed else ""
         return (
-            f'<tr><td style="padding:12px 0; {border}">'
-            f'<table cellpadding="0" cellspacing="0" width="100%">'
-            f'<tr>'
-            f'<td style="vertical-align:middle;">'
-            f'<span style="font-size:13px; {name_w} color:{name_col};">{name}</span>'
-            f'</td>'
-            f'<td style="text-align:right; vertical-align:middle; white-space:nowrap;">'
-            f'<span style="font-size:11px; color:{MUTED};">{completed}/{total} &nbsp;·&nbsp; {hours}h &nbsp;&nbsp;</span>'
-            f'<span style="font-size:13px; font-weight:700; color:{pct_col};">{pct}%</span>'
-            f'</td>'
+            f'<tr style="{row_border}">'
+            f'<td style="width:80px; padding:7px 10px 7px 0; text-align:right; vertical-align:middle; white-space:nowrap; font-size:13px; font-weight:500; color:{MUTED};">{name}</td>'
+            f'<td style="padding:7px 8px 7px 0; vertical-align:middle;">'
+            f'<div style="background:{SUBTLE}; border-radius:13px; height:26px; overflow:hidden;">'
+            f'<div style="background:{fill_color}; border-radius:13px; height:26px; width:{bar_w}%; {fill_dim}">'
+            f'<span style="display:inline-block; color:#fff; font-size:12px; font-weight:700; line-height:26px; padding-left:10px; white-space:nowrap;">{pct if pct > 0 else ""}{"%" if pct > 0 else ""}</span>'
+            f'</div></div></td>'
+            f'<td style="width:90px; padding:7px 0; text-align:right; vertical-align:middle; white-space:nowrap; font-size:12px; color:{MUTED};">{completed}/{total}&nbsp;·&nbsp;{hours}h</td>'
             f'</tr>'
-            f'<tr><td colspan="2" style="padding-top:5px;">'
-            f'<div style="background:{BORDER}; border-radius:2px; height:3px; overflow:hidden;">'
-            f'<div style="background:{color}; height:3px; width:{bar_w}%; {bar_dim}"></div>'
-            f'</div></td></tr>'
-            f'</table></td></tr>'
         )
 
     # Merge task arenas with any missed arenas (in all_arenas but no tasks this week)
@@ -542,30 +532,21 @@ async def send_monthly_summary_email(
 
     # ── arena breakdown ───────────────────────────────────────────────────────
     def _arena_row_m(name: str, color: str, pct: int, hours: float, completed: int, total: int, is_last: bool, is_overall: bool = False) -> str:
-        border   = "" if is_last else f"border-bottom:1px solid {BORDER};"
-        bar_w    = max(pct, 2) if pct > 0 else 0
-        missed   = total == 0
-        name_col = SECONDARY if missed else TEXT
-        pct_col  = MUTED if missed else color
-        bar_dim  = "opacity:0.25;" if missed else ""
-        name_w   = "font-weight:700;" if is_overall else "font-weight:600;"
+        row_border = "" if is_last else f"border-bottom:1px solid {BORDER};"
+        bar_w      = max(pct, 12) if pct > 0 else 0
+        missed     = total == 0
+        fill_color = MUTED if is_overall else color
+        fill_dim   = "opacity:0.3;" if missed else ""
         return (
-            f'<tr><td style="padding:12px 0; {border}">'
-            f'<table cellpadding="0" cellspacing="0" width="100%">'
-            f'<tr>'
-            f'<td style="vertical-align:middle;">'
-            f'<span style="font-size:13px; {name_w} color:{name_col};">{name}</span>'
-            f'</td>'
-            f'<td style="text-align:right; vertical-align:middle; white-space:nowrap;">'
-            f'<span style="font-size:11px; color:{MUTED};">{completed}/{total} &nbsp;·&nbsp; {hours}h &nbsp;&nbsp;</span>'
-            f'<span style="font-size:13px; font-weight:700; color:{pct_col};">{pct}%</span>'
-            f'</td>'
+            f'<tr style="{row_border}">'
+            f'<td style="width:80px; padding:7px 10px 7px 0; text-align:right; vertical-align:middle; white-space:nowrap; font-size:13px; font-weight:500; color:{MUTED};">{name}</td>'
+            f'<td style="padding:7px 8px 7px 0; vertical-align:middle;">'
+            f'<div style="background:{SUBTLE}; border-radius:13px; height:26px; overflow:hidden;">'
+            f'<div style="background:{fill_color}; border-radius:13px; height:26px; width:{bar_w}%; {fill_dim}">'
+            f'<span style="display:inline-block; color:#fff; font-size:12px; font-weight:700; line-height:26px; padding-left:10px; white-space:nowrap;">{pct if pct > 0 else ""}{"%" if pct > 0 else ""}</span>'
+            f'</div></div></td>'
+            f'<td style="width:90px; padding:7px 0; text-align:right; vertical-align:middle; white-space:nowrap; font-size:12px; color:{MUTED};">{completed}/{total}&nbsp;·&nbsp;{hours}h</td>'
             f'</tr>'
-            f'<tr><td colspan="2" style="padding-top:5px;">'
-            f'<div style="background:{BORDER}; border-radius:2px; height:3px; overflow:hidden;">'
-            f'<div style="background:{color}; height:3px; width:{bar_w}%; {bar_dim}"></div>'
-            f'</div></td></tr>'
-            f'</table></td></tr>'
         )
 
     # Merge task arenas with any missed arenas
