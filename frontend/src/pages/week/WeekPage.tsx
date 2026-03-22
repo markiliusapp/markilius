@@ -328,7 +328,12 @@ const WeekPage = () => {
                                             <div className="summary-card-value-row">
                                                 <span className="summary-card-value">{weekData.summary.completion_percentage}%</span>
                                                 {delta && (
-                                                    <span className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}>
+                                                    <span
+                                                        className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
+                                                        data-tooltip={delta.positive
+                                                            ? `${Math.abs(delta.pct)}% higher completion rate vs last week`
+                                                            : `${Math.abs(delta.pct)}% lower completion rate vs last week`}
+                                                    >
                                                         {delta.positive ? '↑' : '↓'} {Math.abs(delta.pct)}%
                                                     </span>
                                                 )}
@@ -370,7 +375,12 @@ const WeekPage = () => {
                                             <div className="summary-card-value-row">
                                                 <span className="summary-card-value">{weekData.summary.total_duration_hours.toFixed(1)}h</span>
                                                 {delta && (
-                                                    <span className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}>
+                                                    <span
+                                                        className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
+                                                        data-tooltip={delta.positive
+                                                            ? `${Math.abs(delta.diff).toFixed(1)}h more time logged vs last week`
+                                                            : `${Math.abs(delta.diff).toFixed(1)}h less time logged vs last week`}
+                                                    >
                                                         {delta.positive ? '↑' : '↓'} {Math.abs(delta.diff).toFixed(1)}h
                                                     </span>
                                                 )}

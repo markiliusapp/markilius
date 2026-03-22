@@ -241,7 +241,12 @@ const MonthPage = () => {
                                             <div className="summary-card-value-row">
                                                 <span className="summary-card-value">{monthData.summary.completion_percentage}%</span>
                                                 {delta && (
-                                                    <span className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}>
+                                                    <span
+                                                        className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
+                                                        data-tooltip={delta.positive
+                                                            ? `${Math.abs(delta.pct)}% higher completion rate vs last month`
+                                                            : `${Math.abs(delta.pct)}% lower completion rate vs last month`}
+                                                    >
                                                         {delta.positive ? '↑' : '↓'} {Math.abs(delta.pct)}%
                                                     </span>
                                                 )}
@@ -310,7 +315,12 @@ const MonthPage = () => {
                                             <div className="summary-card-value-row">
                                                 <span className="summary-card-value">{monthData.summary.total_duration_hours.toFixed(1)}h</span>
                                                 {delta && (
-                                                    <span className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}>
+                                                    <span
+                                                        className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
+                                                        data-tooltip={delta.positive
+                                                            ? `${Math.abs(delta.diff).toFixed(1)}h more time logged vs last month`
+                                                            : `${Math.abs(delta.diff).toFixed(1)}h less time logged vs last month`}
+                                                    >
                                                         {delta.positive ? '↑' : '↓'} {Math.abs(delta.diff).toFixed(1)}h
                                                     </span>
                                                 )}
