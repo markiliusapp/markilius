@@ -27,15 +27,27 @@ const MonthPage = () => {
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [copied, setCopied] = useState(false)
-    const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const [shareOpen, setShareOpen] = useState(false)
+    const shareRef = useRef<HTMLDivElement>(null)
 
-    const handleShare = () => {
+    useEffect(() => {
+        if (!shareOpen) return
+        const handler = (e: MouseEvent) => {
+            if (shareRef.current && !shareRef.current.contains(e.target as Node))
+                setShareOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [shareOpen])
+
+    const handleShareArena = (arenaId: number | null) => {
         if (!user?.public_id) return
-        const url = `${window.location.origin}/u/${user.public_id}?year=${currentYear}&month=${currentMonth}`
+        const base = `${window.location.origin}/u/${user.public_id}?year=${currentYear}&month=${currentMonth}`
+        const url = arenaId ? `${base}&arena=${arenaId}` : base
         navigator.clipboard.writeText(url)
         setCopied(true)
-        if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-        copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
+        setShareOpen(false)
+        setTimeout(() => setCopied(false), 2000)
     }
 
     useEffect(() => {
@@ -156,22 +168,37 @@ const MonthPage = () => {
                     {/* Section 1: Heatmap */}
                     <div className="heatmap-section" style={{ position: 'relative' }}>
                         {user?.public_id && (
-                            <button
-                                className="heatmap-share-btn"
-                                onClick={handleShare}
-                                title="Share this month's heatmap"
-                            >
-                                {copied ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                                    </svg>
+                            <div className="heatmap-share-wrapper" ref={shareRef}>
+                                <button
+                                    className={`heatmap-share-btn ${shareOpen ? 'active' : ''}`}
+                                    onClick={() => setShareOpen(o => !o)}
+                                    title="Share this month's heatmap"
+                                >
+                                    {copied ? (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    ) : (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                        </svg>
+                                    )}
+                                </button>
+                                {shareOpen && (
+                                    <div className="share-dropdown">
+                                        <button className="share-dropdown-item" onClick={() => handleShareArena(null)}>
+                                            All arenas
+                                        </button>
+                                        {arenas.map(arena => (
+                                            <button key={arena.arena_id} className="share-dropdown-item" onClick={() => handleShareArena(arena.arena_id)}>
+                                                <span className="share-dropdown-dot" style={{ backgroundColor: arena.arena_color }} />
+                                                {arena.arena_name}
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
-                            </button>
+                            </div>
                         )}
                         <Heatmap
                             year={currentYear}

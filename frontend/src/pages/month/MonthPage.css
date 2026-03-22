@@ -89,10 +89,14 @@
 
 
 /* Heatmap share button */
-.heatmap-share-btn {
+.heatmap-share-wrapper {
     position: absolute;
     top: 16px;
     right: 16px;
+    z-index: 1;
+}
+
+.heatmap-share-btn {
     width: 28px;
     height: 28px;
     border: 1px solid var(--color-border);
@@ -103,12 +107,50 @@
     align-items: center;
     justify-content: center;
     transition: var(--transition);
-    z-index: 1;
 }
 
-.heatmap-share-btn:hover {
+.heatmap-share-btn:hover,
+.heatmap-share-btn.active {
     border-color: var(--color-text-muted);
     color: var(--color-text);
+}
+
+.heatmap-share-wrapper .share-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 160px;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.share-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.share-dropdown-item:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.share-dropdown-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 /* Bar Chart Section */

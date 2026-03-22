@@ -5,6 +5,7 @@ import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
 import Heatmap from '@/components/heatmap/Heatmap';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import AuthHeader from '@/components/authHeader/AuthHeader';
+import { hexToRgb } from '@/services/colorIntensity';
 import type { YearlyProductivity, MonthlyProductivity } from '@/types';
 import './PublicProfilePage.css';
 
@@ -74,8 +75,11 @@ const PublicProfilePage = () => {
     if (isMonthView && monthlyData) {
         const m = parseInt(monthParam!);
         const y = parseInt(yearParam!);
-        const monthName = `${MONTH_NAMES[m - 1]} ${y}`;
         const completion = monthlyData.summary.completion_percentage;
+        const filteredArena = filteredArenaId
+            ? monthlyData.summary.arenas.find(a => a.arena_id === filteredArenaId)
+            : null;
+        const legendColor = filteredArena ? hexToRgb(filteredArena.arena_color) : undefined;
         return (
             <div className="public-page">
                 <AuthHeader />
@@ -84,20 +88,22 @@ const PublicProfilePage = () => {
                         <div className="public-avatar">{firstName?.[0]?.toUpperCase()}</div>
                         <div>
                             <h1 className="public-name">{firstName} on Markilius</h1>
-                            <p className="public-sub">markilius</p>
+                            <p className="public-sub">
+                                {filteredArena ? filteredArena.arena_name : `${MONTH_NAMES[m - 1]} ${y}`}
+                            </p>
                         </div>
                     </div>
                     <div className="public-heatmap-card">
-                        <div className="public-heatmap-header">
-                            <span className="public-heatmap-title">{monthName} · {completion}% complete</span>
+                        <div style={{ maxWidth: 420, margin: '0 auto' }}>
+                            <Heatmap
+                                year={y}
+                                month={m}
+                                data={monthlyData.daily_breakdown}
+                                completion={completion}
+                                selectedArenaId={filteredArenaId}
+                            />
+                            <HeatmapLegend color={legendColor} />
                         </div>
-                        <Heatmap
-                            year={y}
-                            month={m}
-                            data={monthlyData.daily_breakdown}
-                            completion={completion}
-                        />
-                        <HeatmapLegend />
                     </div>
                     <div className="public-footer">
                         <a href="/" className="public-footer-link">Powered by Markilius</a>
