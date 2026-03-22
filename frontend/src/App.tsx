@@ -20,6 +20,7 @@ import OnboardingPage from './pages/onboarding/OnboardingPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import AboutPage from './pages/legal/AboutPage';
 import ContactPage from './pages/legal/ContactPage';
+import ManifestoPage from './pages/manifesto/ManifestoPage';
 
 const RootRoute = () => {
   const { user, loading } = useAuth();
@@ -79,6 +80,7 @@ function App() {
           <Route path="/u/:publicId" element={<PublicProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/manifesto" element={<ManifestoPage />} />
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </AuthProvider>

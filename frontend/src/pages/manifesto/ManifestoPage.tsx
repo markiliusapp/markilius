@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/authContext';
 import BrandLogo from '@/components/brandLogo/BrandLogo';
+import Footer from '@/components/footer/Footer';
 import '../landing/LandingPage.css';
 import './ManifestoPage.css';
-import Footer from '@/components/footer/Footer';
 
 const ManifestoPage = () => {
     const navigate = useNavigate();
@@ -28,76 +28,44 @@ const ManifestoPage = () => {
                 </div>
             </nav>
 
-            {/* Hero */}
+            {/* Hero — lead with the person */}
             <section className="mf-hero">
-                <p className="mf-eyebrow">Markilius</p>
+                <p className="mf-eyebrow">Who this is for</p>
                 <h1 className="mf-headline">
-                    You don't have<br />a planning problem.
+                    For someone serious<br />about who they're becoming.
                 </h1>
                 <p className="mf-subhead">
-                    You have a consistency problem.<br />
-                    Most apps make the first one worse.
+                    Not a productivity app. A consistency mirror.
+                    It shows you whether you actually showed up.
                 </p>
             </section>
 
             <div className="mf-divider" />
 
-            {/* What it is */}
+            {/* What makes it the right tool — light touch */}
             <section className="mf-section">
                 <div className="mf-inner">
-                    <h2 className="mf-label">What Markilius is</h2>
-                    <p className="mf-statement">A consistency mirror.</p>
+                    <h2 className="mf-label">What makes it different</h2>
+                    <p className="mf-statement">The heatmap is not data. It is identity made visible.</p>
                     <p className="mf-body">
-                        Not a to-do app. Not a habit tracker. Not a productivity suite.
-                        A mirror. You log what you commit to. It shows you whether you showed up.
-                        The heatmap is the output — your entire year, laid out as a grid of days.
-                        Green means you showed up. Grey means you didn't. No interpretation needed.
+                        You log what you commit to. Markilius shows whether you kept it —
+                        your year as a grid of days, green where you showed up, grey where you didn't.
+                        No encouragement. No interpretation. Just the truth.
                     </p>
                     <p className="mf-body">
-                        The heatmap is not data. It is identity made visible.
+                        When a deadline passes, the task locks. You cannot go back and complete something
+                        you didn't do. Your record cannot be revised after the fact.
+                        A grey month stays grey. That is what makes the green worth anything.
+                    </p>
+                    <p className="mf-body">
+                        Your life is not one thing. Work, fitness, learning, creativity — each has its own record.
+                        The heatmap breaks down by arena, so you can see exactly where you show up
+                        and where you disappear.
                     </p>
                 </div>
             </section>
 
-            {/* The lock */}
-            <section className="mf-section mf-section--highlight">
-                <div className="mf-inner">
-                    <h2 className="mf-label">The thing that makes it honest</h2>
-                    <p className="mf-statement">
-                        When a deadline passes, the task locks. Permanently.
-                    </p>
-                    <p className="mf-body">
-                        You cannot go back and complete something you didn't do. You cannot edit it.
-                        You cannot delete it. Not by you, not by anyone.
-                    </p>
-                    <p className="mf-body">
-                        Marcus Aurelius did not rewrite his past. The Meditations were honest
-                        precisely because they could not be revised after the fact.
-                        Markilius applies the same principle: your record is your record.
-                        A grey month stays grey.
-                    </p>
-                    <p className="mf-body mf-body--accent">
-                        This is not a punishment. It is what makes the green worth anything.
-                    </p>
-                </div>
-            </section>
-
-            {/* The arenas */}
-            <section className="mf-section">
-                <div className="mf-inner">
-                    <h2 className="mf-label">Your life is not one thing</h2>
-                    <p className="mf-statement">
-                        Arenas. The pillars that give a task meaning.
-                    </p>
-                    <p className="mf-body">
-                        Work, fitness, learning, creativity — each has its own record.
-                        The heatmap breaks down by arena. You can see exactly where you
-                        show up and where you disappear. Most people are surprised.
-                    </p>
-                </div>
-            </section>
-
-            {/* Who it's for */}
+            {/* Who it's for — the full portrait, closing with the question */}
             <section className="mf-section mf-section--highlight">
                 <div className="mf-inner">
                     <h2 className="mf-label">Who this is for</h2>
@@ -107,10 +75,9 @@ const ManifestoPage = () => {
                     <p className="mf-body">
                         The knowledge is not the problem. You know you should train.
                         You know you should read. You know you should do the work.
-                        Markilius is not for someone who needs reminding to show up.
+                        Markilius is not for someone who needs reminding.
                         It is not for someone who wants to be encouraged after a bad week.
-                        It will not send you a notification at 9pm asking if you've worked out.
-                        It will show you your record and say nothing.
+                        It will not chase you. It will show you your record and say nothing.
                     </p>
                     <p className="mf-body">
                         It is for someone who holds themselves to a standard.
@@ -119,13 +86,13 @@ const ManifestoPage = () => {
                         even when no one else can see it.
                     </p>
                     <p className="mf-body">
-                        It is for someone who can look at a grey month, tell the truth about it,
+                        Someone who can look at a grey month, tell the truth about it,
                         and do better next month. Not because the app asked them to.
                         Because they already know what the answer should be.
                     </p>
                     <p className="mf-body">
-                        The first question Markilius asks you is the only one that matters:
-                        <span className="mf-inline-question"> "What are you working on becoming?"</span>
+                        The first question Markilius asks is the only one that matters:
+                        <span className="mf-inline-question">"What are you working on becoming?"</span>
                     </p>
                     <button
                         className="landing-btn-primary mf-section-cta"
@@ -135,6 +102,7 @@ const ManifestoPage = () => {
                     </button>
                 </div>
             </section>
+
             <Footer />
         </div>
     );
