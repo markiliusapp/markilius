@@ -173,99 +173,49 @@ const DashboardPage = () => {
                     <div className='streaks-and-stats'>
                         {/* Streaks */}
                         {streaks && <Streaks streaks={streaks} />}
-                        {
-                        productivity && (
+                        {productivity && (
                             <div className="stats-section">
-                                <div className="stats-grid">
-                                    {/* Progress side */}
-                                    <div className="progress-column">
-                                        {/* Overall Progress */}
-                                        <div className="progress-item">
-                                            <div className="progress-item-header">
-                                                <span className="progress-item-label">Overall Progress</span>
-                                                <div className="progress-item-meta">
-                                                    <span className="progress-item-count">
-                                                        {productivity.completed_tasks}/{productivity.total_tasks}
-                                                    </span>
-                                                    <span className="progress-item-percentage">
-                                                        {productivity.completion_percentage}%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="progress-bar">
-                                                <div
-                                                    className="progress-fill progress-fill-dark"
-                                                    style={{ width: `${productivity.completion_percentage}%` }}
-                                                />
+                                <h2>Arena Breakdown</h2>
+                                <div className="stats-list">
+                                    {/* Overall row */}
+                                    <div className="stats-row">
+                                        <span className="stats-label">Overall</span>
+                                        <div className="stats-track">
+                                            <div
+                                                className="stats-fill"
+                                                style={{ width: `${productivity.completion_percentage}%`, backgroundColor: 'var(--color-text-muted)' }}
+                                            >
+                                                <span className="stats-fill-pct">{productivity.completion_percentage}%</span>
                                             </div>
                                         </div>
-
-                                        {/* Arena Breakdown */}
-                                        {productivity.arenas.map(arena => (
-                                            <div key={arena.arena_id} className="progress-item">
-                                                <div className="progress-item-header">
-                                                    <span className="progress-item-label">
-                                                        {arena.arena_name}
-                                                    </span>
-                                                    <div className="progress-item-meta">
-                                                        <span className="progress-item-count">
-                                                            {arena.completed_tasks}/{arena.total_tasks}
-                                                        </span>
-                                                        <span className="progress-item-percentage">
-                                                            {arena.completion_percentage}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="progress-bar">
-                                                    <div
-                                                        className="progress-fill"
-                                                        style={{
-                                                            width: `${arena.completion_percentage}%`,
-                                                            backgroundColor: arena.arena_color,
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
+                                        <div className="stats-meta">
+                                            <span className="stats-count">{productivity.completed_tasks}/{productivity.total_tasks}</span>
+                                            <span className="stats-hours">{productivity.total_hours.toFixed(1)}h</span>
+                                        </div>
                                     </div>
 
-                                    {/* Time stats side */}
-                                    <div className="time-column">
-                                        <div className="time-stat-item">
-                                            <div className="time-stat-icon time-stat-icon-dark">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                    <circle cx="12" cy="12" r="10" />
-                                                    <polyline points="12 6 12 12 16 14" />
-                                                </svg>
-                                            </div>
-                                            <div className="time-stat-content">
-                                                <span className="time-stat-value">{productivity.total_hours.toFixed(1)}h</span>
-                                                <span className="time-stat-label">Total</span>
-                                            </div>
-                                        </div>
-
-                                        {productivity.arenas.map(arena => (
-                                            <div key={arena.arena_id} className="time-stat-item">
+                                    {/* Arena rows */}
+                                    {productivity.arenas.map(arena => (
+                                        <div key={arena.arena_id} className="stats-row">
+                                            <span className="stats-label">{arena.arena_name}</span>
+                                            <div className="stats-track">
                                                 <div
-                                                    className="time-stat-icon"
-                                                    style={{ backgroundColor: `${arena.arena_color}20`, color: arena.arena_color }}
+                                                    className="stats-fill"
+                                                    style={{ width: `${arena.completion_percentage}%`, backgroundColor: arena.arena_color }}
                                                 >
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                        <circle cx="12" cy="12" r="10" />
-                                                        <polyline points="12 6 12 12 16 14" />
-                                                    </svg>
-                                                </div>
-                                                <div className="time-stat-content">
-                                                    <span className="time-stat-value">{arena.total_hours.toFixed(1)}h</span>
-                                                    <span className="time-stat-label">{arena.arena_name}</span>
+                                                    <span className="stats-fill-pct">{arena.completion_percentage}%</span>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
+                                            <div className="stats-meta">
+                                                <span className="stats-count">{arena.completed_tasks}/{arena.total_tasks}</span>
+                                                <span className="stats-hours">{arena.total_hours.toFixed(1)}h</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        )
-                    }</div>
+                        )}
+                    </div>
                 )}
             </div>
             <FloatingAddButton onClick={() => setShowTaskInput(true)} />

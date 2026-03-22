@@ -1,8 +1,8 @@
 .dashboard-today {
-    /* max-width: 1200px; */
     width: 100%;
 }
 
+/* Header */
 .dashboard-header {
     display: flex;
     justify-content: center;
@@ -60,9 +60,7 @@
     outline: none;
 }
 
-
-
-/* Task panes - Desktop: side by side */
+/* Task panes */
 .panes {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -151,47 +149,130 @@
     background-color: rgba(249, 115, 22, 0.1);
 }
 
-/* Progress section */
-.progress-section {
+/* Streaks + Stats row */
+.streaks-and-stats {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.streaks-wrapper,
+.stats-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.stats-section h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 16px;
+}
+
+/* Stats list */
+.stats-list {
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: 20px;
+    padding: 6px 0;
 }
 
-.progress-header {
+.stats-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 12px;
+    padding: 5px 16px;
 }
 
-.progress-label {
-    font-size: 14px;
+.stats-label {
+    width: 84px;
+    flex-shrink: 0;
+    font-size: 13px;
     font-weight: 500;
-    color: var(--color-text);
+    color: var(--color-text-muted);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.progress-percentage {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--color-primary);
+.stats-track {
+    flex: 1;
+    height: 26px;
+    background-color: var(--color-bg-muted);
+    border-radius: 100px;
+    overflow: hidden;
+    min-width: 0;
 }
 
-.streaks-and-stats {
+.stats-fill {
+    height: 100%;
+    border-radius: 100px;
     display: flex;
-    /* grid-template-columns: 1fr 1fr; */
-    gap: 24px;
-
+    align-items: center;
+    transition: width 0.5s ease;
+    min-width: 44px;
 }
 
-/* ================================
-   RESPONSIVE BREAKPOINTS
-================================ */
+.stats-fill-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    padding-left: 10px;
+    white-space: nowrap;
+}
 
-/* Tablet and below (< 768px) - Stack panes vertically */
+.stats-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.stats-count {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.stats-hours {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    min-width: 36px;
+    text-align: right;
+}
+
+/* Loading state */
+.tasks-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.spinner-large {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-bg-subtle);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .streaks-and-stats {
+        flex-direction: column;
+    }
+}
+
 @media (max-width: 768px) {
-    /* Stack panes vertically */
     .panes {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -201,17 +282,8 @@
     .completedPane {
         min-height: 300px;
     }
-
-    .progress-section {
-        padding: 16px;
-    }
-
-    .progress-percentage {
-        font-size: 18px;
-    }
 }
 
-/* Small mobile (< 480px) */
 @media (max-width: 480px) {
     .date-nav input[type="date"] {
         font-size: 13px;
@@ -222,11 +294,6 @@
         width: 32px;
         height: 32px;
         font-size: 16px;
-    }
-
-    .btn-add-task {
-        padding: 10px 14px;
-        font-size: 13px;
     }
 
     .activePane h1,
@@ -247,241 +314,4 @@
         width: 56px;
         height: 56px;
     }
-
-    .progress-section {
-        padding: 14px;
-    }
-
-    .progress-label {
-        font-size: 13px;
-    }
-}
-/* Stats Section */
-.stats-section {
-    margin-top: 24px;
-    width: 100%;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-}
-
-/* Progress Column - Left side */
-.progress-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.progress-item {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.progress-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.progress-item-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.progress-item-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.progress-item-count {
-    font-size: 13px;
-    color: var(--color-text-secondary);
-}
-
-.progress-item-percentage {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--color-text);
-}
-
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: var(--color-bg-subtle);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: var(--color-primary);
-    border-radius: 5px;
-    transition: width 0.3s ease;
-}
-
-/* 3 shades of orange */
-.progress-fill-dark {
-    background-color: #ea6c0a;
-    /* Darkest orange */
-}
-
-.progress-fill-medium {
-    background-color: #f97316;
-    /* Medium orange (your primary) */
-}
-
-.progress-fill-light {
-    background-color: #fb923c;
-    /* Light orange */
-}
-
-/* Time Column - Right side */
-.time-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding-left: 24px;
-    border-left: 1px solid var(--color-border);
-}
-
-.time-stat-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.time-stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.time-stat-icon-dark {
-    background-color: rgba(234, 108, 10, 0.1);
-    color: #ea6c0a;
-}
-
-.time-stat-icon-medium {
-    background-color: rgba(249, 115, 22, 0.1);
-    color: #f97316;
-}
-
-.time-stat-icon-light {
-    background-color: rgba(251, 146, 60, 0.1);
-    color: #fb923c;
-}
-
-.time-stat-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.time-stat-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--color-text);
-}
-
-.time-stat-label {
-    font-size: 12px;
-    color: var(--color-text-secondary);
-}
-
-/* ================================
-   RESPONSIVE BREAKPOINTS
-================================ */
-
-@media (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .streaks-and-stats {
-        flex-direction: column;
-    }
-
-    .time-column {
-        padding-left: 0;
-        padding-top: 24px;
-        border-left: none;
-        border-top: 1px solid var(--color-border);
-    }
-
-    .time-stat-item {
-        padding: 12px;
-        background-color: var(--color-bg-subtle);
-        border-radius: var(--radius-md);
-    }
-}
-
-@media (max-width: 1320px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-@media (max-width: 768px) {
-    .stats-grid {
-        padding: 16px;
-    }
-
-    .progress-column {
-        gap: 16px;
-    }
-
-    .time-column {
-        gap: 12px;
-        padding-top: 16px;
-    }
-
-    .progress-item-percentage {
-        font-size: 16px;
-    }
-
-    .time-stat-value {
-        font-size: 18px;
-    }
-
-    .time-stat-icon {
-        width: 40px;
-        height: 40px;
-    }
-}
-
-
-/* Loading state */
-.tasks-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    text-align: center;
-}
-
-.spinner-large {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--color-bg-subtle);
-    border-top-color: var(--color-primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 16px;
 }
