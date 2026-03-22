@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
 import type { MonthlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
@@ -13,10 +13,12 @@ import TaskInput from '@/components/taskinput/TaskInput';
 import MonthlyArenaChart from '@/components/monthArenaChart/MonthlyArenaChart';
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
+import { useAuth } from '@/context/authContext'
 
 
 const MonthPage = () => {
     const navigate = useNavigate()
+    const { user } = useAuth()
     const [monthData, setMonthData] = useState<MonthlyProductivity | null>(null);
     const [prevMonthData, setPrevMonthData] = useState<MonthlyProductivity | null>(null);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,17 @@ const MonthPage = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
     const [showTaskInput, setShowTaskInput] = useState(false)
+    const [copied, setCopied] = useState(false)
+    const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const handleShare = () => {
+        if (!user?.public_id) return
+        const url = `${window.location.origin}/u/${user.public_id}?year=${currentYear}&month=${currentMonth}`
+        navigator.clipboard.writeText(url)
+        setCopied(true)
+        if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+        copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
+    }
 
     useEffect(() => {
         fetchMonthData();
@@ -141,7 +154,25 @@ const MonthPage = () => {
                 {/* 4-Section Grid */}
                 <div className="month-content">
                     {/* Section 1: Heatmap */}
-                    <div className="heatmap-section">
+                    <div className="heatmap-section" style={{ position: 'relative' }}>
+                        {user?.public_id && (
+                            <button
+                                className="heatmap-share-btn"
+                                onClick={handleShare}
+                                title="Share this month's heatmap"
+                            >
+                                {copied ? (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                ) : (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                    </svg>
+                                )}
+                            </button>
+                        )}
                         <Heatmap
                             year={currentYear}
                             month={currentMonth}

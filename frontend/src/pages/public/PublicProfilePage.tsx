@@ -2,17 +2,27 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { publicAPI } from '@/services/api';
 import CompactHeatmap from '@/components/compactHeatmap/CompactHeatmap';
+import Heatmap from '@/components/heatmap/Heatmap';
+import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import AuthHeader from '@/components/authHeader/AuthHeader';
-import type { YearlyProductivity } from '@/types';
+import type { YearlyProductivity, MonthlyProductivity } from '@/types';
 import './PublicProfilePage.css';
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 const PublicProfilePage = () => {
     const { publicId } = useParams<{ publicId: string }>();
     const [searchParams] = useSearchParams();
+
     const arenaIdParam = searchParams.get('arena');
     const filteredArenaId = arenaIdParam ? parseInt(arenaIdParam) : null;
+    const yearParam = searchParams.get('year');
+    const monthParam = searchParams.get('month');
+    const isMonthView = !!yearParam && !!monthParam;
+
     const [firstName, setFirstName] = useState<string | null>(null);
     const [yearlyData, setYearlyData] = useState<YearlyProductivity | null>(null);
+    const [monthlyData, setMonthlyData] = useState<MonthlyProductivity | null>(null);
     const [year, setYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
@@ -24,8 +34,13 @@ const PublicProfilePage = () => {
             try {
                 const profile = await publicAPI.getProfile(publicId);
                 setFirstName(profile.first_name);
-                const data = await publicAPI.getYearlyProductivity(publicId, year);
-                setYearlyData(data);
+                if (isMonthView) {
+                    const data = await publicAPI.getMonthlyProductivity(publicId, parseInt(yearParam!), parseInt(monthParam!));
+                    setMonthlyData(data);
+                } else {
+                    const data = await publicAPI.getYearlyProductivity(publicId, year);
+                    setYearlyData(data);
+                }
             } catch {
                 setNotFound(true);
             } finally {
@@ -51,6 +66,42 @@ const PublicProfilePage = () => {
                 <div className="public-not-found">
                     <h2>Profile not found</h2>
                     <p>This profile doesn't exist or has been made private.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isMonthView && monthlyData) {
+        const m = parseInt(monthParam!);
+        const y = parseInt(yearParam!);
+        const monthName = `${MONTH_NAMES[m - 1]} ${y}`;
+        const completion = monthlyData.summary.completion_percentage;
+        return (
+            <div className="public-page">
+                <AuthHeader />
+                <div className="public-container">
+                    <div className="public-header">
+                        <div className="public-avatar">{firstName?.[0]?.toUpperCase()}</div>
+                        <div>
+                            <h1 className="public-name">{firstName} on Markilius</h1>
+                            <p className="public-sub">markilius</p>
+                        </div>
+                    </div>
+                    <div className="public-heatmap-card">
+                        <div className="public-heatmap-header">
+                            <span className="public-heatmap-title">{monthName} · {completion}% complete</span>
+                        </div>
+                        <Heatmap
+                            year={y}
+                            month={m}
+                            data={monthlyData.daily_breakdown}
+                            completion={completion}
+                        />
+                        <HeatmapLegend />
+                    </div>
+                    <div className="public-footer">
+                        <a href="/" className="public-footer-link">Powered by Markilius</a>
+                    </div>
                 </div>
             </div>
         );
@@ -98,7 +149,6 @@ const PublicProfilePage = () => {
                             arenas={arenas}
                             showOverall={!filteredArenaId}
                         />
-
                     )}
                 </div>
 

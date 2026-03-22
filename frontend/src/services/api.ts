@@ -330,4 +330,8 @@ export const publicAPI = {
         const response = await fetch(`${API_URL}/public/${publicId}/productivity/year?year=${year}`);
         return handleResponse(response);
     },
+    getMonthlyProductivity: async (publicId: string, year: number, month: number) => {
+        const response = await fetch(`${API_URL}/public/${publicId}/productivity/month?year=${year}&month=${month}`);
+        return handleResponse(response);
+    },
 };
