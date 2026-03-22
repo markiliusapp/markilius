@@ -156,7 +156,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
                 {/* Brand */}
                 <div className="sidebar-brand">
-                    <BrandLogo size="md" />
+                    <BrandLogo size="sm" />
                 </div>
 
                 {/* Navigation */}

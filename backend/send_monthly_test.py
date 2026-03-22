@@ -11,7 +11,7 @@ from app.services.email import send_monthly_summary_email
 from sqlalchemy.orm import contains_eager
 
 YEAR = 2026
-MONTH = 2
+MONTH = 3
 USER_ID = 16
 
 
@@ -49,6 +49,13 @@ async def main():
             )
             .all()
         )
+
+        all_user_arenas = (
+            db.query(Arena)
+            .filter(Arena.user_id == USER_ID, Arena.is_archived == False)
+            .all()
+        )
+        all_arenas = [{"name": a.name, "color": a.color} for a in all_user_arenas]
 
         total_tasks       = len(tasks)
         completed_tasks   = sum(1 for t in tasks if t.is_completed)
@@ -173,6 +180,7 @@ async def main():
             perfect_days=perfect_days,
             most_productive_day=most_productive_day,
             daily_breakdown=daily_breakdown,
+            all_arenas=all_arenas,
         )
         print("Done.")
     finally:

@@ -3,7 +3,7 @@ import './AuthHeader.css';
 
 const AuthHeader = () => (
     <div className="auth-header">
-        <BrandLogo size="md" />
+        <BrandLogo size="sm" />
     </div>
 );
 

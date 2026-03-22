@@ -69,7 +69,7 @@ def _render_heatmap(year: int, month: int, daily_data: List[dict]) -> str:
                 bg        = _heatmap_cell_color(cell["pct"])
                 has_tasks = cell["total"] > 0
                 num_color = C["TEXT"] if cell["pct"] < 60 else "#fff"
-                pct_color = "rgba(255,255,255,0.75)" if cell["pct"] >= 60 else C["MUTED"]
+                pct_color = "#ffffff"
                 pct_str   = f'{int(cell["pct"])}%' if has_tasks else ""
                 tds += (
                     f'<td style="padding:2px; width:14.28%;">'
@@ -282,78 +282,116 @@ async def send_weekly_summary_email(
     arenas: List[dict],
     avg_tasks_per_day: float = 0.0,
     days_with_tasks: int = 0,
-    most_productive_day: Optional[dict] = None,  # {day_name, completion_percentage}
-    daily_breakdown: Optional[List[dict]] = None, # [{date, completion_percentage, completed_tasks, total_tasks}]
+    most_productive_day: Optional[dict] = None,   # {day_name, completion_percentage}
+    least_productive_day: Optional[dict] = None,  # {day_name, completion_percentage}
+    daily_breakdown: Optional[List[dict]] = None,  # [{date, completion_percentage, completed_tasks, total_tasks, arenas}]
+    all_arenas: Optional[List[dict]] = None,       # [{name, color}] — full arena list to surface missed arenas
 ):
     MAIL_FROM = _init()
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    week_label = f"{start_date.strftime('%b %d')} – {end_date.strftime('%b %d, %Y')}"
+
+    # Subject: "Your Week — Mar 17–23"
+    if start_date.month == end_date.month:
+        week_label_short = f"{start_date.strftime('%b')} {start_date.day}–{end_date.day}"
+    else:
+        week_label_short = f"{start_date.strftime('%b')} {start_date.day}–{end_date.strftime('%b')} {end_date.day}"
+
+    week_label_full = f"{start_date.strftime('%b %d')} – {end_date.strftime('%b %d, %Y')}"
 
     # ── colours (dark theme) ──────────────────────────────────────────────────
-    BG       = "#161616"
-    CARD     = "#1e1e1e"
-    SUBTLE   = "#262626"
-    BORDER   = "#3a3a3a"
-    TEXT     = "#f0f0f0"
+    BG        = "#161616"
+    CARD      = "#1e1e1e"
+    SUBTLE    = "#262626"
+    BORDER    = "#3a3a3a"
+    TEXT      = "#f0f0f0"
     SECONDARY = "#a1a1aa"
-    MUTED    = "#71717a"
-    ORANGE   = "#f97316"
+    MUTED     = "#71717a"
+    ORANGE    = "#f97316"
 
     def stat_card(value: str, label: str, highlight: bool = False) -> str:
         bg = "rgba(249,115,22,0.12)" if highlight else SUBTLE
-        border = f"1px solid rgba(249,115,22,0.25)" if highlight else f"1px solid {BORDER}"
+        border = "1px solid rgba(249,115,22,0.25)" if highlight else f"1px solid {BORDER}"
         val_color = ORANGE if highlight else TEXT
-        return f"""
-        <td style="width:33%; padding:4px;">
-            <div style="background:{bg}; border:{border}; border-radius:8px; padding:14px 12px;">
-                <div style="font-size:22px; font-weight:700; color:{val_color}; margin-bottom:3px;">{value}</div>
-                <div style="font-size:11px; color:{SECONDARY};">{label}</div>
-            </div>
-        </td>"""
+        return (
+            f'<td style="width:33%; padding:4px;">'
+            f'<div style="background:{bg}; border:{border}; border-radius:8px; padding:14px 12px;">'
+            f'<div style="font-size:22px; font-weight:700; color:{val_color}; margin-bottom:3px;">{value}</div>'
+            f'<div style="font-size:11px; color:{SECONDARY};">{label}</div>'
+            f'</div></td>'
+        )
 
-    # ── 7-day overview ────────────────────────────────────────────────────────
-    day_cells = ""
-    if daily_breakdown:
-        for d in daily_breakdown:
-            pct = d.get("completion_percentage", 0)
-            total = d.get("total_tasks", 0)
-            done  = d.get("completed_tasks", 0)
-            d_obj = date.fromisoformat(str(d["date"]))
-            day_name   = d_obj.strftime("%a")
-            day_number = d_obj.day
-            pct_color  = ORANGE if pct > 0 else MUTED
-            bar_width  = max(int(pct), 2) if total > 0 else 0
-            day_cells += f"""
-            <td style="text-align:center; padding:4px 2px; width:14.28%;">
-                <div style="background:{SUBTLE}; border:1px solid {BORDER}; border-radius:8px; padding:10px 6px;">
-                    <div style="font-size:10px; color:{SECONDARY}; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px;">{day_name}</div>
-                    <div style="font-size:18px; font-weight:700; color:{TEXT}; margin-bottom:6px;">{day_number}</div>
-                    <div style="background:{BORDER}; border-radius:2px; height:4px; margin-bottom:6px; overflow:hidden;">
-                        <div style="background:{ORANGE}; height:4px; width:{bar_width}%;"></div>
-                    </div>
-                    <div style="font-size:13px; font-weight:700; color:{pct_color};">{int(pct)}%</div>
-                    <div style="font-size:10px; color:{MUTED}; margin-top:2px;">{done}/{total}</div>
-                </div>
-            </td>"""
+    # ── plain sentence ────────────────────────────────────────────────────────
+    if total_tasks == 0:
+        plain_sentence = "No tasks recorded this week."
+    elif completion_percentage >= 80:
+        plain_sentence = f"{completion_percentage}% completion. You showed up."
+    elif completion_percentage >= 50:
+        plain_sentence = f"{completion_percentage}% completion. Room to close the gap."
+    else:
+        plain_sentence = f"{completion_percentage}% completion. This week's record is honest."
+
+    # ── best / worst day ─────────────────────────────────────────────────────
+    best_day_value  = most_productive_day["day_name"]   if most_productive_day  else "—"
+    best_day_label  = f"Best Day ({most_productive_day['completion_percentage']}%)"   if most_productive_day  else "Best Day"
+    worst_day_value = least_productive_day["day_name"]  if least_productive_day else "—"
+    worst_day_label = f"Worst Day ({least_productive_day['completion_percentage']}%)" if least_productive_day else "Worst Day"
 
     # ── arena breakdown ───────────────────────────────────────────────────────
-    arena_rows = ""
-    for arena in arenas:
-        pct = round((arena["completed"] / arena["total"] * 100) if arena["total"] > 0 else 0)
-        arena_rows += f"""
-        <tr>
-            <td style="padding:10px 0; border-bottom:1px solid {BORDER};">
-                <span style="display:inline-block; width:9px; height:9px; border-radius:50%;
-                             background:{arena['color']}; margin-right:8px; vertical-align:middle;"></span>
-                <span style="color:{TEXT}; font-size:13px;">{arena['name']}</span>
-            </td>
-            <td style="padding:10px 0; border-bottom:1px solid {BORDER}; text-align:right; color:{SECONDARY}; font-size:13px;">
-                {arena['completed']}/{arena['total']} &nbsp;·&nbsp; {arena['hours']}h &nbsp;·&nbsp; {pct}%
-            </td>
-        </tr>"""
+    def _arena_row_w(name: str, color: str, pct: int, hours: float, completed: int, total: int, is_last: bool, is_overall: bool = False) -> str:
+        border    = "" if is_last else f"border-bottom:1px solid {BORDER};"
+        bar_w     = max(pct, 2) if pct > 0 else 0
+        missed    = total == 0
+        name_col  = SECONDARY if missed else TEXT
+        pct_col   = MUTED if missed else color
+        bar_dim   = "opacity:0.25;" if missed else ""
 
-    best_day_value = most_productive_day["day_name"] if most_productive_day else "—"
-    best_day_label = f"Best Day ({most_productive_day['completion_percentage']}%)" if most_productive_day else "Best Day"
+        name_w    = "font-weight:700;" if is_overall else "font-weight:600;"
+        return (
+            f'<tr><td style="padding:12px 0; {border}">'
+            f'<table cellpadding="0" cellspacing="0" width="100%">'
+            f'<tr>'
+            f'<td style="vertical-align:middle;">'
+            f'<span style="font-size:13px; {name_w} color:{name_col};">{name}</span>'
+            f'</td>'
+            f'<td style="text-align:right; vertical-align:middle; white-space:nowrap;">'
+            f'<span style="font-size:11px; color:{MUTED};">{completed}/{total} &nbsp;·&nbsp; {hours}h &nbsp;&nbsp;</span>'
+            f'<span style="font-size:13px; font-weight:700; color:{pct_col};">{pct}%</span>'
+            f'</td>'
+            f'</tr>'
+            f'<tr><td colspan="2" style="padding-top:5px;">'
+            f'<div style="background:{BORDER}; border-radius:2px; height:3px; overflow:hidden;">'
+            f'<div style="background:{color}; height:3px; width:{bar_w}%; {bar_dim}"></div>'
+            f'</div></td></tr>'
+            f'</table></td></tr>'
+        )
+
+    # Merge task arenas with any missed arenas (in all_arenas but no tasks this week)
+    arena_names_with_tasks = {a["name"] for a in arenas}
+    full_arenas = list(arenas)
+    if all_arenas:
+        for a in all_arenas:
+            if a["name"] not in arena_names_with_tasks:
+                full_arenas.append({"name": a["name"], "color": a["color"], "total": 0, "completed": 0, "hours": 0.0})
+
+    # Sort: active arenas by completion % desc, missed arenas at the bottom
+    full_arenas.sort(
+        key=lambda a: (a["total"] > 0, (a["completed"] / a["total"] * 100) if a["total"] > 0 else 0),
+        reverse=True,
+    )
+
+    total_all     = sum(a["total"]     for a in full_arenas)
+    completed_all = sum(a["completed"] for a in full_arenas)
+    hours_all     = round(sum(a["hours"] for a in full_arenas), 1)
+    overall_pct   = round((completed_all / total_all * 100) if total_all > 0 else 0)
+
+    arena_rows = _arena_row_w("Overall", ORANGE, overall_pct, hours_all, completed_all, total_all, is_last=(len(full_arenas) == 0), is_overall=True)
+    for i, arena in enumerate(full_arenas):
+        pct = round((arena["completed"] / arena["total"] * 100) if arena["total"] > 0 else 0)
+        arena_rows += _arena_row_w(
+            arena["name"], arena["color"], pct, arena["hours"],
+            arena["completed"], arena["total"],
+            is_last=(i == len(full_arenas) - 1),
+        )
 
     html_body = f"""<!DOCTYPE html>
 <html>
@@ -361,28 +399,54 @@ async def send_weekly_summary_email(
 <div style="max-width:620px; margin:0 auto; padding:24px 16px;">
 
     <!-- header -->
-    <div style="background:{CARD}; border:1px solid {BORDER}; border-radius:10px 10px 0 0; padding:20px 24px; border-bottom:none;">
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-            <span style="font-size:18px; font-weight:700; color:{TEXT}; letter-spacing:-0.3px;">Markilius</span>
-            <span style="font-size:12px; color:{SECONDARY}; background:{SUBTLE}; border:1px solid {BORDER}; border-radius:20px; padding:4px 12px;">Week Summary</span>
-        </div>
-        <div style="margin-top:16px; padding-top:16px; border-top:1px solid {BORDER};">
-            <span style="font-size:14px; font-weight:500; color:{TEXT};">{week_label}</span>
+    <div style="background:{CARD}; border:1px solid {BORDER}; border-radius:10px 10px 0 0; padding:24px; border-bottom:none;">
+        <!-- brand logo -->
+        <a href="https://markilius.com" style="text-decoration:none; cursor:pointer; display:inline-block;">
+        <table cellpadding="0" cellspacing="0"><tr>
+            <td style="vertical-align:middle; padding-right:10px;">
+                <div style="width:26px; height:26px; background:{ORANGE}; border-radius:6px; text-align:center; line-height:26px; font-size:15px; color:#fff; font-weight:900; display:inline-block;">&#10003;</div>
+            </td>
+            <td style="vertical-align:middle;">
+                <span style="font-size:16px; font-weight:700; color:{ORANGE}; letter-spacing:-0.4px; line-height:1;">Markilius</span>
+            </td>
+        </tr></table>
+        </a>
+        <!-- week info -->
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid {BORDER};">
+            <div style="font-size:11px; font-weight:600; color:{SECONDARY}; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">Week Summary</div>
+            <div style="font-size:22px; font-weight:700; color:{TEXT}; letter-spacing:-0.4px;">{week_label_full}</div>
         </div>
     </div>
 
     <!-- body -->
     <div style="background:{CARD}; border:1px solid {BORDER}; border-radius:0 0 10px 10px; padding:24px; border-top:none;">
 
+        <!-- stat cards row 1 -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:8px;"><tr>
+            {stat_card(f"{completion_percentage}%", "Completion Rate", highlight=True)}
+            {stat_card(f"{completed_tasks}/{total_tasks}", "Tasks Completed")}
+            {stat_card(str(days_with_tasks), "Days Active")}
+        </tr></table>
+
+        <!-- stat cards row 2 -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;"><tr>
+            {stat_card(f"{total_hours}h", "Time Logged")}
+            {stat_card(best_day_value, best_day_label)}
+            {stat_card(worst_day_value, worst_day_label)}
+        </tr></table>
+
         {_render_weekly_chart(daily_breakdown) if daily_breakdown else ""}
 
-        {"<!-- arena breakdown -->" + f"""
+        <!-- arena breakdown -->
         <div style="font-size:11px; font-weight:600; color:{SECONDARY}; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px;">Arena Breakdown</div>
-        <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">{arena_rows}</table>""" if arena_rows else ""}
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">{arena_rows}</table>
+
+        <!-- plain sentence -->
+        <p style="color:{SECONDARY}; font-size:13px; margin:0 0 24px; padding:12px 14px; background:{SUBTLE}; border-radius:8px; border-left:3px solid {ORANGE};">{plain_sentence}</p>
 
         <!-- CTA -->
         <div style="text-align:center; margin-top:8px;">
-            <a href="{frontend_url}/week"
+            <a href="{frontend_url}/dashboard/week"
                style="background:{ORANGE}; color:#fff; padding:11px 28px; text-decoration:none;
                       border-radius:8px; display:inline-block; font-size:13px; font-weight:600; letter-spacing:0.2px;">
                 View your week
@@ -404,7 +468,7 @@ async def send_weekly_summary_email(
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
-        "subject": f"Week Summary — {week_label}",
+        "subject": f"Your Week — {week_label_short}",
         "html": html_body,
     })
 
@@ -429,6 +493,7 @@ async def send_monthly_summary_email(
     perfect_days: int = 0,
     most_productive_day: Optional[dict] = None,  # {date_label, completion_percentage}
     daily_breakdown: Optional[List[dict]] = None, # [{date, completion_percentage, total_tasks}]
+    all_arenas: Optional[List[dict]] = None,      # [{name, color}] — full arena list to surface missed arenas
 ):
     MAIL_FROM = _init()
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -476,20 +541,55 @@ async def send_monthly_summary_email(
     worst_week_str = fmt_week(worst_week) if worst_week else f"<span style='color:{MUTED}'>—</span>"
 
     # ── arena breakdown ───────────────────────────────────────────────────────
-    arena_rows = ""
-    for arena in arenas:
+    def _arena_row_m(name: str, color: str, pct: int, hours: float, completed: int, total: int, is_last: bool, is_overall: bool = False) -> str:
+        border   = "" if is_last else f"border-bottom:1px solid {BORDER};"
+        bar_w    = max(pct, 2) if pct > 0 else 0
+        missed   = total == 0
+        name_col = SECONDARY if missed else TEXT
+        pct_col  = MUTED if missed else color
+        bar_dim  = "opacity:0.25;" if missed else ""
+        name_w   = "font-weight:700;" if is_overall else "font-weight:600;"
+        return (
+            f'<tr><td style="padding:12px 0; {border}">'
+            f'<table cellpadding="0" cellspacing="0" width="100%">'
+            f'<tr>'
+            f'<td style="vertical-align:middle;">'
+            f'<span style="font-size:13px; {name_w} color:{name_col};">{name}</span>'
+            f'</td>'
+            f'<td style="text-align:right; vertical-align:middle; white-space:nowrap;">'
+            f'<span style="font-size:11px; color:{MUTED};">{completed}/{total} &nbsp;·&nbsp; {hours}h &nbsp;&nbsp;</span>'
+            f'<span style="font-size:13px; font-weight:700; color:{pct_col};">{pct}%</span>'
+            f'</td>'
+            f'</tr>'
+            f'<tr><td colspan="2" style="padding-top:5px;">'
+            f'<div style="background:{BORDER}; border-radius:2px; height:3px; overflow:hidden;">'
+            f'<div style="background:{color}; height:3px; width:{bar_w}%; {bar_dim}"></div>'
+            f'</div></td></tr>'
+            f'</table></td></tr>'
+        )
+
+    # Merge task arenas with any missed arenas
+    arena_names_with_tasks = {a["name"] for a in arenas}
+    full_arenas_m = list(arenas)
+    if all_arenas:
+        for a in all_arenas:
+            if a["name"] not in arena_names_with_tasks:
+                full_arenas_m.append({"name": a["name"], "color": a["color"], "total": 0, "completed": 0, "hours": 0.0})
+
+    full_arenas_m.sort(
+        key=lambda a: (a["total"] > 0, (a["completed"] / a["total"] * 100) if a["total"] > 0 else 0),
+        reverse=True,
+    )
+
+    total_all_m     = sum(a["total"]     for a in full_arenas_m)
+    completed_all_m = sum(a["completed"] for a in full_arenas_m)
+    hours_all_m     = round(sum(a["hours"] for a in full_arenas_m), 1)
+    overall_pct_m   = round((completed_all_m / total_all_m * 100) if total_all_m > 0 else 0)
+
+    arena_rows = _arena_row_m("Overall", ORANGE, overall_pct_m, hours_all_m, completed_all_m, total_all_m, is_last=(len(full_arenas_m) == 0), is_overall=True)
+    for i, arena in enumerate(full_arenas_m):
         pct = round((arena["completed"] / arena["total"] * 100) if arena["total"] > 0 else 0)
-        arena_rows += f"""
-        <tr>
-            <td style="padding:10px 0; border-bottom:1px solid {BORDER};">
-                <span style="display:inline-block; width:9px; height:9px; border-radius:50%;
-                             background:{arena['color']}; margin-right:8px; vertical-align:middle;"></span>
-                <span style="color:{TEXT}; font-size:13px;">{arena['name']}</span>
-            </td>
-            <td style="padding:10px 0; border-bottom:1px solid {BORDER}; text-align:right; color:{SECONDARY}; font-size:13px;">
-                {arena['completed']}/{arena['total']} &nbsp;·&nbsp; {arena['hours']}h &nbsp;·&nbsp; {pct}%
-            </td>
-        </tr>"""
+        arena_rows += _arena_row_m(arena["name"], arena["color"], pct, arena["hours"], arena["completed"], arena["total"], is_last=(i == len(full_arenas_m) - 1))
 
     best_day_value = most_productive_day["date_label"] if most_productive_day else "—"
     best_day_label = f"Most Productive ({most_productive_day['completion_percentage']}%)" if most_productive_day else "Most Productive"
@@ -500,13 +600,22 @@ async def send_monthly_summary_email(
 <div style="max-width:620px; margin:0 auto; padding:24px 16px;">
 
     <!-- header -->
-    <div style="background:{CARD}; border:1px solid {BORDER}; border-radius:10px 10px 0 0; padding:20px 24px; border-bottom:none;">
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-            <span style="font-size:18px; font-weight:700; color:{TEXT}; letter-spacing:-0.3px;">Markilius</span>
-            <span style="font-size:12px; color:{SECONDARY}; background:{SUBTLE}; border:1px solid {BORDER}; border-radius:20px; padding:4px 12px;">Monthly Review</span>
-        </div>
-        <div style="margin-top:16px; padding-top:16px; border-top:1px solid {BORDER};">
-            <span style="font-size:14px; font-weight:500; color:{TEXT};">{month_label}</span>
+    <div style="background:{CARD}; border:1px solid {BORDER}; border-radius:10px 10px 0 0; padding:24px; border-bottom:none;">
+        <!-- brand logo -->
+        <a href="https://markilius.com" style="text-decoration:none; cursor:pointer; display:inline-block;">
+        <table cellpadding="0" cellspacing="0"><tr>
+            <td style="vertical-align:middle; padding-right:10px;">
+                <div style="width:26px; height:26px; background:{ORANGE}; border-radius:6px; text-align:center; line-height:26px; font-size:15px; color:#fff; font-weight:900; display:inline-block;">&#10003;</div>
+            </td>
+            <td style="vertical-align:middle;">
+                <span style="font-size:16px; font-weight:700; color:{ORANGE}; letter-spacing:-0.4px; line-height:1;">Markilius</span>
+            </td>
+        </tr></table>
+        </a>
+        <!-- month info -->
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid {BORDER};">
+            <div style="font-size:11px; font-weight:600; color:{SECONDARY}; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;">Monthly Review</div>
+            <div style="font-size:22px; font-weight:700; color:{TEXT}; letter-spacing:-0.4px;">{month_label}</div>
         </div>
     </div>
 
@@ -572,7 +681,7 @@ async def send_monthly_summary_email(
 
         <!-- CTA -->
         <div style="text-align:center;">
-            <a href="{frontend_url}/month"
+            <a href="{frontend_url}/dashboard/month"
                style="background:{ORANGE}; color:#fff; padding:11px 28px; text-decoration:none;
                       border-radius:8px; display:inline-block; font-size:13px; font-weight:600; letter-spacing:0.2px;">
                 View full heatmap
@@ -594,6 +703,6 @@ async def send_monthly_summary_email(
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
-        "subject": f"Monthly Review — {month_label}",
+        "subject": f"Your Month — {month_label}",
         "html": html_body,
     })

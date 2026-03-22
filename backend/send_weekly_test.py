@@ -36,12 +36,20 @@ async def main():
             .all()
         )
 
+        # All non-archived arenas for this user (to surface missed arenas)
+        all_user_arenas = (
+            db.query(Arena)
+            .filter(Arena.user_id == USER_ID, Arena.is_archived == False)
+            .all()
+        )
+        all_arenas = [{"name": a.name, "color": a.color} for a in all_user_arenas]
+
         total = len(tasks)
         completed = sum(1 for t in tasks if t.is_completed)
         completion_pct = round((completed / total * 100) if total > 0 else 0)
         total_hours = round(sum((t.duration or 0) for t in tasks if t.is_completed) / 60, 1)
 
-        # Daily breakdown for 7-day overview
+        # Daily breakdown for chart + stat computation
         tasks_by_date: dict = {}
         current = START_DATE
         while current <= END_DATE:
@@ -55,7 +63,6 @@ async def main():
         for d, day_tasks in sorted(tasks_by_date.items()):
             dt = len(day_tasks)
             dc = sum(1 for t in day_tasks if t.is_completed)
-            # Arena hours per day (for bar chart)
             day_arena_map: dict = {}
             for t in day_tasks:
                 if t.arena:
@@ -75,16 +82,19 @@ async def main():
         days_with_tasks = sum(1 for d in daily_breakdown if d["total_tasks"] > 0)
         avg_tasks_per_day = round(total / days_with_tasks if days_with_tasks > 0 else 0, 1)
 
-        # Most productive day
+        # Best and worst day
         candidates = [d for d in daily_breakdown if d["total_tasks"] > 0]
         most_productive_day = None
+        least_productive_day = None
         if candidates:
             best = max(candidates, key=lambda d: (d["completion_percentage"], d["completed_tasks"]))
-            d_obj = date.fromisoformat(best["date"])
-            most_productive_day = {
-                "day_name": d_obj.strftime("%a"),
-                "completion_percentage": best["completion_percentage"],
-            }
+            worst = min(candidates, key=lambda d: (d["completion_percentage"], d["completed_tasks"]))
+            d_best  = date.fromisoformat(best["date"])
+            d_worst = date.fromisoformat(worst["date"])
+            most_productive_day  = {"day_name": d_best.strftime("%a"),  "completion_percentage": best["completion_percentage"]}
+            # Only show worst day if it's different from best
+            if worst["date"] != best["date"]:
+                least_productive_day = {"day_name": d_worst.strftime("%a"), "completion_percentage": worst["completion_percentage"]}
 
         arena_map: dict = {}
         for task in tasks:
@@ -121,7 +131,9 @@ async def main():
             avg_tasks_per_day=avg_tasks_per_day,
             days_with_tasks=days_with_tasks,
             most_productive_day=most_productive_day,
+            least_productive_day=least_productive_day,
             daily_breakdown=daily_breakdown,
+            all_arenas=all_arenas,
         )
         print("Done.")
     finally:
