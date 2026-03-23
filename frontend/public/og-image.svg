@@ -1,0 +1,158 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0d0d0d"/>
+
+  <!-- Brand logo — top left, sm size scaled 1.5x: icon 45px, text 24px -->
+  <g transform="translate(80, 55) scale(0.703)">
+    <rect x="9"  y="9"  width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="21" y="9"  width="10" height="10" rx="2" fill="rgba(249,115,22,0.5)"/>
+    <rect x="33" y="9"  width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="45" y="9"  width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="9"  y="21" width="10" height="10" rx="2" fill="rgba(249,115,22,0.5)"/>
+    <rect x="21" y="21" width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="33" y="21" width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="45" y="21" width="10" height="10" rx="2" fill="rgba(249,115,22,0.2)"/>
+    <rect x="9"  y="33" width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="21" y="33" width="10" height="10" rx="2" fill="rgba(249,115,22,0.5)"/>
+    <rect x="33" y="33" width="10" height="10" rx="2" fill="rgba(249,115,22,0.2)"/>
+    <rect x="45" y="33" width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="9"  y="45" width="10" height="10" rx="2" fill="#f97316"/>
+    <rect x="21" y="45" width="10" height="10" rx="2" fill="rgba(249,115,22,0.2)"/>
+    <rect x="33" y="45" width="10" height="10" rx="2" fill="rgba(249,115,22,0.5)"/>
+    <rect x="45" y="45" width="10" height="10" rx="2" fill="#f97316"/>
+  </g>
+  <text x="137" y="90" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="700" fill="#f97316" letter-spacing="-0.4">Markilius</text>
+
+  <!-- Tagline — hero text -->
+  <text x="80" y="290" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" fill="#f5f5f5" letter-spacing="-0.5">The gap between</text>
+  <text x="80" y="332" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" fill="#f5f5f5" letter-spacing="-0.5">who you are</text>
+  <text x="80" y="374" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" fill="#737373" letter-spacing="-0.5">and who you intend to be.</text>
+
+  <!-- Domain -->
+  <text x="80" y="555" font-family="Inter, system-ui, sans-serif" font-size="15" font-weight="400" fill="#606060">markilius.com</text>
+
+  <!-- Heatmap columns -->
+  <!-- Col 1 -->
+  <rect x="600" y="160" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="600" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="600" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="600" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="600" y="304" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="600" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.4"/>
+  <rect x="600" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.8"/>
+
+  <!-- Col 2 -->
+  <rect x="636" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="636" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="636" y="232" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="636" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+  <rect x="636" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="636" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="636" y="376" width="28" height="28" rx="4" fill="#1a1a1a"/>
+
+  <!-- Col 3 -->
+  <rect x="672" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+  <rect x="672" y="196" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="672" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="672" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="672" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="672" y="340" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="672" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+
+  <!-- Col 4 -->
+  <rect x="708" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="708" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="708" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="708" y="268" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="708" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.4"/>
+  <rect x="708" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="708" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+
+  <!-- Col 5 -->
+  <rect x="744" y="160" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="744" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.8"/>
+  <rect x="744" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+  <rect x="744" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="744" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="744" y="340" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="744" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+
+  <!-- Col 6 -->
+  <rect x="780" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="780" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="780" y="232" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="780" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.8"/>
+  <rect x="780" y="304" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="780" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="780" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+
+  <!-- Col 7 -->
+  <rect x="816" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="816" y="196" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="816" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="816" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="816" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="816" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="816" y="376" width="28" height="28" rx="4" fill="#1a1a1a"/>
+
+  <!-- Col 8 -->
+  <rect x="852" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.4"/>
+  <rect x="852" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="852" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="852" y="268" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="852" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="852" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="852" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+
+  <!-- Col 9 -->
+  <rect x="888" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="888" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+  <rect x="888" y="232" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="888" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="888" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.8"/>
+  <rect x="888" y="340" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="888" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+
+  <!-- Col 10 -->
+  <rect x="924" y="160" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="924" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="924" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="924" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="924" y="304" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="924" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.5"/>
+  <rect x="924" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+
+  <!-- Col 11 -->
+  <rect x="960" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.8"/>
+  <rect x="960" y="196" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="960" y="232" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="960" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.4"/>
+  <rect x="960" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="960" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="960" y="376" width="28" height="28" rx="4" fill="#1a1a1a"/>
+
+  <!-- Col 12 -->
+  <rect x="996" y="160" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="996" y="196" width="28" height="28" rx="4" fill="#f97316" opacity="0.7"/>
+  <rect x="996" y="232" width="28" height="28" rx="4" fill="#1a1a1a"/>
+  <rect x="996" y="268" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="996" y="304" width="28" height="28" rx="4" fill="#f97316" opacity="0.6"/>
+  <rect x="996" y="340" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+  <rect x="996" y="376" width="28" height="28" rx="4" fill="#f97316" opacity="0.9"/>
+
+  <!-- Fade overlays -->
+  <defs>
+    <linearGradient id="fadeLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d0d0d" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0d0d0d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fadeRight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d0d0d" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0d0d0d" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect x="580" y="140" width="60" height="280" fill="url(#fadeLeft)"/>
+  <rect x="1000" y="140" width="120" height="280" fill="url(#fadeRight)"/>
+
+</svg>
