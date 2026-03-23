@@ -225,167 +225,135 @@
     text-align: center;
 }
 
-/* --- Features grid --- */
-.landing-features-grid {
+/* --- Philosophy grid --- */
+.landing-philosophy-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
 }
 
-.landing-feature-card {
-    background: var(--color-bg-subtle);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 28px 24px;
-    transition: box-shadow 0.15s;
-}
-
-.landing-feature-card:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-}
-
-.landing-feature-icon {
-    font-size: 20px;
-    display: block;
-    margin-bottom: 14px;
-    color: var(--color-primary);
-    font-style: normal;
-}
-
-.landing-feature-title {
-    font-size: 15px;
-    font-weight: 700;
+.landing-philosophy-headline {
+    font-size: clamp(30px, 3.8vw, 50px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
     color: var(--color-text);
+    margin: 0;
+}
+
+.landing-philosophy-headline em {
+    font-style: italic;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.landing-philosophy-right {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-top: 6px;
+}
+
+.landing-philosophy-item {
+    border-left: 1px solid var(--color-border);
+    padding-left: 18px;
+}
+
+.landing-philosophy-item-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
     margin: 0 0 8px;
 }
 
-.landing-feature-desc {
+.landing-philosophy-item-body {
     font-size: 14px;
-    line-height: 1.65;
     color: var(--color-text-secondary);
+    line-height: 1.7;
     margin: 0;
 }
 
 /* --- How it works --- */
+.landing-how-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin: 0 0 40px;
+}
+
 .landing-steps {
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .landing-step {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 44px 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    padding: 32px 0;
+    border-top: 1px solid var(--color-border);
 }
 
-.landing-step-number {
+.landing-step:last-child {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.landing-step-num {
     font-size: 12px;
-    font-weight: 700;
-    color: var(--color-primary);
-    background: rgba(249, 115, 22, 0.1);
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding-top: 3px;
+    font-variant-numeric: tabular-nums;
 }
 
 .landing-step-title {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--color-text);
-    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+    line-height: 1.25;
+    margin: 0;
 }
 
-.landing-step-desc {
+.landing-step-body {
     font-size: 14px;
-    line-height: 1.65;
     color: var(--color-text-secondary);
+    line-height: 1.7;
     margin: 0;
 }
 
-/* --- Pricing CTA --- */
-.landing-pricing-cta {
+/* --- Final CTA --- */
+.landing-final {
     text-align: center;
-}
-
-.landing-pricing-cta-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 28px;
-}
-
-.landing-pricing-cta-title {
-    font-size: clamp(26px, 3.5vw, 40px);
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: var(--color-text);
-    margin: 0;
-}
-
-.landing-pricing-cta-sub {
-    font-size: 16px;
-    color: var(--color-text-secondary);
-    max-width: 460px;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.landing-pricing-pills {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.landing-pricing-pill {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 20px 32px;
+    padding: 120px 40px;
     background: var(--color-bg-subtle);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    min-width: 130px;
+    border-top: 1px solid var(--color-border);
 }
 
-.landing-pricing-pill-highlight {
-    border-color: var(--color-primary);
-    background: rgba(249, 115, 22, 0.05);
+.landing-final-inner {
+    max-width: 560px;
+    margin: 0 auto;
 }
 
-.landing-pricing-pill-badge {
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-weight: 700;
-    color: #fff;
-    background: var(--color-primary);
-    padding: 2px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-}
-
-.landing-pricing-pill-price {
-    font-size: 24px;
+.landing-final-headline {
+    font-size: clamp(40px, 6vw, 68px);
     font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
     color: var(--color-text);
+    margin: 0 0 40px;
 }
 
-.landing-pricing-pill-period {
-    font-size: 12px;
-    color: var(--color-text-muted);
+.landing-final-headline em {
+    font-style: italic;
+    color: var(--color-text-secondary);
+    font-weight: 700;
 }
 
 /* --- Footer --- */
@@ -434,10 +402,6 @@
 
 /* --- Responsive --- */
 @media (max-width: 900px) {
-    .landing-features-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .landing-hero {
         flex-direction: column;
         padding: 60px 24px 80px;
@@ -449,6 +413,20 @@
         width: 100%;
         max-width: 400px;
         margin: 0 auto;
+    }
+
+    .landing-philosophy-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .landing-step {
+        grid-template-columns: 44px 1fr;
+        gap: 20px;
+    }
+
+    .landing-step-body {
+        grid-column: 2;
     }
 }
 
@@ -473,18 +451,8 @@
         padding: 64px 20px;
     }
 
-    .landing-features-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .landing-pricing-pills {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .landing-pricing-pill {
-        width: 100%;
-        max-width: 240px;
+    .landing-final {
+        padding: 80px 20px;
     }
 
     .landing-footer {

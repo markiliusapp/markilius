@@ -83,16 +83,26 @@
 
 .heatmap-cell-day {
     opacity: 1;
+    max-height: 2em;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-height 0.15s ease;
 }
 
 .heatmap-cell-percentage {
     opacity: 0;
-    transition: opacity 0.15s ease;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-height 0.15s ease;
 }
 
-.heatmap-cell:hover .heatmap-cell-day,
-.heatmap-cell:hover .heatmap-cell-percentage {
+.heatmap-container:hover .heatmap-cell-percentage {
     opacity: 1;
+    max-height: 2em;
+}
+
+.heatmap-dates-hidden .heatmap-cell-day {
+    opacity: 0;
+    max-height: 0;
 }
 
 .heatmap-cell-today {

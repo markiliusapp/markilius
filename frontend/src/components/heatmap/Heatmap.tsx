@@ -9,9 +9,10 @@ interface HeatmapProps {
     completion: number;
     selectedArenaId?: number | null;
     onDayClick?: (date: string) => void;
+    showDates?: boolean;
 }
 
-const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }: HeatmapProps) => {
+const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick, showDates = true }: HeatmapProps) => {
     const getDaysInMonth = () => {
         return new Date(year, month, 0).getDate();
     };
@@ -62,7 +63,7 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick }:
     const displayCompletion = getMonthArenaCompletion();
 
     return (
-        <div className="heatmap-container">
+        <div className={`heatmap-container${showDates ? '' : ' heatmap-dates-hidden'}`}>
             <div className="heatmap-month-header">
                 <p className="month-completion">{Math.round(displayCompletion)|| 0}%</p>
                 <p className="heatmap-month-title">

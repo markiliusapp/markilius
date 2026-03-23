@@ -6,56 +6,6 @@ import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import './LandingPage.css';
 import Footer from '../../components/footer/Footer';
 
-const FEATURES = [
-    {
-        icon: '▦',
-        title: 'The Heatmap',
-        description: 'Every cell is a day. Every colour is an answer to one question: did you show up? The heatmap is not data — it is identity made visible.',
-    },
-    {
-        icon: '◈',
-        title: 'Arenas',
-        description: 'Divide your life into pillars — Work, Fitness, Learning, Creativity. Every task belongs to one. The heatmap breaks down by arena, not just overall.',
-    },
-    {
-        icon: '↻',
-        title: 'Recurring Commitments',
-        description: 'Log what you commit to once. Daily, weekends, monthly. The schedule is set. All that remains is whether you kept it.',
-    },
-    {
-        icon: '◎',
-        title: 'Sunday Summary',
-        description: 'Every Sunday morning, your week comes back to you. Not as a nudge — as a record. Your numbers, plainly. No spin.',
-    },
-    {
-        icon: '⊞',
-        title: 'The Public Profile',
-        description: 'A shareable heatmap at markilius.com/u/you. Proof of work. Not followers, not likes — just your record, visible.',
-    },
-    {
-        icon: '≡',
-        title: 'Honest Numbers',
-        description: 'Daily, weekly, monthly, yearly — your consistency, returned to you as data. No motivational language. Just the truth.',
-    },
-];
-
-const STEPS = [
-    {
-        number: '01',
-        title: 'Define your pillars',
-        description: 'Name the areas of your life that matter — Work, Fitness, Learning, whatever they are. Give each a colour. These are your arenas.',
-    },
-    {
-        number: '02',
-        title: 'Log your commitments',
-        description: 'Add what you plan to do. Set it to recur if it should. The input is simple. The log is honest.',
-    },
-    {
-        number: '03',
-        title: 'See your record',
-        description: 'Your heatmap fills in day by day. A green month feels earned. A grey one tells you something worth hearing.',
-    },
-];
 
 
 const LandingPage = () => {
@@ -68,7 +18,6 @@ const LandingPage = () => {
             <nav className="landing-nav">
                 <BrandLogo size="sm" />
                 <div className="landing-nav-links">
-                    <a href="#how-it-works" className="landing-nav-link">How it works</a>
                     <button className="landing-nav-link" onClick={() => navigate('/manifesto')}>Who it's for</button>
                     <button className="landing-nav-link" onClick={() => navigate('/pricing')}>Pricing</button>
                     {user ? (
@@ -121,69 +70,89 @@ const LandingPage = () => {
                 </blockquote>
             </div>
 
-            {/* Features */}
-            <section className="landing-section" id="features">
+            {/* Philosophy */}
+            <section className="landing-section">
                 <div className="landing-section-inner">
-                    <p className="landing-section-eyebrow">What it does</p>
-                    <h2 className="landing-section-title">Everything in service of the mirror.</h2>
-                    <div className="landing-features-grid">
-                        {FEATURES.map(f => (
-                            <div key={f.title} className="landing-feature-card">
-                                <span className="landing-feature-icon">{f.icon}</span>
-                                <h3 className="landing-feature-title">{f.title}</h3>
-                                <p className="landing-feature-desc">{f.description}</p>
+                    <div className="landing-philosophy-grid">
+                        <div className="landing-philosophy-left">
+                            <h2 className="landing-philosophy-headline">
+                                The gap between<br />
+                                <em>who you are</em><br />
+                                and who you<br />
+                                intend to be.
+                            </h2>
+                        </div>
+                        <div className="landing-philosophy-right">
+                            <div className="landing-philosophy-item">
+                                <p className="landing-philosophy-item-label">The mirror</p>
+                                <p className="landing-philosophy-item-body">Marcus Aurelius kept the Meditations not for an audience — but as a private confrontation with himself. Markilius is that practice made digital. Your record is your record.</p>
                             </div>
-                        ))}
+                            <div className="landing-philosophy-item">
+                                <p className="landing-philosophy-item-label">No judgment</p>
+                                <p className="landing-philosophy-item-body">The app doesn't motivate. It doesn't guilt. A 60% month isn't a failure — it's a number. What you do with it is yours.</p>
+                            </div>
+                            <div className="landing-philosophy-item">
+                                <p className="landing-philosophy-item-label">The lock</p>
+                                <p className="landing-philosophy-item-body">Once a deadline passes, that task is sealed. You cannot go back. You cannot quietly delete the evidence. Your record is permanent, exactly like it should be.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
+
+            {/* Quote */}
+            <div className="landing-quote">
+                <blockquote>
+                    "You have power over your mind — not outside events. Realize this, and you will find strength."
+                    <cite>— Marcus Aurelius, Meditations</cite>
+                </blockquote>
+            </div>
 
             {/* How it works */}
-            <section className="landing-section landing-section-alt" id="how-it-works">
+            <section className="landing-section" id="how">
                 <div className="landing-section-inner">
-                    <p className="landing-section-eyebrow">How it works</p>
-                    <h2 className="landing-section-title">Three steps. No fluff.</h2>
+                    <p className="landing-how-label">How it works</p>
                     <div className="landing-steps">
-                        {STEPS.map(s => (
-                            <div key={s.number} className="landing-step">
-                                <span className="landing-step-number">{s.number}</span>
-                                <div>
-                                    <h3 className="landing-step-title">{s.title}</h3>
-                                    <p className="landing-step-desc">{s.description}</p>
-                                </div>
-                            </div>
-                        ))}
+                        <div className="landing-step">
+                            <span className="landing-step-num">01</span>
+                            <h3 className="landing-step-title">Set your arenas</h3>
+                            <p className="landing-step-body">Arenas are your life pillars — Fitness, Learning, Work, whatever matters to you. Every task belongs to one. No untagged tasks, no vague intentions.</p>
+                        </div>
+                        <div className="landing-step">
+                            <span className="landing-step-num">02</span>
+                            <h3 className="landing-step-title">Log what you intend to do</h3>
+                            <p className="landing-step-body">Add tasks with deadlines. Not aspirations — commitments. The app records what you said you'd do.</p>
+                        </div>
+                        <div className="landing-step">
+                            <span className="landing-step-num">03</span>
+                            <h3 className="landing-step-title">Show up — or don't</h3>
+                            <p className="landing-step-body">When the deadline passes, the task locks. Permanently. You complete it or you don't. Either way, the heatmap remembers.</p>
+                        </div>
+                        <div className="landing-step">
+                            <span className="landing-step-num">04</span>
+                            <h3 className="landing-step-title">Read your record</h3>
+                            <p className="landing-step-body">The heatmap is your year, made visible. Every Sunday, a plain summary of your week. Every month, your number — no commentary, no spin.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Pricing CTA */}
-            <section className="landing-section landing-pricing-cta">
-                <div className="landing-section-inner landing-pricing-cta-inner">
-                    <h2 className="landing-pricing-cta-title">One price. Everything included.</h2>
-                    <p className="landing-pricing-cta-sub">
-                        No locked tiers. No feature upsells. Pay once or monthly — all features, always.
-                    </p>
-                    <div className="landing-pricing-pills">
-                        <div className="landing-pricing-pill">
-                            <span className="landing-pricing-pill-price">$2.99</span>
-                            <span className="landing-pricing-pill-period">/ month</span>
-                        </div>
-                        <div className="landing-pricing-pill landing-pricing-pill-highlight">
-                            <span className="landing-pricing-pill-badge">Best value</span>
-                            <span className="landing-pricing-pill-price">$19.99</span>
-                            <span className="landing-pricing-pill-period">/ year</span>
-                        </div>
-                        <div className="landing-pricing-pill">
-                            <span className="landing-pricing-pill-price">$39.99</span>
-                            <span className="landing-pricing-pill-period">lifetime</span>
-                        </div>
-                    </div>
-                    <button className="landing-btn-primary landing-btn-lg" onClick={() => navigate('/pricing')}>
-                        See full pricing
+            {/* Final CTA */}
+            <div className="landing-final">
+                <div className="landing-final-inner">
+                    <h2 className="landing-final-headline">
+                        This is your<br />
+                        <em>record.</em><br />
+                        It starts today.
+                    </h2>
+                    <button
+                        className="landing-btn-primary landing-btn-lg"
+                        onClick={() => navigate(user ? '/dashboard' : '/register')}
+                    >
+                        {user ? 'Go to your record' : 'Get started'}
                     </button>
                 </div>
-            </section>
+            </div>
 
             <Footer />
         </div>

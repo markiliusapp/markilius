@@ -176,6 +176,7 @@ const YearPage = () => {
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [compactView, setCompactView] = useState(false)
+    const [showDates, setShowDates] = useState(true)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedChartArenaId, setSelectedChartArenaId] = useState<number | null>(null)
     const [chartLayout, setChartLayout] = useState<ChartLayout>('grouped')
@@ -312,9 +313,6 @@ const YearPage = () => {
         () => makeYearStackedShape(visibleChartArenas, chartYMax, effectiveChartSortOrder),
         [visibleChartArenas, chartYMax, effectiveChartSortOrder]
     )
-    const chartBarSize = chartLayout === 'stacked'
-        ? Math.max(12, Math.min(40, Math.floor(200 / (monthlyChartData.length || 12))))
-        : Math.max(20, Math.min(64, Math.floor(320 / (monthlyChartData.length || 12))))
 
     if (loading) {
         return (
@@ -382,6 +380,14 @@ const YearPage = () => {
                                 )}
                             </div>
                         )}
+                        <button className={`compact-toggle ${!showDates ? 'active' : ''}`} onClick={() => setShowDates(!showDates)} title={showDates ? 'Hide dates' : 'Show dates'}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="8" height="8" rx="1" />
+                                <line x1="14" y1="6" x2="21" y2="6" />
+                                <line x1="14" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
                         <button className={`compact-toggle ${compactView ? 'active' : ''}`} onClick={() => setCompactView(!compactView)} title={compactView ? 'Expand' : 'Compact'}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 {compactView ? (
@@ -434,6 +440,7 @@ const YearPage = () => {
                                                 completion={getMonthCompletion(month)}
                                                 selectedArenaId={selectedArenaId}
                                                 onDayClick={handleDayClick}
+                                                showDates={showDates}
                                             />
                                         </div>
                                     ))}
@@ -524,7 +531,7 @@ const YearPage = () => {
                     <div className="year-bar-chart">
                         <div className="year-bar-chart-inner">
                         <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={chartDataWithAnchor} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%" barSize={chartBarSize}>
+                            <BarChart data={chartDataWithAnchor} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%">
                                 <XAxis
                                     dataKey="month"
                                     tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
