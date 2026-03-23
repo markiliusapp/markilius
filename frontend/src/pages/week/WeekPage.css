@@ -318,6 +318,14 @@
 }
 
 @media (max-width: 768px) {
+    .week-header {
+        justify-content: space-between;
+    }
+
+    .week-header .header-actions {
+        position: static;
+    }
+
     .week-grid {
         grid-template-columns: repeat(7, minmax(300px, 1fr));
     }

@@ -227,8 +227,7 @@
 
 @media (max-width: 768px) {
     .year-header {
-        flex-direction: column;
-        gap: 12px;
+        justify-content: space-between;
     }
 
     .year-header .header-actions {

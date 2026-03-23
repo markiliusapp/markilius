@@ -302,6 +302,14 @@
 }
 
 @media (max-width: 768px) {
+    .month-header {
+        justify-content: space-between;
+    }
+
+    .month-header .header-actions {
+        position: static;
+    }
+
     .month-content {
         gap: 16px;
     }
