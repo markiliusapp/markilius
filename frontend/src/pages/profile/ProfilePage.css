@@ -285,3 +285,70 @@
     font-size: 13px;
     color: var(--color-text-secondary);
 }
+
+/* Danger zone */
+
+.profile-btn--secondary {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.profile-btn--secondary:hover {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+.profile-btn--danger {
+    background-color: var(--color-error);
+    color: #fff;
+    border: none;
+}
+
+.profile-btn--danger:hover:not(:disabled) {
+    opacity: 0.88;
+}
+
+.profile-btn--danger:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.delete-confirm-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.delete-confirm-input {
+    width: 100%;
+    padding: 10px 13px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+    outline: none;
+}
+
+.delete-confirm-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.delete-confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.spinner--danger {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+}

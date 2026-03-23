@@ -13,6 +13,7 @@ from app.schemas.user import (
 )
 import uuid
 from app.models.arena import Arena
+from app.models.task import Task
 from app.models.user import User
 from app.utils.auth import (
     hash_password,
@@ -301,6 +302,17 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 
     access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_account(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    db.query(Task).filter(Task.user_id == current_user.id).delete()
+    db.query(Arena).filter(Arena.user_id == current_user.id).delete()
+    db.delete(current_user)
+    db.commit()
 
 
 @router.post("/resend-verification")

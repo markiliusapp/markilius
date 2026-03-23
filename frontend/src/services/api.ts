@@ -9,6 +9,9 @@ const getToken = (): string | null => {
 // Helper to handle API responses
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
+        if (response.status === 401) {
+            window.dispatchEvent(new CustomEvent('session-expired'));
+        }
         let errorMessage = "An error occurred"
         try {
             const errorData = await response.json()
@@ -103,6 +106,13 @@ export const authAPI = {
             body: JSON.stringify(data)
         });
         return handleResponse(response);
+    },
+    deleteMe: async () => {
+        const response = await fetch(`${API_URL}/auth/me`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) return handleResponse(response);
     },
 }
 

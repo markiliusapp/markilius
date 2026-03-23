@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/authContext';
 import { authAPI, paymentAPI } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashBoardLayout';
 import './ProfilePage.css';
 
 const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const ProfilePage = () => {
-    const { user, refreshUser } = useAuth();
+    const { user, refreshUser, logout } = useAuth();
+    const navigate = useNavigate();
 
     const [infoForm, setInfoForm] = useState({
         first_name: user?.first_name || '',
@@ -37,6 +39,11 @@ const ProfilePage = () => {
     const [prefLoading, setPrefLoading] = useState(false);
     const [prefSuccess, setPrefSuccess] = useState('');
     const [prefError, setPrefError] = useState('');
+
+    const [deleteConfirm, setDeleteConfirm] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const handleInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -82,6 +89,19 @@ const ProfilePage = () => {
             setPrefError(err instanceof Error ? err.message : 'Failed to save preferences.');
         } finally {
             setPrefLoading(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        setDeleteLoading(true);
+        setDeleteError('');
+        try {
+            await authAPI.deleteMe();
+            logout();
+            navigate('/');
+        } catch (err: unknown) {
+            setDeleteError(err instanceof Error ? err.message : 'Failed to delete account.');
+            setDeleteLoading(false);
         }
     };
 
@@ -327,6 +347,54 @@ const ProfilePage = () => {
                             <p className="billing-hint">
                                 Update your payment method, view invoices, or cancel your subscription via the billing portal.
                             </p>
+                        )}
+                    </div>
+
+                    {/* Delete Account */}
+                    <div className="profile-card profile-card--danger">
+                        <h2 className="profile-card-title">Delete Account</h2>
+                        <p className="profile-card-subtitle">
+                            Permanently delete your account and all data. This cannot be undone.
+                        </p>
+
+                        {deleteError && <div className="profile-error">{deleteError}</div>}
+
+                        {!showDeleteConfirm ? (
+                            <button
+                                type="button"
+                                className="profile-btn profile-btn--danger"
+                                onClick={() => setShowDeleteConfirm(true)}
+                            >
+                                Delete Account
+                            </button>
+                        ) : (
+                            <div className="delete-confirm">
+                                <p className="delete-confirm-label">Type your email to confirm:</p>
+                                <input
+                                    type="email"
+                                    className="delete-confirm-input"
+                                    placeholder={user?.email}
+                                    value={deleteConfirm}
+                                    onChange={e => setDeleteConfirm(e.target.value)}
+                                />
+                                <div className="delete-confirm-actions">
+                                    <button
+                                        type="button"
+                                        className="profile-btn profile-btn--secondary"
+                                        onClick={() => { setShowDeleteConfirm(false); setDeleteConfirm(''); setDeleteError(''); }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="profile-btn profile-btn--danger"
+                                        disabled={deleteConfirm !== user?.email || deleteLoading}
+                                        onClick={handleDeleteAccount}
+                                    >
+                                        {deleteLoading ? <><span className="spinner spinner--danger" />Deleting...</> : 'Confirm Delete'}
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
 

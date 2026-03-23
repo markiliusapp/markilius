@@ -2,7 +2,7 @@ import { useState } from "react";
 import AuthHeader from '../../components/authHeader/AuthHeader';
 import { authAPI } from '../../services/api'
 import type { LoginUser } from "@/types";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
 import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
@@ -20,6 +20,8 @@ const Login = () => {
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
     const [resendSent, setResendSent] = useState(false)
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const sessionExpired = searchParams.get('expired') === 'true';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -74,6 +76,16 @@ const Login = () => {
                 <div className="login-card">
                     <h2 className="login-card-title">Welcome back</h2>
                     <p className="login-card-subtitle">Your record is waiting.</p>
+
+                    {/* Session expired */}
+                    {sessionExpired && !error && (
+                        <div className="login-warning">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <p>Your session has expired. Sign in to continue.</p>
+                        </div>
+                    )}
 
                     {/* Error */}
                     {error && (

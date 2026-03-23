@@ -17,6 +17,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         checkAuth();
     }, []);
 
+    useEffect(() => {
+        const handleSessionExpired = () => {
+            localStorage.removeItem('token');
+            setAuthState({ user: null, loading: false });
+            window.location.href = '/login?expired=true';
+        };
+        window.addEventListener('session-expired', handleSessionExpired);
+        return () => window.removeEventListener('session-expired', handleSessionExpired);
+    }, []);
+
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
 
