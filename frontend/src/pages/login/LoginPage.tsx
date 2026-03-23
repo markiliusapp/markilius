@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AuthHeader from '../../components/authHeader/AuthHeader';
 import { authAPI } from '../../services/api'
 import type { LoginUser } from "@/types";
@@ -21,7 +21,14 @@ const Login = () => {
     const [resendSent, setResendSent] = useState(false)
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const sessionExpired = searchParams.get('expired') === 'true';
+    const [sessionExpired, setSessionExpired] = useState(searchParams.get('expired') === 'true');
+
+    useEffect(() => {
+        if (sessionExpired) {
+            const timer = setTimeout(() => setSessionExpired(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -79,10 +86,7 @@ const Login = () => {
 
                     {/* Session expired */}
                     {sessionExpired && !error && (
-                        <div className="login-warning">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                            </svg>
+                        <div className="login-notice">
                             <p>Your session has expired. Sign in to continue.</p>
                         </div>
                     )}
