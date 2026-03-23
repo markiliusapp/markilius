@@ -158,7 +158,7 @@
 }
 
 .user-menu-item--danger:hover {
-    background-color: var(--color-error-bg);
+    background-color: var(--color-bg-subtle);
     color: var(--color-error);
 }
 

@@ -119,6 +119,50 @@
     color: var(--color-text-muted);
 }
 
+.duration-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.duration-pill {
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.duration-pill:hover {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-text-muted);
+}
+
+.duration-pill--active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+}
+
+.duration-pill--active:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    color: #fff;
+}
+
+.duration-custom-input {
+    width: 90px !important;
+    padding: 5px 10px !important;
+    font-size: 13px !important;
+    margin-bottom: 0 !important;
+}
+
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;

@@ -111,35 +111,54 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
                         onSelect={(arenaId) => setFormData(prev => ({ ...prev, arena_id: arenaId }))}
                         onArenaChange={onArenaChange}
                     />
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="frequency">Frequency</label>
-                            <div className={`select-wrapper ${editMode ? 'select-wrapper-disabled' : ''}`}>
-                                <select
-                                    id="frequency"
-                                    name="frequency"
-                                    value={formData.frequency ?? "once"}
-                                    onChange={handleChange}
-                                    disabled={editMode}
-                                >
-                                    <option value="once">Once</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="saturday">Every Saturday</option>
-                                    <option value="sunday">Every Sunday</option>
-                                    <option value="weekends">Weekends</option>
-                                    <option value="monthly">Monthly</option>
-                                </select>
-                                {editMode && (
-                                    <div className="select-tooltip">
-                                        To change frequency, delete and recreate the task.
-                                    </div>
-                                )}
-                            </div>
+                    <div className="form-group">
+                        <label htmlFor="frequency">Frequency</label>
+                        <div className={`select-wrapper ${editMode ? 'select-wrapper-disabled' : ''}`}>
+                            <select
+                                id="frequency"
+                                name="frequency"
+                                value={formData.frequency ?? "once"}
+                                onChange={handleChange}
+                                disabled={editMode}
+                            >
+                                <option value="once">Once</option>
+                                <option value="daily">Daily</option>
+                                <option value="saturday">Every Saturday</option>
+                                <option value="sunday">Every Sunday</option>
+                                <option value="weekends">Weekends</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                            {editMode && (
+                                <div className="select-tooltip">
+                                    To change frequency, delete and recreate the task.
+                                </div>
+                            )}
                         </div>
+                    </div>
 
-                        <div className="form-group">
-                            <label htmlFor="duration">Duration (minutes)</label>
-                            <input id="duration" type="number" name="duration" placeholder="e.g. 30" value={formData.duration ?? ""} onChange={handleChange} min="1" />
+                    <div className="form-group">
+                        <label>Duration</label>
+                        <div className="duration-pills">
+                            {[15, 30, 45, 60, 90, 120].map(min => (
+                                <button
+                                    key={min}
+                                    type="button"
+                                    className={`duration-pill${formData.duration === min ? ' duration-pill--active' : ''}`}
+                                    onClick={() => setFormData(prev => ({ ...prev, duration: prev.duration === min ? undefined : min }))}
+                                >
+                                    {min >= 60 ? `${min / 60}h` : `${min}m`}
+                                </button>
+                            ))}
+                            <input
+                                id="duration"
+                                type="number"
+                                name="duration"
+                                placeholder="Custom"
+                                value={[15, 30, 45, 60, 90, 120].includes(formData.duration ?? 0) ? "" : (formData.duration ?? "")}
+                                onChange={handleChange}
+                                min="1"
+                                className="duration-custom-input"
+                            />
                         </div>
                     </div>
 
