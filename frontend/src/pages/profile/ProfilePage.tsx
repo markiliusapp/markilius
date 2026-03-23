@@ -286,7 +286,7 @@ const ProfilePage = () => {
                         <div className="pref-row">
                             <div className="pref-info">
                                 <span className="pref-label">Weekly Summary Email</span>
-                                <span className="pref-desc">Sent Sunday at 8 AM · {detectedTimezone}</span>
+                                <span className="pref-desc">Sent Sunday at 8 AM · {user?.timezone || detectedTimezone}</span>
                             </div>
                             <button
                                 className={`toggle-btn ${weeklyEmail ? 'toggle-btn--on' : ''}`}
@@ -299,7 +299,7 @@ const ProfilePage = () => {
                         <div className="pref-row">
                             <div className="pref-info">
                                 <span className="pref-label">Monthly Summary Email</span>
-                                <span className="pref-desc">Sent on the 1st of every month · {detectedTimezone}</span>
+                                <span className="pref-desc">Sent on the 1st of every month · {user?.timezone || detectedTimezone}</span>
                             </div>
                             <button
                                 className={`toggle-btn ${monthlyEmail ? 'toggle-btn--on' : ''}`}

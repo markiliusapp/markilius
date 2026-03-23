@@ -27,6 +27,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return () => window.removeEventListener('session-expired', handleSessionExpired);
     }, []);
 
+    const syncTimezone = async (userData: User) => {
+        const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (detectedTz && detectedTz !== userData.timezone) {
+            try {
+                await authAPI.updateMe({ timezone: detectedTz });
+            } catch {
+                // silently fail — not critical
+            }
+        }
+    };
+
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
 
@@ -38,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authAPI.getMe();
             setAuthState({ user: userData, loading: false })
+            syncTimezone(userData);
         } catch (err) {
             localStorage.removeItem('token');
             setAuthState({ user: null, loading: false })
@@ -49,6 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authAPI.getMe()
             setAuthState({ user: userData, loading: false })
+            syncTimezone(userData);
             const isSubscribed = userData.subscription_status === 'active' || userData.subscription_status === 'lifetime';
             navigate(isSubscribed ? "/dashboard" : "/pricing")
         } catch (err) {

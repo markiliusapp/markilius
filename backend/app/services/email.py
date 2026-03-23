@@ -448,7 +448,7 @@ async def send_weekly_summary_email(
         <div style="margin-top:28px; padding-top:20px; border-top:1px solid {BORDER}; text-align:center;">
             <p style="color:{MUTED}; font-size:11px; margin:0;">
                 Markilius · your identity made visible &nbsp;·&nbsp;
-                <a href="{frontend_url}/profile" style="color:{SECONDARY}; text-decoration:none;">Manage preferences</a>
+                <a href="{frontend_url}/dashboard/profile" style="color:{SECONDARY}; text-decoration:none;">Manage preferences</a>
             </p>
         </div>
     </div>
@@ -680,7 +680,7 @@ async def send_monthly_summary_email(
         <div style="margin-top:28px; padding-top:20px; border-top:1px solid {BORDER}; text-align:center;">
             <p style="color:{MUTED}; font-size:11px; margin:0;">
                 Markilius · your identity made visible &nbsp;·&nbsp;
-                <a href="{frontend_url}/profile" style="color:{SECONDARY}; text-decoration:none;">Manage preferences</a>
+                <a href="{frontend_url}/dashboard/profile" style="color:{SECONDARY}; text-decoration:none;">Manage preferences</a>
             </p>
         </div>
     </div>
