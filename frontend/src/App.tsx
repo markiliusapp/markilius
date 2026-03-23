@@ -18,9 +18,11 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import LandingPage from './pages/landing/LandingPage';
 import OnboardingPage from './pages/onboarding/OnboardingPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
+import TermsPage from './pages/legal/TermsPage';
 import AboutPage from './pages/legal/AboutPage';
 import ContactPage from './pages/legal/ContactPage';
 import ManifestoPage from './pages/manifesto/ManifestoPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 const RootRoute = () => {
   const { user, loading } = useAuth();
@@ -79,9 +81,11 @@ function App() {
           } />
           <Route path="/u/:publicId" element={<PublicProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/manifesto" element={<ManifestoPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

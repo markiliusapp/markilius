@@ -16,6 +16,7 @@ const Footer = () => {
                     <a href="/manifesto">Who it's for</a>
                     <a href="/about">About</a>
                     <a href="/privacy">Privacy</a>
+                    <a href="/terms">Terms</a>
                     <a href="/contact">Contact</a>
                 </nav>
                 <p className="site-footer-copy">© {new Date().getFullYear()} Markilius</p>
