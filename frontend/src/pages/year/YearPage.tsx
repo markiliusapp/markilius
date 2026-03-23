@@ -405,13 +405,13 @@ const YearPage = () => {
                             </button>
                             {viewOpen && (
                                 <div className="share-dropdown view-dropdown">
-                                    <button className="view-dropdown-row" onClick={() => setShowDates(v => !v)}>
+                                    <button className={`view-dropdown-row${compactView ? ' view-dropdown-row--disabled' : ''}`} onClick={() => !compactView && setShowDates(v => !v)}>
                                         <span>Day numbers</span>
-                                        {showDates && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                                        {showDates && !compactView && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                                     </button>
-                                    <button className="view-dropdown-row" onClick={() => setShowPercentage(v => !v)}>
+                                    <button className={`view-dropdown-row${compactView ? ' view-dropdown-row--disabled' : ''}`} onClick={() => !compactView && setShowPercentage(v => !v)}>
                                         <span>Completion %</span>
-                                        {showPercentage && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                                        {showPercentage && !compactView && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                                     </button>
                                     <button className="view-dropdown-row" onClick={() => setCompactView(v => !v)}>
                                         <span>Compact view</span>

@@ -95,7 +95,7 @@
     transition: opacity 0.15s ease, max-height 0.15s ease;
 }
 
-.heatmap-container:hover .heatmap-cell-percentage {
+.heatmap-pct-visible .heatmap-cell-percentage {
     opacity: 1;
     max-height: 2em;
 }
@@ -198,6 +198,7 @@
     .heatmap-cell-percentage {
         display: none;
     }
+
 
     .heatmap-cell-today {
         border-color: transparent;

@@ -10,9 +10,10 @@ interface HeatmapProps {
     selectedArenaId?: number | null;
     onDayClick?: (date: string) => void;
     showDates?: boolean;
+    showPercentage?: boolean;
 }
 
-const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick, showDates = true }: HeatmapProps) => {
+const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick, showDates = true, showPercentage = false }: HeatmapProps) => {
     const getDaysInMonth = () => {
         return new Date(year, month, 0).getDate();
     };
@@ -63,7 +64,7 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick, s
     const displayCompletion = getMonthArenaCompletion();
 
     return (
-        <div className={`heatmap-container${showDates ? '' : ' heatmap-dates-hidden'}`}>
+        <div className={`heatmap-container${showDates ? '' : ' heatmap-dates-hidden'}${showPercentage ? ' heatmap-pct-visible' : ''}`}>
             <div className="heatmap-month-header">
                 <p className="month-completion">{Math.round(displayCompletion)|| 0}%</p>
                 <p className="heatmap-month-title">
