@@ -315,7 +315,9 @@ const YearPage = () => {
         : monthlyChartData.reduce((sum, d) => sum + (d.total || 0), 0) / (monthlyChartData.length || 1)
     const chartVisibleMax = selectedChartArenaId
         ? Math.max(...monthlyChartData.map(d => d[`arena_${selectedChartArenaId}`] || 0), chartAverage)
-        : Math.max(...monthlyChartData.map(d => d.total || 0), chartAverage)
+        : chartLayout === 'grouped'
+            ? Math.max(...monthlyChartData.flatMap(d => arenas.map(a => d[`arena_${a.arena_id}`] || 0)), chartAverage)
+            : Math.max(...monthlyChartData.map(d => d.total || 0), chartAverage)
     const chartYMax = chartVisibleMax > 0 ? Math.ceil(chartVisibleMax) : 1
     const chartDataWithAnchor = monthlyChartData.map(p => ({ ...p, _yAnchor: chartYMax }))
     const chartGroupedShape = useMemo(
