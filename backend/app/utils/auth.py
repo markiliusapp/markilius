@@ -2,6 +2,9 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 import os
+import hmac
+import hashlib
+import base64
 from dotenv import load_dotenv
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, Depends, status
@@ -26,6 +29,25 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+
+
+def generate_unsubscribe_token(email: str, email_type: str) -> str:
+    payload = f"{email}:{email_type}"
+    sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return base64.urlsafe_b64encode(f"{payload}:{sig}".encode()).decode()
+
+
+def verify_unsubscribe_token(token: str):
+    try:
+        decoded = base64.urlsafe_b64decode(token.encode() + b"==").decode()
+        email, email_type, sig = decoded.rsplit(":", 2)
+        payload = f"{email}:{email_type}"
+        expected = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return None
+        return email, email_type
+    except Exception:
+        return None
 
 
 def create_access_token(data: dict):

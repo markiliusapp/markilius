@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    password: str
+    password: str = Field(min_length=10)
 
 
 class UserResponse(BaseModel):
@@ -46,7 +46,7 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+    new_password: str = Field(min_length=10)
 
 
 class ResendVerificationRequest(BaseModel):
@@ -58,7 +58,7 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     current_password: Optional[str] = None
-    new_password: Optional[str] = None
+    new_password: Optional[str] = Field(default=None, min_length=10)
     weekly_email: Optional[bool] = None
     monthly_email: Optional[bool] = None
     timezone: Optional[str] = None

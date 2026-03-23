@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from typing import List, Optional
 import os
 from dotenv import load_dotenv
+from app.utils.auth import generate_unsubscribe_token
 
 load_dotenv()
 
@@ -455,11 +456,17 @@ async def send_weekly_summary_email(
 </body>
 </html>"""
 
+    api_url = os.getenv("API_URL", "http://localhost:8000")
+    unsubscribe_url = f"{api_url}/auth/unsubscribe?token={generate_unsubscribe_token(email, 'weekly')}&type=weekly"
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
         "subject": f"Your Week — {week_label_short}",
         "html": html_body,
+        "headers": {
+            "List-Unsubscribe": f"<{unsubscribe_url}>",
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
     })
 
 
@@ -681,9 +688,15 @@ async def send_monthly_summary_email(
 </body>
 </html>"""
 
+    api_url = os.getenv("API_URL", "http://localhost:8000")
+    unsubscribe_url = f"{api_url}/auth/unsubscribe?token={generate_unsubscribe_token(email, 'monthly')}&type=monthly"
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
         "subject": f"Your Month — {month_label}",
         "html": html_body,
+        "headers": {
+            "List-Unsubscribe": f"<{unsubscribe_url}>",
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
     })

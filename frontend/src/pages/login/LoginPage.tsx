@@ -8,6 +8,7 @@ import HeatmapMock from '../../components/heatmapMock/HeatmapMock';
 import { MOCK_CELLS, MOCK_ARENAS } from '../../components/heatmapMock/mockData';
 import './Login.css'
 import { useAuth } from "@/context/authContext";
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 
 const Login = () => {
     const { login } = useAuth()
@@ -22,6 +23,14 @@ const Login = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [sessionExpired, setSessionExpired] = useState(searchParams.get('expired') === 'true');
+    const accountDeleted = searchParams.get('deleted') === 'true';
+
+    useDismissOnClick(() => {
+        setError(null)
+        setSessionExpired(false)
+        setUnverifiedEmail(null)
+        setResendSent(false)
+    }, !!(error || sessionExpired || unverifiedEmail || resendSent))
 
     useEffect(() => {
         if (sessionExpired) {
@@ -51,6 +60,8 @@ const Login = () => {
             const message = err instanceof Error ? err.message : 'Login failed'
             if (message.includes('Email not verified')) {
                 setUnverifiedEmail(formData.email)
+            } else if (message.includes('Rate limit exceeded') || message.includes('Too Many Requests')) {
+                setError('Too many attempts. Wait a minute and try again.')
             } else {
                 setError(message)
             }
@@ -84,8 +95,15 @@ const Login = () => {
                     <h2 className="login-card-title">Welcome back</h2>
                     <p className="login-card-subtitle">Your record is waiting.</p>
 
+                    {/* Account deleted */}
+                    {accountDeleted && (
+                        <div className="login-notice">
+                            <p>Your account has been deleted.</p>
+                        </div>
+                    )}
+
                     {/* Session expired */}
-                    {sessionExpired && !error && (
+                    {sessionExpired && !error && !accountDeleted && (
                         <div className="login-notice">
                             <p>Your session has expired. Sign in to continue.</p>
                         </div>

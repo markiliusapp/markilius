@@ -4,6 +4,7 @@ import { authAPI, paymentAPI } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashBoardLayout';
 import './ProfilePage.css';
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 
 const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -44,6 +45,14 @@ const ProfilePage = () => {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    useDismissOnClick(() => {
+        setInfoError(''); setInfoSuccess('');
+        setPasswordError(''); setPasswordSuccess('');
+        setBillingError('');
+        setPrefError(''); setPrefSuccess('');
+        setDeleteError('');
+    }, !!(infoError || infoSuccess || passwordError || passwordSuccess || billingError || prefError || prefSuccess || deleteError))
 
     const handleInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -97,8 +106,8 @@ const ProfilePage = () => {
         setDeleteError('');
         try {
             await authAPI.deleteMe();
-            logout();
-            navigate('/');
+            localStorage.removeItem('token');
+            window.location.href = '/login?deleted=true';
         } catch (err: unknown) {
             setDeleteError(err instanceof Error ? err.message : 'Failed to delete account.');
             setDeleteLoading(false);
@@ -114,8 +123,8 @@ const ProfilePage = () => {
             setPasswordError('New passwords do not match.');
             return;
         }
-        if (passwordForm.new_password.length < 6) {
-            setPasswordError('New password must be at least 6 characters.');
+        if (passwordForm.new_password.length < 10) {
+            setPasswordError('New password must be at least 10 characters.');
             return;
         }
 
@@ -237,6 +246,7 @@ const ProfilePage = () => {
                                     onChange={e => setPasswordForm(f => ({ ...f, new_password: e.target.value }))}
                                     placeholder="Enter new password"
                                     required
+                                    minLength={10}
                                 />
                             </div>
                             <div className="form-field">

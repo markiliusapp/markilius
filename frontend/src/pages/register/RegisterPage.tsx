@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 import AuthHeader from '../../components/authHeader/AuthHeader';
 import { authAPI } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +42,8 @@ const RegisterPage = () => {
     const [registered, setRegistered] = useState(false);
     const [resendSent, setResendSent] = useState(false);
     const navigate = useNavigate();
+
+    useDismissOnClick(() => setError(null), !!error)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -204,7 +207,7 @@ const RegisterPage = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                minLength={8}
+                                minLength={10}
                             />
                         </div>
 

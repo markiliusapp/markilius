@@ -9,8 +9,11 @@ const getToken = (): string | null => {
 // Helper to handle API responses
 const handleResponse = async (response: Response) => {
     if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 && getToken()) {
             window.dispatchEvent(new CustomEvent('session-expired'));
+        }
+        if (response.status === 429) {
+            throw new Error('Rate limit exceeded')
         }
         let errorMessage = "An error occurred"
         try {

@@ -3,6 +3,7 @@ import AuthHeader from '../components/authHeader/AuthHeader';
 import { authAPI } from '../services/api';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import "./login/Login.css"
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 
 const ResetPasswordPage = () => {
     const [searchParams] = useSearchParams();
@@ -11,6 +12,8 @@ const ResetPasswordPage = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    useDismissOnClick(() => setError(''), !!error)
 
     const token = searchParams.get('token');
 
@@ -28,8 +31,8 @@ const ResetPasswordPage = () => {
             return;
         }
 
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters');
+        if (password.length < 10) {
+            setError('Password must be at least 10 characters');
             return;
         }
 
@@ -81,7 +84,7 @@ const ResetPasswordPage = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                minLength={8}
+                                minLength={10}
                             />
                         </div>
 
@@ -94,7 +97,7 @@ const ResetPasswordPage = () => {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
-                                minLength={8}
+                                minLength={10}
                             />
                         </div>
 

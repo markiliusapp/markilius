@@ -1,6 +1,10 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
 from app.routes import auth, tasks, productivity, arena, public, payments
 from app.services.scheduler import scheduler, send_weekly_summaries, send_monthly_summaries
 
@@ -15,6 +19,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Markilius Backend", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

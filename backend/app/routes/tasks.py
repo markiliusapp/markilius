@@ -31,7 +31,9 @@ def create_task(
 
     arena = (
         db.query(Arena)
-        .filter(Arena.id == task_data.arena_id, Arena.user_id == current_user.id)
+        .filter(
+            Arena.id == task_data.arena_id, Arena.user_id == current_user.id
+        )
         .first()
     )
     if not arena:
@@ -144,7 +146,10 @@ def update_task(
     if task_data.arena_id is not None and task_data.arena_id != task.arena_id:
         new_arena = (
             db.query(Arena)
-            .filter(Arena.id == task_data.arena_id, Arena.user_id == current_user.id)
+            .filter(
+                Arena.id == task_data.arena_id,
+                Arena.user_id == current_user.id,
+            )
             .first()
         )
         if not new_arena:

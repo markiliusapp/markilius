@@ -3,6 +3,7 @@ import type { CreateTask, TaskResponse, UpdateTask } from '@/types'
 import { taskAPI } from "../../services/api"
 import Arena from '../arena/Arena'
 import './TaskInput.css'
+import { useDismissOnClick } from '@/hooks/useDismissOnClick'
 
 interface TaskInputProps {
     onTaskCreated: () => void;
@@ -23,6 +24,8 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
     })
     const [error, setError] = useState<string>("")
     const [loading, setLoading] = useState(false)
+
+    useDismissOnClick(() => setError(""), !!error)
 
 
     const handleChange = (

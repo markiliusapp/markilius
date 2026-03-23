@@ -3,6 +3,7 @@ import AuthHeader from '../components/authHeader/AuthHeader';
 import { authAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import "./login/Login.css"
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState('');
@@ -10,6 +11,8 @@ const ForgotPasswordPage = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    useDismissOnClick(() => { setError(''); setMessage('') }, !!(error || message))
 
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();

@@ -4,6 +4,7 @@ import type { ArenaResponse } from '@/types';
 import DashboardLayout from '@/components/DashBoardLayout';
 import ArenaManagerList from '@/components/arenaManagerList/ArenaManagerList';
 import './ArenasPage.css';
+import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 
 const ArenasPage = () => {
     const [arenas, setArenas] = useState<ArenaResponse[]>([]);
@@ -11,6 +12,8 @@ const ArenasPage = () => {
     const [showArchived, setShowArchived] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    useDismissOnClick(() => setError(''), !!error)
 
     const fetchAll = async () => {
         try {

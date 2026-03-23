@@ -1,4 +1,5 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, Request, status, Depends, HTTPException
+from app.limiter import limiter
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.user import (
@@ -20,13 +21,17 @@ from app.utils.auth import (
     verify_password,
     create_access_token,
     get_current_user,
+    verify_unsubscribe_token,
 )
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
-from app.services.email import send_password_reset_email, send_verification_email
+from app.services.email import (
+    send_password_reset_email,
+    send_verification_email,
+)
 
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -67,7 +72,8 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hash_password(user_input.password),
         is_verified=False,
         verification_token=verification_token,
-        verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=24),
+        verification_token_expires=datetime.now(timezone.utc)
+        + timedelta(hours=24),
         public_id=str(uuid.uuid4()),
     )
     db.add(new_user)
@@ -88,11 +94,16 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Failed to send verification email: {e}")
 
-    return {"message": "Account created. Please check your email to verify your account."}
+    return {
+        "message": "Account created. Please check your email to verify your account."
+    }
 
 
 @router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-def login(user_input: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(
+    request: Request, user_input: UserLogin, db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.email == user_input.email).first()
 
     if not user:
@@ -119,7 +130,10 @@ def login(user_input: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def get_current_user_info(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_current_user_info(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     if not current_user.public_id:
         current_user.public_id = str(uuid.uuid4())
         db.commit()
@@ -131,10 +145,12 @@ def get_current_user_info(current_user: User = Depends(get_current_user), db: Se
 def update_current_user(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     if user_update.email and user_update.email != current_user.email:
-        existing = db.query(User).filter(User.email == user_update.email).first()
+        existing = (
+            db.query(User).filter(User.email == user_update.email).first()
+        )
         if existing:
             raise HTTPException(status_code=400, detail="Email already in use")
         current_user.email = user_update.email
@@ -146,9 +162,15 @@ def update_current_user(
 
     if user_update.new_password:
         if not user_update.current_password:
-            raise HTTPException(status_code=400, detail="Current password required")
-        if not verify_password(user_update.current_password, current_user.hashed_password):
-            raise HTTPException(status_code=400, detail="Current password is incorrect")
+            raise HTTPException(
+                status_code=400, detail="Current password required"
+            )
+        if not verify_password(
+            user_update.current_password, current_user.hashed_password
+        ):
+            raise HTTPException(
+                status_code=400, detail="Current password is incorrect"
+            )
         current_user.hashed_password = hash_password(user_update.new_password)
 
     if user_update.weekly_email is not None:
@@ -161,7 +183,6 @@ def update_current_user(
     db.commit()
     db.refresh(current_user)
     return current_user
-
 
 
 @router.post("/google", response_model=Token)
@@ -323,11 +344,15 @@ async def resend_verification(
 
     # Don't reveal if email exists
     if not user or user.is_verified:
-        return {"message": "If that email exists and is unverified, a new link has been sent"}
+        return {
+            "message": "If that email exists and is unverified, a new link has been sent"
+        }
 
     verification_token = secrets.token_urlsafe(32)
     user.verification_token = verification_token
-    user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=24)
+    user.verification_token_expires = datetime.now(timezone.utc) + timedelta(
+        hours=24
+    )
     db.commit()
 
     try:
@@ -335,4 +360,27 @@ async def resend_verification(
     except Exception as e:
         print(f"Failed to send verification email: {e}")
 
-    return {"message": "If that email exists and is unverified, a new link has been sent"}
+    return {
+        "message": "If that email exists and is unverified, a new link has been sent"
+    }
+
+
+@router.post("/unsubscribe")
+def unsubscribe_email(token: str, type: str, db: Session = Depends(get_db)):
+    result = verify_unsubscribe_token(token)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid unsubscribe link")
+    email, email_type = result
+    if email_type != type:
+        raise HTTPException(status_code=400, detail="Invalid unsubscribe link")
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"message": "Unsubscribed"}  # Don't reveal if email exists
+    if email_type == "weekly":
+        user.weekly_email = False
+    elif email_type == "monthly":
+        user.monthly_email = False
+    else:
+        raise HTTPException(status_code=400, detail="Invalid email type")
+    db.commit()
+    return {"message": "Unsubscribed"}
