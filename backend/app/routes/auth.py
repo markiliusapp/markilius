@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Request, status, Depends, HTTPException
 from app.limiter import limiter
+from app.logger import get_logger
+
+logger = get_logger(__name__)
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.user import (
@@ -92,7 +95,7 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
     try:
         await send_verification_email(new_user.email, verification_token)
     except Exception as e:
-        print(f"Failed to send verification email: {e}")
+        logger.error("Failed to send verification email", extra={"email": new_user.email, "error": str(e)})
 
     return {
         "message": "Account created. Please check your email to verify your account."
@@ -262,7 +265,7 @@ async def forgot_password(
     try:
         await send_password_reset_email(user.email, reset_token)
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logger.error("Failed to send password reset email", extra={"email": user.email, "error": str(e)})
 
     return {"message": "If that email exists, a reset link has been sent"}
 
@@ -358,7 +361,7 @@ async def resend_verification(
     try:
         await send_verification_email(user.email, verification_token)
     except Exception as e:
-        print(f"Failed to send verification email: {e}")
+        logger.error("Failed to resend verification email", extra={"email": user.email, "error": str(e)})
 
     return {
         "message": "If that email exists and is unverified, a new link has been sent"

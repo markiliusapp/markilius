@@ -88,13 +88,43 @@
 }
 
 
-/* Heatmap share button */
-.heatmap-share-wrapper {
+/* Heatmap controls row */
+.heatmap-controls {
     position: absolute;
     top: 16px;
     right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
+
+.heatmap-section:hover .heatmap-controls,
+.heatmap-section.controls-visible .heatmap-controls {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .heatmap-share-btn {
+        width: 24px;
+        height: 24px;
+    }
+
+    .heatmap-share-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+.heatmap-share-wrapper {
+    position: relative;
+}
+
+/* Heatmap share button */
 
 .heatmap-share-btn {
     width: 28px;

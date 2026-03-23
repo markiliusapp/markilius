@@ -6,8 +6,11 @@ from app.models.user import User
 from app.models.task import Task
 from app.models.arena import Arena
 from app.services.email import send_weekly_summary_email, send_monthly_summary_email
+from app.logger import get_logger
 from sqlalchemy.orm import contains_eager
 import pytz
+
+logger = get_logger(__name__)
 
 scheduler = AsyncIOScheduler()
 
@@ -98,9 +101,9 @@ async def send_weekly_summaries():
                 )
                 user.last_weekly_email_sent = datetime.now(timezone.utc)
                 db.commit()
-                print(f"Weekly summary sent to {user.email}")
+                logger.info("Weekly summary sent", extra={"email": user.email})
             except Exception as e:
-                print(f"Failed to send weekly summary to {user.email}: {e}")
+                logger.error("Failed to send weekly summary", extra={"email": user.email, "error": str(e)})
 
     finally:
         db.close()
@@ -309,9 +312,9 @@ async def send_monthly_summaries():
                 )
                 user.last_monthly_email_sent = datetime.now(timezone.utc)
                 db.commit()
-                print(f"Monthly summary sent to {user.email}")
+                logger.info("Monthly summary sent", extra={"email": user.email})
             except Exception as e:
-                print(f"Failed to send monthly summary to {user.email}: {e}")
+                logger.error("Failed to send monthly summary", extra={"email": user.email, "error": str(e)})
 
     finally:
         db.close()

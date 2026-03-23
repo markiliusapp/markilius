@@ -28,7 +28,16 @@ const MonthPage = () => {
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [copied, setCopied] = useState(false)
     const [shareOpen, setShareOpen] = useState(false)
+    const [showDates, setShowDates] = useState(true)
+    const [showPercentage, setShowPercentage] = useState(false)
+    const [controlsVisible, setControlsVisible] = useState(false)
     const shareRef = useRef<HTMLDivElement>(null)
+
+    const handleHeatmapSectionTouch = (e: React.TouchEvent) => {
+        if ((e.target as HTMLElement).closest('.heatmap-controls')) return
+        if ((e.target as HTMLElement).closest('.heatmap-cell')) return
+        setControlsVisible(v => !v)
+    }
 
     useEffect(() => {
         if (!shareOpen) return
@@ -39,6 +48,7 @@ const MonthPage = () => {
         document.addEventListener('mousedown', handler)
         return () => document.removeEventListener('mousedown', handler)
     }, [shareOpen])
+
 
     const handleShareArena = (arenaId: number | null) => {
         if (!user?.public_id) return
@@ -166,40 +176,63 @@ const MonthPage = () => {
                 {/* 4-Section Grid */}
                 <div className="month-content">
                     {/* Section 1: Heatmap */}
-                    <div className="heatmap-section" style={{ position: 'relative' }}>
-                        {user?.public_id && (
-                            <div className="heatmap-share-wrapper" ref={shareRef}>
-                                <button
-                                    className={`heatmap-share-btn ${shareOpen ? 'active' : ''}`}
-                                    onClick={() => setShareOpen(o => !o)}
-                                    title="Share this month's heatmap"
-                                >
-                                    {copied ? (
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    ) : (
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                                        </svg>
-                                    )}
-                                </button>
-                                {shareOpen && (
-                                    <div className="share-dropdown">
-                                        <button className="share-dropdown-item" onClick={() => handleShareArena(null)}>
-                                            All arenas
-                                        </button>
-                                        {arenas.map(arena => (
-                                            <button key={arena.arena_id} className="share-dropdown-item" onClick={() => handleShareArena(arena.arena_id)}>
-                                                <span className="share-dropdown-dot" style={{ backgroundColor: arena.arena_color }} />
-                                                {arena.arena_name}
+                    <div className={`heatmap-section${controlsVisible ? ' controls-visible' : ''}`} style={{ position: 'relative' }} onTouchEnd={handleHeatmapSectionTouch}>
+                        <div className="heatmap-controls">
+                            {/* Day numbers toggle */}
+                            <button
+                                className={`heatmap-share-btn ${showDates ? 'active' : ''}`}
+                                onClick={() => setShowDates(v => !v)}
+                                title="Toggle day numbers"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                            </button>
+                            {/* Completion % toggle */}
+                            <button
+                                className={`heatmap-share-btn ${showPercentage ? 'active' : ''}`}
+                                onClick={() => setShowPercentage(v => !v)}
+                                title="Toggle completion %"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" /><path d="M22 12A10 10 0 0 0 12 2v10z" />
+                                </svg>
+                            </button>
+                            {/* Share */}
+                            {user?.public_id && (
+                                <div className="heatmap-share-wrapper" ref={shareRef} style={{ position: 'relative' }}>
+                                    <button
+                                        className={`heatmap-share-btn ${shareOpen ? 'active' : ''}`}
+                                        onClick={() => setShareOpen(o => !o)}
+                                        title="Share this month's heatmap"
+                                    >
+                                        {copied ? (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        ) : (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                    {shareOpen && (
+                                        <div className="share-dropdown">
+                                            <button className="share-dropdown-item" onClick={() => handleShareArena(null)}>
+                                                All arenas
                                             </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                            {arenas.map(arena => (
+                                                <button key={arena.arena_id} className="share-dropdown-item" onClick={() => handleShareArena(arena.arena_id)}>
+                                                    <span className="share-dropdown-dot" style={{ backgroundColor: arena.arena_color }} />
+                                                    {arena.arena_name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <Heatmap
                             year={currentYear}
                             month={currentMonth}
@@ -207,6 +240,8 @@ const MonthPage = () => {
                             completion={selectedArena ? selectedArena.completion_percentage : monthData.summary.completion_percentage}
                             selectedArenaId={selectedArenaId}
                             onDayClick={handleDayClick}
+                            showDates={showDates}
+                            showPercentage={showPercentage}
                         />
                         <HeatmapLegend color={rgbColor} />
                     </div>
