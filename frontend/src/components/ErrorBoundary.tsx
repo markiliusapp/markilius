@@ -28,19 +28,26 @@ export class ErrorBoundary extends Component<Props, State> {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          gap: '1rem',
-          fontFamily: 'inherit',
+          gap: '0.5rem',
+          fontFamily: 'var(--font-sans)',
+          backgroundColor: 'var(--color-bg)',
+          color: 'var(--color-text)',
         }}>
-          <p style={{ fontSize: '1rem', opacity: 0.6 }}>Something went wrong.</p>
+          <p style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Something broke on our end.</p>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+            We're working on it. Try reloading.
+          </p>
           <button
             onClick={() => window.location.reload()}
             style={{
+              marginTop: '0.75rem',
               padding: '0.5rem 1.25rem',
-              border: '1px solid currentColor',
+              border: '1px solid var(--color-border)',
               borderRadius: '6px',
               background: 'transparent',
               cursor: 'pointer',
               fontSize: '0.875rem',
+              color: 'var(--color-text)',
             }}
           >
             Reload
