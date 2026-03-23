@@ -274,7 +274,9 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
 
     const visibleMax = selectedArenaId
         ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
-        : Math.max(...baseChartData.map(d => d.total), averageDuration)
+        : layout === 'grouped'
+            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)), averageDuration)
+            : Math.max(...baseChartData.map(d => d.total), averageDuration)
 
     const ticks = Array.from({ length: Math.ceil(visibleMax) + 1 }, (_, i) => i)
     const yMax = Math.ceil(visibleMax)

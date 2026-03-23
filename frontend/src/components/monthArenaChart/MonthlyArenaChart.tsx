@@ -266,7 +266,9 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
 
     const visibleMax = selectedArenaId
         ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
-        : Math.max(...baseChartData.map(d => d.total), displayAverage)
+        : layout === 'grouped'
+            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)), displayAverage)
+            : Math.max(...baseChartData.map(d => d.total), displayAverage)
 
     const tickCount = 3
     const tickInterval = Math.ceil(visibleMax / tickCount)
