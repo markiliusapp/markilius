@@ -151,8 +151,8 @@ const RegisterPage = () => {
                             text="signin_with"
                             shape="rectangular"
                             theme="outline"
+                            width={400}
                             size="large"
-                            width="100%"
                         />
                     </div>
 
