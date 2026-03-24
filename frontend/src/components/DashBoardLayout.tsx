@@ -3,7 +3,7 @@ import { useAuth } from '../context/authContext';
 import { useTheme } from '../context/themeContext';
 import { NavLink } from 'react-router-dom';
 import BrandLogo from './brandLogo/BrandLogo';
-import './DashboardLayout.css';
+import './DashBoardLayout.css';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
