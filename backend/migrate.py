@@ -27,5 +27,5 @@ port = os.environ.get("PORT", "8000")
 print(f"Starting uvicorn on port {port}...", flush=True)
 os.execv(
     sys.executable,
-    [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", port],
+    [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", port, "--proxy-headers", "--forwarded-allow-ips=*"],
 )
