@@ -109,8 +109,6 @@
 .login-google-wrapper {
     margin-top: 16px;
     margin-bottom: 12px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
 }
 
 .login-resend-hint {

@@ -164,7 +164,7 @@ const Login = () => {
                             onError={() => setError('Google login failed')}
                             useOneTap
                             text="signin_with"
-                            shape="rectangular"
+                            shape="pill"
                             theme="outline"
                             size="large"
                             width={googleButtonWidth}

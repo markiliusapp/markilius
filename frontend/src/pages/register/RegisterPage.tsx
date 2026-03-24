@@ -157,7 +157,7 @@ const RegisterPage = () => {
                             onError={() => setError('Google login failed')}
                             useOneTap
                             text="signin_with"
-                            shape="rectangular"
+                            shape="pill"
                             theme="outline"
                             width={googleButtonWidth}
                             size="large"
