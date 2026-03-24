@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AuthHeader from '../../components/authHeader/AuthHeader';
 import { authAPI } from '../../services/api'
 import type { LoginUser } from "@/types";
@@ -18,6 +18,8 @@ const Login = () => {
     });
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const googleWrapperRef = useRef<HTMLDivElement>(null)
+    const [googleButtonWidth, setGoogleButtonWidth] = useState(400)
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
     const [resendSent, setResendSent] = useState(false)
     const navigate = useNavigate();
@@ -36,6 +38,12 @@ const Login = () => {
         if (sessionExpired) {
             const timer = setTimeout(() => setSessionExpired(false), 5000);
             return () => clearTimeout(timer);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (googleWrapperRef.current) {
+            setGoogleButtonWidth(googleWrapperRef.current.offsetWidth);
         }
     }, []);
 
@@ -150,7 +158,7 @@ const Login = () => {
                         </div>
                     )}
 
-                    <div className="login-google-wrapper">
+                    <div className="login-google-wrapper" ref={googleWrapperRef}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => setError('Google login failed')}
@@ -159,7 +167,7 @@ const Login = () => {
                             shape="rectangular"
                             theme="outline"
                             size="large"
-                            width={400}
+                            width={googleButtonWidth}
                         />
                     </div>
 

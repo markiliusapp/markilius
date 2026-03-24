@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDismissOnClick } from '@/hooks/useDismissOnClick';
 import AuthHeader from '../../components/authHeader/AuthHeader';
 import { authAPI } from '../../services/api';
@@ -41,6 +41,14 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [registered, setRegistered] = useState(false);
     const [resendSent, setResendSent] = useState(false);
+    const googleWrapperRef = useRef<HTMLDivElement>(null);
+    const [googleButtonWidth, setGoogleButtonWidth] = useState(400);
+
+    useEffect(() => {
+        if (googleWrapperRef.current) {
+            setGoogleButtonWidth(googleWrapperRef.current.offsetWidth);
+        }
+    }, []);
     const navigate = useNavigate();
 
     useDismissOnClick(() => setError(null), !!error)
@@ -143,7 +151,7 @@ const RegisterPage = () => {
                         </div>
                     )}
 
-                    <div className="login-google-wrapper">
+                    <div className="login-google-wrapper" ref={googleWrapperRef}>
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => setError('Google login failed')}
@@ -151,7 +159,7 @@ const RegisterPage = () => {
                             text="signin_with"
                             shape="rectangular"
                             theme="outline"
-                            width={400}
+                            width={googleButtonWidth}
                             size="large"
                         />
                     </div>
