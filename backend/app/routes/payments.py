@@ -11,13 +11,16 @@ from app.utils.auth import get_current_user
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 PRICE_IDS = {
     "monthly": os.getenv("STRIPE_PRICE_MONTHLY"),
     "yearly": os.getenv("STRIPE_PRICE_YEARLY"),
     "lifetime": os.getenv("STRIPE_PRICE_LIFETIME"),
 }
+
+
+def get_frontend_url() -> str:
+    return os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
@@ -61,8 +64,8 @@ def create_checkout_session(
         line_items=[{"price": price_id, "quantity": 1}],
         mode=mode,
         client_reference_id=str(current_user.id),
-        success_url=f"{FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{FRONTEND_URL}/pricing",
+        success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{get_frontend_url()}/pricing",
     )
 
     return {"url": session.url}
@@ -95,8 +98,8 @@ def upgrade_to_lifetime(
         line_items=[{"price": price_id, "quantity": 1}],
         mode="payment",
         client_reference_id=str(current_user.id),
-        success_url=f"{FRONTEND_URL}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{FRONTEND_URL}/dashboard/profile",
+        success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{get_frontend_url()}/dashboard/profile",
     )
 
     return {"url": session.url}
@@ -196,7 +199,7 @@ def create_portal_session(
 
     session = stripe.billing_portal.Session.create(
         customer=current_user.stripe_customer_id,
-        return_url=f"{FRONTEND_URL}/dashboard/profile",
+        return_url=f"{get_frontend_url()}/dashboard/profile",
     )
 
     return {"url": session.url}
