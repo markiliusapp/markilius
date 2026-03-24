@@ -17,13 +17,13 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy backend
-        run: railway up --service ${{ secrets.RAILWAY_SERVICE_BACKEND }} --detach
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE_BACKEND_PROD }} --detach
         working-directory: backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
 
       - name: Deploy worker
-        run: railway up --service ${{ secrets.RAILWAY_SERVICE_WORKER }} --detach
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE_WORKER_PROD }} --detach
         working-directory: backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
