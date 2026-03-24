@@ -357,5 +357,16 @@ The name is not explained in the UI. It does not need to be. The product tells t
 
 ---
 
+## 15. Git Workflow
+
+**Always work on a branch — never commit directly to `main`.**
+
+- Create a branch before making any changes: `git checkout -b <branch-name>`
+- Use descriptive branch names: `fix/google-button-width`, `feat/payment-portal`, `chore/update-deps`
+- Commit and push all changes to the branch
+- `main` is the production branch — Railway deploys from it, so only merge when the work is ready to ship
+
+---
+
 *Last updated: March 2026*
 *This document lives in the repo root. Update it before updating the product.*
