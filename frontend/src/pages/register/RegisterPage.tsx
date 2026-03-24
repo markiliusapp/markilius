@@ -42,7 +42,7 @@ const RegisterPage = () => {
     const [registered, setRegistered] = useState(false);
     const [resendSent, setResendSent] = useState(false);
     const googleWrapperRef = useRef<HTMLDivElement>(null);
-    const [googleButtonWidth, setGoogleButtonWidth] = useState(400);
+    const [googleButtonWidth, setGoogleButtonWidth] = useState<number | null>(null);
 
     useEffect(() => {
         if (googleWrapperRef.current) {
@@ -152,16 +152,18 @@ const RegisterPage = () => {
                     )}
 
                     <div className="login-google-wrapper" ref={googleWrapperRef}>
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => setError('Google login failed')}
-                            useOneTap
-                            text="signin_with"
-                            shape="pill"
-                            theme="outline"
-                            width={googleButtonWidth}
-                            size="large"
-                        />
+                        {googleButtonWidth !== null && (
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => setError('Google login failed')}
+                                useOneTap
+                                text="signin_with"
+                                shape="pill"
+                                theme="outline"
+                                width={googleButtonWidth}
+                                size="large"
+                            />
+                        )}
                     </div>
 
                     <form onSubmit={handleSubmit} className="login-form">

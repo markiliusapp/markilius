@@ -19,7 +19,7 @@ const Login = () => {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const googleWrapperRef = useRef<HTMLDivElement>(null)
-    const [googleButtonWidth, setGoogleButtonWidth] = useState(400)
+    const [googleButtonWidth, setGoogleButtonWidth] = useState<number | null>(null)
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
     const [resendSent, setResendSent] = useState(false)
     const navigate = useNavigate();
@@ -159,16 +159,18 @@ const Login = () => {
                     )}
 
                     <div className="login-google-wrapper" ref={googleWrapperRef}>
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => setError('Google login failed')}
-                            useOneTap
-                            text="signin_with"
-                            shape="pill"
-                            theme="outline"
-                            size="large"
-                            width={googleButtonWidth}
-                        />
+                        {googleButtonWidth !== null && (
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => setError('Google login failed')}
+                                useOneTap
+                                text="signin_with"
+                                shape="pill"
+                                theme="outline"
+                                size="large"
+                                width={googleButtonWidth}
+                            />
+                        )}
                     </div>
 
                     {/* Form */}
