@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.utils.auth import get_current_user
+from app.logger import get_logger
+
+logger = get_logger(__name__)
 
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -20,7 +23,9 @@ PRICE_IDS = {
 
 
 def get_frontend_url() -> str:
-    return os.getenv("FRONTEND_URL", "http://localhost:5173")
+    url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    logger.info("FRONTEND_URL", extra={"value": url})
+    return url
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
