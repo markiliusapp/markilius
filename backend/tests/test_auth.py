@@ -261,7 +261,7 @@ def test_reset_password_success(client, test_user, db, mocker):
 def test_reset_password_invalid_token(client):
     response = client.post(
         RESET_PASSWORD_URL,
-        json={"token": "doesnotexist", "new_password": "newpass"},
+        json={"token": "doesnotexist", "new_password": "newpassword123"},
     )
     assert response.status_code == 400
 
@@ -277,7 +277,7 @@ def test_reset_password_expired_token(client, test_user, db, mocker):
 
     response = client.post(
         RESET_PASSWORD_URL,
-        json={"token": "expiredtoken", "new_password": "newpass"},
+        json={"token": "expiredtoken", "new_password": "newpassword123"},
     )
     assert response.status_code == 400
     assert "expired" in response.json()["detail"]
