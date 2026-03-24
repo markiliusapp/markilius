@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background: scaled 8x from the component's 64x64 viewBox -->
+  <rect width="512" height="512" fill="#111111" rx="32"/>
+
+  <!-- Grid cells from BrandLogo.tsx, scaled 8x (x8, y8, w80, h80, rx16) -->
+  <!-- Row 0 (y=9 → 72) -->
+  <rect x="72"  y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="168" y="72"  width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+  <rect x="264" y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="360" y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+
+  <!-- Row 1 (y=21 → 168) -->
+  <rect x="72"  y="168" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+  <rect x="168" y="168" width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="264" y="168" width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="360" y="168" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+
+  <!-- Row 2 (y=33 → 264) -->
+  <rect x="72"  y="264" width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="168" y="264" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+  <rect x="264" y="264" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+  <rect x="360" y="264" width="80" height="80" rx="16" fill="#f97316"/>
+
+  <!-- Row 3 (y=45 → 360) -->
+  <rect x="72"  y="360" width="80" height="80" rx="16" fill="#f97316"/>
+  <rect x="168" y="360" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+  <rect x="264" y="360" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+  <rect x="360" y="360" width="80" height="80" rx="16" fill="#f97316"/>
+</svg>

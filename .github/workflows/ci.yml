@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  backend-lint:
+    name: Backend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install black flake8 bandit
+
+      - name: black
+        run: black --check .
+
+      - name: flake8
+        run: flake8 . --max-line-length=120 --exclude=migrations/
+
+      - name: bandit
+        run: bandit -r app/ -ll
+
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: sqlite:///:memory:
+      SECRET_KEY: ci-secret-key-not-used-in-prod
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      RESEND_API_KEY: re_dummy
+      MAIL_FROM: noreply@markilius.com
+      GOOGLE_CLIENT_ID: dummy
+      GOOGLE_CLIENT_SECRET: dummy
+      GOOGLE_REDIRECT_URI: http://localhost:5173/auth/google/callback
+      STRIPE_SECRET_KEY: sk_test_dummy
+      STRIPE_PRICE_MONTHLY: price_dummy
+      STRIPE_PRICE_YEARLY: price_dummy
+      STRIPE_PRICE_LIFETIME: price_dummy
+      STRIPE_WEBHOOK_SECRET: whsec_dummy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.markilius.com
+          VITE_GOOGLE_CLIENT_ID: dummy
+          VITE_SENTRY_DSN: ""

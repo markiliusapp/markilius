@@ -1,26 +1,33 @@
 from contextlib import asynccontextmanager
+import os
 import time
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.limiter import limiter
 from app.logger import configure_logging, get_logger
 from app.routes import auth, tasks, productivity, arena, public, payments
-from app.services.scheduler import scheduler, send_weekly_summaries, send_monthly_summaries
 
 configure_logging()
 logger = get_logger(__name__)
 
+_sentry_dsn = os.getenv("SENTRY_DSN")
+if _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        environment=os.getenv("ENVIRONMENT", "production"),
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    scheduler.add_job(send_weekly_summaries, "interval", hours=1, id="weekly_summary")
-    scheduler.add_job(send_monthly_summaries, "interval", hours=1, id="monthly_summary")
-    scheduler.start()
+    logger.info("Backend started")
     yield
-    scheduler.shutdown()
+    logger.info("Backend stopped")
 
 
 app = FastAPI(title="Markilius Backend", lifespan=lifespan)

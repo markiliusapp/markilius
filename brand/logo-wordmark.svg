@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 256" width="960" height="256">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="256" fill="#111111" rx="20"/>
+
+  <!-- Icon: same 4x4 grid, scaled to fit 256x256 (scale factor: 256/512 = 0.5 from logo-mark) -->
+  <svg x="16" y="0" width="256" height="256" viewBox="0 0 512 512">
+    <rect x="72"  y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="168" y="72"  width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+    <rect x="264" y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="360" y="72"  width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="72"  y="168" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+    <rect x="168" y="168" width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="264" y="168" width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="360" y="168" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+    <rect x="72"  y="264" width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="168" y="264" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+    <rect x="264" y="264" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+    <rect x="360" y="264" width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="72"  y="360" width="80" height="80" rx="16" fill="#f97316"/>
+    <rect x="168" y="360" width="80" height="80" rx="16" fill="rgba(249,115,22,0.2)"/>
+    <rect x="264" y="360" width="80" height="80" rx="16" fill="rgba(249,115,22,0.5)"/>
+    <rect x="360" y="360" width="80" height="80" rx="16" fill="#f97316"/>
+  </svg>
+
+  <!-- Divider -->
+  <line x1="296" y1="56" x2="296" y2="200" stroke="#2a2a2a" stroke-width="1.5"/>
+
+  <!-- Wordmark -->
+  <text
+    x="332"
+    y="128"
+    dominant-baseline="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="88"
+    font-weight="600"
+    letter-spacing="-1"
+    fill="#ffffff"
+  >Markilius</text>
+</svg>
