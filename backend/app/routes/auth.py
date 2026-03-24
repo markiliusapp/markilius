@@ -28,6 +28,7 @@ from app.utils.auth import (
 )
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+import requests as http_requests
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -189,21 +190,35 @@ def update_current_user(
 
 
 @router.post("/google", response_model=Token)
-def google_login(google_id_token: dict, db: Session = Depends(get_db)):
+def google_login(google_token: dict, db: Session = Depends(get_db)):
     """
-    Verify Google ID token and login/register user
+    Verify Google token (ID token or access token) and login/register user
     """
-    # Verify Google ID token
-    idinfo = id_token.verify_oauth2_token(
-        google_id_token["credential"],
-        google_requests.Request(),
-        GOOGLE_CLIENT_ID,
-    )
-
-    # Get user info from token
-    email = idinfo["email"]
-    first_name = idinfo.get("given_name", "")
-    last_name = idinfo.get("family_name", "")
+    if "credential" in google_token:
+        # ID token flow
+        idinfo = id_token.verify_oauth2_token(
+            google_token["credential"],
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
+        email = idinfo["email"]
+        first_name = idinfo.get("given_name", "")
+        last_name = idinfo.get("family_name", "")
+    elif "access_token" in google_token:
+        # Access token flow — fetch user info from Google
+        resp = http_requests.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {google_token['access_token']}"},
+            timeout=10,
+        )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid Google token")
+        userinfo = resp.json()
+        email = userinfo["email"]
+        first_name = userinfo.get("given_name", "")
+        last_name = userinfo.get("family_name", "")
+    else:
+        raise HTTPException(status_code=400, detail="Missing Google token")
 
     # Check if user exists
     user = db.query(User).filter(User.email == email).first()

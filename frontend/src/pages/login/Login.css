@@ -106,9 +106,33 @@
     color: var(--color-error);
 }
 
-.login-google-wrapper {
+.google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 14px;
     margin-top: 16px;
     margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.google-btn:hover {
+    background-color: var(--color-bg);
+    border-color: var(--color-text-muted);
+}
+
+.google-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .login-resend-hint {
