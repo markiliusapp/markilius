@@ -337,7 +337,10 @@ const ProfilePage = () => {
                                     {user?.subscription_tier === 'lifetime' && 'Lifetime Plan'}
                                 </span>
                                 <span className={`billing-status-badge billing-status-badge--${user?.subscription_status}`}>
-                                    {user?.subscription_status === 'lifetime' ? 'Lifetime' : 'Active'}
+                                    {user?.subscription_status === 'lifetime' ? 'Lifetime'
+                                        : user?.subscription_status === 'past_due' ? 'Past Due'
+                                        : user?.subscription_status === 'read_only' ? 'Read Only'
+                                        : 'Active'}
                                 </span>
                             </div>
 

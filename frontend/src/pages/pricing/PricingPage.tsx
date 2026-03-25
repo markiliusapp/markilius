@@ -59,7 +59,7 @@ const PricingPage = () => {
     );
 
     const currentTier = user?.subscription_tier;
-    const isActive = user?.subscription_status === 'active';
+    const isActive = user?.subscription_status === 'active' || user?.subscription_status === 'past_due';
     const isLifetime = user?.subscription_status === 'lifetime';
 
     const getButtonLabel = (planId: 'monthly' | 'yearly' | 'lifetime') => {

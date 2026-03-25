@@ -80,7 +80,7 @@ def upgrade_to_lifetime(
 ):
     if current_user.subscription_status == "lifetime":
         raise HTTPException(status_code=400, detail="You already have a lifetime plan")
-    if current_user.subscription_status != "active":
+    if current_user.subscription_status not in ("active", "past_due"):
         raise HTTPException(status_code=400, detail="No active subscription to upgrade from")
 
     price_id = PRICE_IDS["lifetime"]

@@ -280,6 +280,16 @@
     color: #c2410c;
 }
 
+.billing-status-badge--past_due {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.billing-status-badge--read_only {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+}
+
 .billing-hint {
     margin-top: 12px;
     font-size: 13px;
