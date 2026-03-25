@@ -13,7 +13,11 @@ const handleResponse = async (response: Response) => {
             window.dispatchEvent(new CustomEvent('session-expired'));
         }
         if (response.status === 403) {
-            window.dispatchEvent(new CustomEvent('subscription-required'));
+            const cloned = response.clone();
+            const body = await cloned.json().catch(() => ({}));
+            if (body.detail !== 'read_only_access') {
+                window.dispatchEvent(new CustomEvent('subscription-required'));
+            }
         }
         if (response.status === 429) {
             throw new Error('Rate limit exceeded')

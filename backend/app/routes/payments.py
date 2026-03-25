@@ -213,7 +213,8 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             User.stripe_subscription_id == subscription["id"]
         ).first()
         if user:
-            user.subscription_status = "inactive"
+            # past_due means all retries failed — keep data accessible in read-only
+            user.subscription_status = "read_only" if user.subscription_status == "past_due" else "inactive"
             user.subscription_tier = None
             user.stripe_subscription_id = None
             db.commit()

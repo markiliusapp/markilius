@@ -18,6 +18,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const [bannerDismissed, setBannerDismissed] = useState(
         () => sessionStorage.getItem('payment-banner-dismissed') === 'true'
     );
+    const [readOnlyDismissed, setReadOnlyDismissed] = useState(
+        () => sessionStorage.getItem('read-only-banner-dismissed') === 'true'
+    );
 
     const handleUpdatePayment = async () => {
         setPortalLoading(true);
@@ -320,6 +323,31 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* Main content */}
             <main className="dashboard-main">
+                {user?.subscription_status === 'read_only' && !readOnlyDismissed && (
+                    <div className="read-only-banner">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <div className="read-only-banner__body">
+                            <span className="read-only-banner__text">
+                                Your subscription has expired. Your record is still here — it's read-only.
+                            </span>
+                            <a href="/pricing" className="read-only-banner__action">Resubscribe</a>
+                        </div>
+                        <button
+                            className="read-only-banner__dismiss"
+                            onClick={() => {
+                                sessionStorage.setItem('read-only-banner-dismissed', 'true');
+                                setReadOnlyDismissed(true);
+                            }}
+                            aria-label="Dismiss"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
                 {user?.subscription_status === 'past_due' && !bannerDismissed && (
                     <div className="payment-failed-banner">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>

@@ -25,6 +25,7 @@ from app.utils.auth import (
     create_access_token,
     get_current_user,
     require_subscription,
+    require_write_access,
     verify_unsubscribe_token,
 )
 from google.oauth2 import id_token

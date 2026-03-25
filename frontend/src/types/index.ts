@@ -168,7 +168,7 @@ export interface User {
     weekly_email: boolean;
     monthly_email: boolean;
     timezone: string;
-    subscription_status: 'inactive' | 'active' | 'lifetime' | 'past_due';
+    subscription_status: 'inactive' | 'active' | 'lifetime' | 'past_due' | 'read_only';
     subscription_tier: 'monthly' | 'yearly' | 'lifetime' | null;
 }
 

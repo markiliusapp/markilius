@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.task import TaskResponse, TaskCreate, TaskUpdate
 from app.models.user import User
-from app.utils.auth import require_subscription
+from app.utils.auth import require_subscription, require_write_access
 from app.database import get_db
 from app.models.task import Task
 from app.models.arena import Arena
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 )
 def create_task(
     task_data: TaskCreate,
-    current_user: User = Depends(require_subscription),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db),
 ) -> TaskResponse:
     """
@@ -110,7 +110,7 @@ def get_task(
 def update_task(
     task_id: int,
     task_data: TaskUpdate,
-    current_user: User = Depends(require_subscription),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db),
 ):
     """
@@ -191,7 +191,7 @@ def update_task(
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     task_id: int,
-    current_user: User = Depends(require_subscription),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db),
 ):
     """
@@ -227,7 +227,7 @@ def delete_task(
 @router.patch("/{task_id}", response_model=TaskResponse)
 def toggle_task_completion(
     task_id: int,
-    current_user: User = Depends(require_subscription),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db),
 ):
     """
@@ -267,7 +267,7 @@ def toggle_task_completion(
 @router.delete("/{task_id}/series", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task_series(
     task_id: int,
-    current_user: User = Depends(require_subscription),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db),
 ):
     # Find the task to get its group_id
