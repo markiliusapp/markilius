@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.utils.auth import get_current_user
-from app.services.email import send_payment_failed_email
+from app.services.email import send_payment_failed_email, send_subscription_welcome_email, send_plan_switched_email
 from datetime import datetime, timezone
 
 load_dotenv()
@@ -108,7 +108,7 @@ def upgrade_to_lifetime(
 
 
 @router.post("/upgrade-subscription")
-def upgrade_subscription(
+async def upgrade_subscription(
     plan: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -138,9 +138,13 @@ def upgrade_subscription(
         proration_behavior="always_invoice",
     )
 
+    old_tier = current_user.subscription_tier
     current_user.subscription_tier = plan
     db.commit()
     db.refresh(current_user)
+
+    await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", plan)
+
     return {"status": "ok", "tier": plan}
 
 
@@ -162,6 +166,9 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             return {"status": "ok"}
 
         mode = session.get("mode")
+        was_active = user.subscription_status in ("active", "past_due")
+        old_tier = user.subscription_tier
+
         if mode == "payment":
             user.subscription_status = "lifetime"
             user.subscription_tier = "lifetime"
@@ -169,7 +176,6 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             user.subscription_status = "active"
             subscription_id = session.get("subscription")
             user.stripe_subscription_id = subscription_id
-            # Determine monthly vs yearly from the subscription
             if subscription_id:
                 sub = stripe.Subscription.retrieve(subscription_id)
                 price_id = sub["items"]["data"][0]["price"]["id"]
@@ -179,6 +185,13 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                     user.subscription_tier = "monthly"
 
         db.commit()
+
+        if was_active and mode == "payment":
+            # Upgrade from existing subscription to lifetime
+            await send_plan_switched_email(user.email, user.first_name, old_tier or "monthly", "lifetime")
+        else:
+            # Fresh purchase
+            await send_subscription_welcome_email(user.email, user.first_name, user.subscription_tier)
 
     elif event["type"] == "invoice.payment_failed":
         invoice = event["data"]["object"]
@@ -223,7 +236,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/verify-session")
-def verify_session(
+async def verify_session(
     session_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -238,6 +251,10 @@ def verify_session(
 
     if session.get("payment_status") != "paid":
         raise HTTPException(status_code=400, detail="Payment not completed")
+
+    was_inactive = current_user.subscription_status in ("inactive", None)
+    was_active = current_user.subscription_status in ("active", "past_due")
+    old_tier = current_user.subscription_tier
 
     mode = session.get("mode")
     if mode == "payment":
@@ -254,6 +271,12 @@ def verify_session(
 
     db.commit()
     db.refresh(current_user)
+
+    if was_active and mode == "payment":
+        await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", "lifetime")
+    elif was_inactive:
+        await send_subscription_welcome_email(current_user.email, current_user.first_name, current_user.subscription_tier)
+
     return {"status": "ok"}
 
 
