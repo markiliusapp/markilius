@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.utils.auth import get_current_user
-from app.services.email import send_payment_failed_email, send_subscription_welcome_email, send_plan_switched_email
+from app.services.email import send_payment_failed_email, send_subscription_welcome_email, send_plan_switched_email, send_subscription_cancelled_email
 from datetime import datetime, timezone
 
 load_dotenv()
@@ -230,10 +230,15 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             # Note: newer Stripe API versions set cancel_at directly without setting
             # cancel_at_period_end=True, so we check cancel_at alone.
             cancel_at_ts = subscription.get("cancel_at")
+            was_cancellation_new = cancel_at_ts and not user.subscription_cancel_at
             user.subscription_cancel_at = (
                 datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc) if cancel_at_ts else None
             )
             db.commit()
+
+            if was_cancellation_new:
+                access_ends = datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc).strftime("%B %d, %Y")
+                await send_subscription_cancelled_email(user.email, user.first_name, access_ends)
 
     elif event["type"] == "customer.subscription.deleted":
         subscription = event["data"]["object"]

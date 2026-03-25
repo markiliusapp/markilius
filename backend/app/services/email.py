@@ -404,6 +404,34 @@ async def send_payment_failed_email(email: str, first_name: str, next_retry: str
     })
 
 
+async def send_subscription_cancelled_email(email: str, first_name: str, access_ends: str):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    billing_url = f"{frontend_url}/dashboard/profile"
+
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Subscription cancelled.</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            {first_name}, your subscription has been cancelled. Your access and record remain intact until {access_ends}.
+        </p>
+        <div style="background:{C['SUBTLE']};border:1px solid {C['BORDER']};border-radius:8px;padding:14px 16px;margin-bottom:24px;">
+            <p style="margin:0;font-size:12px;color:{C['MUTED']};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Access ends</p>
+            <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:{C['TEXT']};">{access_ends}</p>
+        </div>
+        <a href="{billing_url}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Reactivate subscription
+        </a>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Subscription cancelled — Markilius",
+        "html": _email_template(content),
+    })
+
+
 async def send_weekly_summary_email(
     email: str,
     first_name: str,
