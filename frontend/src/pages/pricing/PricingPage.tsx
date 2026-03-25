@@ -10,7 +10,7 @@ const PLANS = [
     {
         id: 'monthly' as const,
         name: 'Monthly',
-        price: '$2.99',
+        price: '$5.99',
         period: '/ month',
         subtext: 'Billed monthly',
         highlight: false,
@@ -18,15 +18,15 @@ const PLANS = [
     {
         id: 'yearly' as const,
         name: 'Yearly',
-        price: '$19.99',
+        price: '$29.99',
         period: '/ year',
-        subtext: 'Just $1.67 / month — save 44%',
+        subtext: 'Just $2.50 / month — save 58%',
         highlight: true,
     },
     {
         id: 'lifetime' as const,
         name: 'Lifetime',
-        price: '$39.99',
+        price: '$59.99',
         period: 'one-time',
         subtext: 'Pay once, own it forever',
         highlight: false,
