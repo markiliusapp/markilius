@@ -226,12 +226,13 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                 user.subscription_tier = "yearly"
             elif price_id == PRICE_IDS["monthly"]:
                 user.subscription_tier = "monthly"
-            # Track scheduled cancellation (set or cleared by portal or upgrade flow)
+            # Track scheduled cancellation (set or cleared by portal or upgrade flow).
+            # Note: newer Stripe API versions set cancel_at directly without setting
+            # cancel_at_period_end=True, so we check cancel_at alone.
             cancel_at_ts = subscription.get("cancel_at")
-            if subscription.get("cancel_at_period_end") and cancel_at_ts:
-                user.subscription_cancel_at = datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc)
-            else:
-                user.subscription_cancel_at = None
+            user.subscription_cancel_at = (
+                datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc) if cancel_at_ts else None
+            )
             db.commit()
 
     elif event["type"] == "customer.subscription.deleted":
