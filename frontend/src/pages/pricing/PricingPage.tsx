@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { paymentAPI } from '../../services/api';
 import { useAuth } from '../../context/authContext';
 import BrandLogo from '../../components/brandLogo/BrandLogo';
@@ -47,10 +47,9 @@ const FEATURES = [
 const PricingPage = () => {
     const { user, logout, loading, refreshUser } = useAuth();
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [upgradeSuccess, setUpgradeSuccess] = useState(searchParams.get('upgraded') === 'true');
+    const [upgradeSuccess, setUpgradeSuccess] = useState(false);
 
     if (loading) return (
         <div className="pricing-loading">
@@ -84,7 +83,6 @@ const PricingPage = () => {
         if (isDisabled(plan)) return;
         setLoadingPlan(plan);
         setError(null);
-        setUpgradeSuccess(false);
         try {
             if (plan === 'lifetime' && isActive) {
                 const { url } = await paymentAPI.upgradeToLifetime();
