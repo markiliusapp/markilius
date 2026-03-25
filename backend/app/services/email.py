@@ -300,9 +300,9 @@ async def send_verification_email(email: str, verification_token: str):
 
 
 _PLAN_LABELS = {
-    "monthly": "Monthly — $2.99 / month",
-    "yearly": "Yearly — $19.99 / year",
-    "lifetime": "Lifetime — $39.99 one-time",
+    "monthly": "Monthly — $5.99 / month",
+    "yearly": "Yearly — $29.99 / year",
+    "lifetime": "Lifetime — $59.99 one-time",
 }
 
 
