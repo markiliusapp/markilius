@@ -21,6 +21,68 @@ _DARK = dict(
 )
 
 
+def _email_template(content_html: str) -> str:
+    """
+    Wraps content in the standard Markilius email shell.
+    Header: 4×4 brand grid (30px) + Markilius wordmark (16px, line-height 30px) — equal height.
+    SVG not used — email clients strip it. Grid is an HTML table instead.
+    """
+    C = _DARK
+    # rgba values composited against card bg #1e1e1e:
+    #   full #f97316 · 50% → #884516 · 20% → #432916
+    _F, _H, _L = "#f97316", "#884516", "#432916"
+    grid = [
+        [_F, _H, _F, _F],
+        [_H, _F, _F, _L],
+        [_F, _H, _L, _F],
+        [_F, _L, _H, _F],
+    ]
+    # 4 cells × 6px + 3 gaps × 2px (cellspacing) = 30px — matches wordmark line-height
+    cell = "width:6px;height:6px;border-radius:1px;"
+    rows = "".join(
+        "<tr>" + "".join(f'<td style="{cell}background:{c};"></td>' for c in row) + "</tr>"
+        for row in grid
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:{C['BG']};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:{C['BG']};">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+      <!-- Header -->
+      <tr><td style="padding-bottom:32px;">
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align:middle;padding-right:10px;">
+              <table cellpadding="0" cellspacing="2" style="border-collapse:separate;">{rows}</table>
+            </td>
+            <td style="vertical-align:middle;height:30px;">
+              <span style="font-size:16px;font-weight:700;color:{C['ORANGE']};letter-spacing:-0.4px;line-height:30px;white-space:nowrap;">Markilius</span>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Content card -->
+      <tr><td style="background:{C['CARD']};border:1px solid {C['BORDER']};border-radius:12px;padding:32px;">
+        {content_html}
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="padding-top:24px;font-size:12px;color:{C['MUTED']};text-align:center;">
+        Markilius &mdash; <a href="mailto:support@markilius.com" style="color:{C['MUTED']};text-decoration:none;">support@markilius.com</a>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
+
+
 def _heatmap_cell_color(pct: float) -> str:
     if pct == 0:      return _DARK["SUBTLE"]
     if pct < 25:      return "rgba(249,115,22,0.2)"
@@ -181,93 +243,192 @@ def _render_weekly_chart(daily_breakdown: List[dict]) -> str:
 
 async def send_password_reset_email(email: str, reset_token: str):
     MAIL_FROM = _init()
+    C = _DARK
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
 
-    html_body = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0;">Markilius</h1>
-                </div>
-                <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
-                    <h2 style="color: #333; margin-top: 0;">Reset Your Password</h2>
-                    <p>You requested to reset your password. Click the button below to set a new password:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="{reset_link}"
-                           style="background-color: #f97316; color: white; padding: 12px 30px;
-                                  text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
-                            Reset Password
-                        </a>
-                    </div>
-                    <p style="color: #666; font-size: 14px;">
-                        Or copy and paste this link into your browser:<br>
-                        <a href="{reset_link}" style="color: #f97316;">{reset_link}</a>
-                    </p>
-                    <p style="color: #666; font-size: 14px; margin-top: 30px;">This link will expire in 5 minutes.</p>
-                    <p style="color: #666; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
-                    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                    <p style="color: #999; font-size: 12px; text-align: center;">
-                        This email was sent from Markilius. Please do not reply to this email.
-                    </p>
-                </div>
-            </div>
-        </body>
-    </html>
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Reset your password</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            Click the button below to set a new password. This link expires in 5 minutes.
+        </p>
+        <a href="{reset_link}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Reset password
+        </a>
+        <p style="margin:24px 0 0;font-size:13px;color:{C['MUTED']};line-height:1.6;">
+            Or copy this link into your browser:<br>
+            <a href="{reset_link}" style="color:{C['SECONDARY']};word-break:break-all;">{reset_link}</a>
+        </p>
+        <p style="margin:16px 0 0;font-size:13px;color:{C['MUTED']};">If you didn't request this, you can ignore this email.</p>
     """
 
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
-        "subject": "Reset Your Markilius Password",
-        "html": html_body,
+        "subject": "Reset your password — Markilius",
+        "html": _email_template(content),
     })
 
 
 async def send_verification_email(email: str, verification_token: str):
     MAIL_FROM = _init()
+    C = _DARK
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     verify_link = f"{frontend_url}/verify-email?token={verification_token}"
 
-    html_body = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background-color: #f97316; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0;">Markilius</h1>
-                </div>
-                <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
-                    <h2 style="color: #333; margin-top: 0;">Verify Your Email</h2>
-                    <p>Thanks for signing up! Click the button below to verify your email address:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="{verify_link}"
-                           style="background-color: #f97316; color: white; padding: 12px 30px;
-                                  text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 500;">
-                            Verify Email
-                        </a>
-                    </div>
-                    <p style="color: #666; font-size: 14px;">
-                        Or copy and paste this link into your browser:<br>
-                        <a href="{verify_link}" style="color: #f97316;">{verify_link}</a>
-                    </p>
-                    <p style="color: #666; font-size: 14px; margin-top: 30px;">This link will expire in 24 hours.</p>
-                    <p style="color: #666; font-size: 14px;">If you didn't create a Markilius account, you can safely ignore this email.</p>
-                    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                    <p style="color: #999; font-size: 12px; text-align: center;">
-                        This email was sent from Markilius. Please do not reply to this email.
-                    </p>
-                </div>
-            </div>
-        </body>
-    </html>
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Verify your email</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            Click the button below to verify your email address. This link expires in 24 hours.
+        </p>
+        <a href="{verify_link}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Verify email
+        </a>
+        <p style="margin:24px 0 0;font-size:13px;color:{C['MUTED']};line-height:1.6;">
+            Or copy this link into your browser:<br>
+            <a href="{verify_link}" style="color:{C['SECONDARY']};word-break:break-all;">{verify_link}</a>
+        </p>
+        <p style="margin:16px 0 0;font-size:13px;color:{C['MUTED']};">If you didn't create a Markilius account, you can ignore this email.</p>
     """
 
     resend.Emails.send({
         "from": MAIL_FROM,
         "to": [email],
-        "subject": "Verify Your Markilius Email",
-        "html": html_body,
+        "subject": "Verify your email — Markilius",
+        "html": _email_template(content),
+    })
+
+
+_PLAN_LABELS = {
+    "monthly": "Monthly — $2.99 / month",
+    "yearly": "Yearly — $19.99 / year",
+    "lifetime": "Lifetime — $39.99 one-time",
+}
+
+
+async def send_subscription_welcome_email(email: str, first_name: str, tier: str):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    dashboard_url = f"{frontend_url}/dashboard"
+    plan_label = _PLAN_LABELS.get(tier, tier.capitalize())
+
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">You're in.</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            {first_name}, your plan is active. This is your record. It starts today.
+        </p>
+        <div style="background:{C['SUBTLE']};border:1px solid {C['BORDER']};border-radius:8px;padding:14px 16px;margin-bottom:24px;">
+            <p style="margin:0;font-size:12px;color:{C['MUTED']};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Plan</p>
+            <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:{C['TEXT']};">{plan_label}</p>
+        </div>
+        <a href="{dashboard_url}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Go to your dashboard
+        </a>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "You're in — Markilius",
+        "html": _email_template(content),
+    })
+
+
+async def send_plan_switched_email(email: str, first_name: str, old_tier: str, new_tier: str):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    dashboard_url = f"{frontend_url}/dashboard"
+    old_label = _PLAN_LABELS.get(old_tier, old_tier.capitalize())
+    new_label = _PLAN_LABELS.get(new_tier, new_tier.capitalize())
+
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Plan updated.</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            {first_name}, your plan has been updated.
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:{C['SUBTLE']};border:1px solid {C['BORDER']};border-radius:8px;margin-bottom:24px;">
+          <tr>
+            <td style="padding:14px 16px;vertical-align:top;">
+              <p style="margin:0;font-size:12px;color:{C['MUTED']};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">From</p>
+              <p style="margin:4px 0 0;font-size:14px;color:{C['SECONDARY']};text-decoration:line-through;">{old_label}</p>
+            </td>
+            <td style="padding:14px 16px;vertical-align:top;">
+              <p style="margin:0;font-size:12px;color:{C['MUTED']};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">To</p>
+              <p style="margin:4px 0 0;font-size:14px;font-weight:600;color:{C['TEXT']};">{new_label}</p>
+            </td>
+          </tr>
+        </table>
+        <a href="{dashboard_url}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Go to your dashboard
+        </a>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Plan updated — Markilius",
+        "html": _email_template(content),
+    })
+
+
+async def send_payment_failed_email(email: str, first_name: str, next_retry: str | None):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    billing_url = f"{frontend_url}/dashboard/profile"
+
+    retry_line = (
+        f'<p style="margin:0 0 24px;color:{C["SECONDARY"]};font-size:14px;line-height:1.6;">Stripe will retry on {next_retry}. Update your card before then to avoid losing access.</p>'
+        if next_retry else
+        f'<p style="margin:0 0 24px;color:{C["SECONDARY"]};font-size:14px;line-height:1.6;">No further retries are scheduled. Update your payment method to restore access.</p>'
+    )
+
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Payment failed</h1>
+        <p style="margin:0 0 16px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            {first_name}, your last payment didn't go through. Update your payment method to keep access to Markilius.
+        </p>
+        {retry_line}
+        <a href="{billing_url}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Update payment method
+        </a>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Payment failed — action required",
+        "html": _email_template(content),
+    })
+
+
+async def send_subscription_cancelled_email(email: str, first_name: str, access_ends: str):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    billing_url = f"{frontend_url}/dashboard/profile"
+
+    content = f"""
+        <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;color:{C['TEXT']};letter-spacing:-0.3px;">Subscription cancelled.</h1>
+        <p style="margin:0 0 24px;color:{C['SECONDARY']};font-size:14px;line-height:1.6;">
+            {first_name}, your subscription has been cancelled. Your access and record remain intact until {access_ends}.
+        </p>
+        <div style="background:{C['SUBTLE']};border:1px solid {C['BORDER']};border-radius:8px;padding:14px 16px;margin-bottom:24px;">
+            <p style="margin:0;font-size:12px;color:{C['MUTED']};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Access ends</p>
+            <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:{C['TEXT']};">{access_ends}</p>
+        </div>
+        <a href="{billing_url}" style="display:inline-block;background:{C['ORANGE']};color:#fff;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+            Reactivate subscription
+        </a>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Subscription cancelled — Markilius",
+        "html": _email_template(content),
     })
 
 

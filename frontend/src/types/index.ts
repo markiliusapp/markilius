@@ -168,8 +168,10 @@ export interface User {
     weekly_email: boolean;
     monthly_email: boolean;
     timezone: string;
-    subscription_status: 'inactive' | 'active' | 'lifetime';
+    subscription_status: 'inactive' | 'active' | 'lifetime' | 'past_due' | 'read_only';
     subscription_tier: 'monthly' | 'yearly' | 'lifetime' | null;
+    subscription_cancel_at: string | null;
+    onboarding_completed: boolean;
 }
 
 export interface UserUpdate {

@@ -27,6 +27,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return () => window.removeEventListener('session-expired', handleSessionExpired);
     }, []);
 
+    useEffect(() => {
+        const handleSubscriptionRequired = () => {
+            window.location.href = '/pricing';
+        };
+        window.addEventListener('subscription-required', handleSubscriptionRequired);
+        return () => window.removeEventListener('subscription-required', handleSubscriptionRequired);
+    }, []);
+
     const syncTimezone = async (userData: User) => {
         const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (detectedTz && detectedTz !== userData.timezone) {
@@ -79,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authAPI.getMe();
             setAuthState(prev => ({ ...prev, user: userData }));
+            return userData;
         } catch (err) {
             // silently fail
         }

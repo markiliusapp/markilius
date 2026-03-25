@@ -3,6 +3,7 @@ import { useAuth } from '../context/authContext';
 import { useTheme } from '../context/themeContext';
 import { NavLink } from 'react-router-dom';
 import BrandLogo from './brandLogo/BrandLogo';
+import { paymentAPI } from '../services/api';
 import './DashBoardLayout.css';
 
 interface DashboardLayoutProps {
@@ -13,6 +14,26 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [portalLoading, setPortalLoading] = useState(false);
+    const [bannerDismissed, setBannerDismissed] = useState(
+        () => sessionStorage.getItem('payment-banner-dismissed') === 'true'
+    );
+    const [readOnlyDismissed, setReadOnlyDismissed] = useState(
+        () => sessionStorage.getItem('read-only-banner-dismissed') === 'true'
+    );
+    const [cancelDismissed, setCancelDismissed] = useState(
+        () => sessionStorage.getItem('cancel-banner-dismissed') === 'true'
+    );
+
+    const handleUpdatePayment = async () => {
+        setPortalLoading(true);
+        try {
+            const { url } = await paymentAPI.createPortalSession();
+            window.location.href = url;
+        } catch {
+            setPortalLoading(false);
+        }
+    };
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
@@ -305,6 +326,93 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* Main content */}
             <main className="dashboard-main">
+                {user?.subscription_cancel_at && !cancelDismissed && (
+                    <div className="cancel-scheduled-banner">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <div className="cancel-scheduled-banner__body">
+                            <span className="cancel-scheduled-banner__text">
+                                Your access ends on {new Date(user.subscription_cancel_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Reactivate to keep your record going.
+                            </span>
+                            <button
+                                className="cancel-scheduled-banner__action"
+                                onClick={handleUpdatePayment}
+                                disabled={portalLoading}
+                            >
+                                {portalLoading ? 'Loading...' : 'Reactivate'}
+                            </button>
+                        </div>
+                        <button
+                            className="cancel-scheduled-banner__dismiss"
+                            onClick={() => {
+                                sessionStorage.setItem('cancel-banner-dismissed', 'true');
+                                setCancelDismissed(true);
+                            }}
+                            aria-label="Dismiss"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+                {user?.subscription_status === 'read_only' && !readOnlyDismissed && (
+                    <div className="read-only-banner">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <div className="read-only-banner__body">
+                            <span className="read-only-banner__text">
+                                Your subscription has expired. Your record is still here — it's read-only.
+                            </span>
+                            <a href="/pricing" className="read-only-banner__action">Resubscribe</a>
+                        </div>
+                        <button
+                            className="read-only-banner__dismiss"
+                            onClick={() => {
+                                sessionStorage.setItem('read-only-banner-dismissed', 'true');
+                                setReadOnlyDismissed(true);
+                            }}
+                            aria-label="Dismiss"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+                {user?.subscription_status === 'past_due' && !bannerDismissed && (
+                    <div className="payment-failed-banner">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <div className="payment-failed-banner__body">
+                            <span className="payment-failed-banner__text">
+                                Your last payment failed. You have 7 days to update your payment method before losing access.
+                            </span>
+                            <button
+                                className="payment-failed-banner__action"
+                                onClick={handleUpdatePayment}
+                                disabled={portalLoading}
+                            >
+                                {portalLoading ? 'Loading...' : 'Update payment method'}
+                            </button>
+                        </div>
+                        <button
+                            className="payment-failed-banner__dismiss"
+                            onClick={() => {
+                                sessionStorage.setItem('payment-banner-dismissed', 'true');
+                                setBannerDismissed(true);
+                            }}
+                            aria-label="Dismiss"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
                 {children}
             </main>
         </div>

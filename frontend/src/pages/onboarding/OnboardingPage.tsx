@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { arenaAPI } from '@/services/api';
+import { arenaAPI, authAPI } from '@/services/api';
 import type { ArenaResponse } from '@/types';
 import BrandLogo from '@/components/brandLogo/BrandLogo';
 import ArenaManagerList from '@/components/arenaManagerList/ArenaManagerList';
@@ -8,7 +8,6 @@ import './Onboarding.css';
 
 const OnboardingPage = () => {
     const navigate = useNavigate();
-    const [statement, setStatement] = useState('');
     const [arenas, setArenas] = useState<ArenaResponse[]>([]);
 
     useEffect(() => {
@@ -66,10 +65,16 @@ const OnboardingPage = () => {
                 </div>
 
                 <div className="onboarding-actions">
-                    <button className="onboarding-skip-btn" onClick={() => navigate('/dashboard/year')}>
+                    <button className="onboarding-skip-btn" onClick={async () => {
+                        await authAPI.updateMe({ onboarding_completed: true }).catch(() => {});
+                        navigate('/dashboard/year');
+                    }}>
                         Skip for now
                     </button>
-                    <button className="onboarding-continue-btn" onClick={() => navigate('/dashboard/year')}>
+                    <button className="onboarding-continue-btn" onClick={async () => {
+                        await authAPI.updateMe({ onboarding_completed: true }).catch(() => {});
+                        navigate('/dashboard/year');
+                    }}>
                         Continue
                     </button>
                 </div>

@@ -280,6 +280,23 @@
     color: #c2410c;
 }
 
+.billing-status-badge--past_due {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.billing-status-badge--read_only {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+}
+
+.billing-cancel-notice {
+    margin: 10px 0;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
 .billing-hint {
     margin-top: 12px;
     font-size: 13px;

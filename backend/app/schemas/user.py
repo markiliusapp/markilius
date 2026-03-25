@@ -23,6 +23,8 @@ class UserResponse(BaseModel):
     timezone: str
     subscription_status: str
     subscription_tier: Optional[str] = None
+    subscription_cancel_at: Optional[datetime] = None
+    onboarding_completed: bool
 
     class Config:
         from_attributes = True  # Allows SQLAlchemy model conversion
@@ -62,5 +64,6 @@ class UserUpdate(BaseModel):
     weekly_email: Optional[bool] = None
     monthly_email: Optional[bool] = None
     timezone: Optional[str] = None
+    onboarding_completed: Optional[bool] = None
 
 

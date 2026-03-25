@@ -35,10 +35,14 @@ class User(Base):
     last_weekly_email_sent = Column(TIMESTAMP(timezone=True), nullable=True)
     last_monthly_email_sent = Column(TIMESTAMP(timezone=True), nullable=True)
 
+    # Onboarding
+    onboarding_completed = Column(Boolean, nullable=False, default=False)
+
     # Subscription fields
     subscription_status = Column(String(20), nullable=False, default="inactive")  # inactive | active | lifetime
     subscription_tier = Column(String(20), nullable=True)  # monthly | yearly | lifetime
     stripe_customer_id = Column(String(100), nullable=True, unique=True)
     stripe_subscription_id = Column(String(100), nullable=True)
+    subscription_cancel_at = Column(TIMESTAMP(timezone=True), nullable=True)  # set when cancel_at_period_end=True
 
     arenas = relationship("Arena", back_populates="user")

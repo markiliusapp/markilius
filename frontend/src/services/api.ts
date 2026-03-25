@@ -12,6 +12,13 @@ const handleResponse = async (response: Response) => {
         if (response.status === 401 && getToken()) {
             window.dispatchEvent(new CustomEvent('session-expired'));
         }
+        if (response.status === 403) {
+            const cloned = response.clone();
+            const body = await cloned.json().catch(() => ({}));
+            if (body.detail !== 'read_only_access') {
+                window.dispatchEvent(new CustomEvent('subscription-required'));
+            }
+        }
         if (response.status === 429) {
             throw new Error('Rate limit exceeded')
         }
@@ -99,7 +106,7 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
-    updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string; weekly_email?: boolean; monthly_email?: boolean; timezone?: string }) => {
+    updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string; weekly_email?: boolean; monthly_email?: boolean; timezone?: string; onboarding_completed?: boolean }) => {
         const response = await fetch(`${API_URL}/auth/me`, {
             method: 'PUT',
             headers: {
@@ -306,6 +313,13 @@ export const arenaAPI = {
 export const paymentAPI = {
     createCheckoutSession: async (plan: 'monthly' | 'yearly' | 'lifetime'): Promise<{ url: string }> => {
         const response = await fetch(`${API_URL}/payments/checkout?plan=${plan}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    upgradeSubscription: async (plan: 'yearly'): Promise<{ status: string; tier: string }> => {
+        const response = await fetch(`${API_URL}/payments/upgrade-subscription?plan=${plan}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });

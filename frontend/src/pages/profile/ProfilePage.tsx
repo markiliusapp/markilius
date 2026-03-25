@@ -337,7 +337,10 @@ const ProfilePage = () => {
                                     {user?.subscription_tier === 'lifetime' && 'Lifetime Plan'}
                                 </span>
                                 <span className={`billing-status-badge billing-status-badge--${user?.subscription_status}`}>
-                                    {user?.subscription_status === 'lifetime' ? 'Lifetime' : 'Active'}
+                                    {user?.subscription_status === 'lifetime' ? 'Lifetime'
+                                        : user?.subscription_status === 'past_due' ? 'Past Due'
+                                        : user?.subscription_status === 'read_only' ? 'Read Only'
+                                        : 'Active'}
                                 </span>
                             </div>
 
@@ -353,10 +356,29 @@ const ProfilePage = () => {
                             )}
                         </div>
 
-                        {user?.subscription_status !== 'lifetime' && (
-                            <p className="billing-hint">
-                                Update your payment method, view invoices, or cancel your subscription via the billing portal.
+                        {user?.subscription_cancel_at && (
+                            <p className="billing-cancel-notice">
+                                Access ends on {new Date(user.subscription_cancel_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. To keep access, reactivate via the billing portal.
                             </p>
+                        )}
+
+                        {user?.subscription_status === 'lifetime' ? (
+                            <p className="billing-hint">
+                                For billing enquiries, contact <a href="mailto:support@markilius.com">support@markilius.com</a>
+                            </p>
+                        ) : (
+                            <div className="billing-actions">
+                                <button
+                                    type="button"
+                                    className="profile-btn profile-btn--primary"
+                                    onClick={() => navigate('/pricing')}
+                                >
+                                    Upgrade Plan
+                                </button>
+                                <p className="billing-hint">
+                                    Update your payment method, view invoices, or cancel your subscription via the billing portal.
+                                </p>
+                            </div>
                         )}
                     </div>
 

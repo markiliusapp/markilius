@@ -10,7 +10,7 @@ const PLANS = [
     {
         id: 'monthly' as const,
         name: 'Monthly',
-        price: '$2.99',
+        price: '$5.99',
         period: '/ month',
         subtext: 'Billed monthly',
         highlight: false,
@@ -18,15 +18,15 @@ const PLANS = [
     {
         id: 'yearly' as const,
         name: 'Yearly',
-        price: '$19.99',
+        price: '$29.99',
         period: '/ year',
-        subtext: 'Just $1.67 / month — save 44%',
+        subtext: 'Just $2.50 / month — save 58%',
         highlight: true,
     },
     {
         id: 'lifetime' as const,
         name: 'Lifetime',
-        price: '$39.99',
+        price: '$59.99',
         period: 'one-time',
         subtext: 'Pay once, own it forever',
         highlight: false,
@@ -45,10 +45,11 @@ const FEATURES = [
 ];
 
 const PricingPage = () => {
-    const { user, logout, loading } = useAuth();
+    const { user, logout, loading, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [upgradeSuccess, setUpgradeSuccess] = useState(false);
 
     if (loading) return (
         <div className="pricing-loading">
@@ -57,14 +58,14 @@ const PricingPage = () => {
     );
 
     const currentTier = user?.subscription_tier;
-    const isActive = user?.subscription_status === 'active';
+    const isActive = user?.subscription_status === 'active' || user?.subscription_status === 'past_due';
     const isLifetime = user?.subscription_status === 'lifetime';
 
     const getButtonLabel = (planId: 'monthly' | 'yearly' | 'lifetime') => {
         if (isLifetime) return 'Current plan';
         if (currentTier === planId && isActive) return 'Current plan';
         if (planId === 'monthly' && isActive) return 'Downgrade not available';
-        if (planId === 'yearly' && currentTier === 'yearly' && isActive) return 'Current plan';
+        if (planId === 'yearly' && isActive && currentTier === 'monthly') return 'Upgrade to Yearly';
         if (planId === 'lifetime' && isActive) return 'Upgrade to Lifetime';
         return 'Get started';
     };
@@ -86,10 +87,11 @@ const PricingPage = () => {
             if (plan === 'lifetime' && isActive) {
                 const { url } = await paymentAPI.upgradeToLifetime();
                 window.location.href = url;
-            } else if (plan === 'yearly' && isActive) {
-                // Monthly → Yearly: use Stripe billing portal
-                const { url } = await paymentAPI.createPortalSession();
-                window.location.href = url;
+            } else if (plan === 'yearly' && isActive && currentTier === 'monthly') {
+                await paymentAPI.upgradeSubscription('yearly');
+                await refreshUser();
+                setUpgradeSuccess(true);
+                setLoadingPlan(null);
             } else {
                 const { url } = await paymentAPI.createCheckoutSession(plan);
                 window.location.href = url;
@@ -127,6 +129,18 @@ const PricingPage = () => {
                             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                         </svg>
                         <p>{error}</p>
+                    </div>
+                )}
+                {upgradeSuccess && (
+                    <div className="pricing-success">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <p>
+                            {user?.subscription_tier === 'lifetime'
+                                ? "You're now on Lifetime."
+                                : "You're now on the Yearly plan."}
+                        </p>
                     </div>
                 )}
 

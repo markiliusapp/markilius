@@ -1,14 +1,20 @@
-import { useEffect } from 'react';
-import AuthHeader from '../components/authHeader/AuthHeader';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { paymentAPI } from '../services/api';
+import type { User } from '../types';
+import BrandLogo from '../components/brandLogo/BrandLogo';
 import '../pages/login/Login.css';
+import './PaymentSuccess.css';
 
 const PaymentSuccessPage = () => {
     const { refreshUser } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const [ready, setReady] = useState(false);
+    const [resolvedUser, setResolvedUser] = useState<User | null>(null);
+
+    const isUpgrade = searchParams.get('upgrade') === '1';
 
     useEffect(() => {
         const sessionId = searchParams.get('session_id');
@@ -16,40 +22,63 @@ const PaymentSuccessPage = () => {
             if (sessionId) {
                 await paymentAPI.verifySession(sessionId);
             }
-            await refreshUser();
-            navigate('/onboarding');
+            const updatedUser = await refreshUser();
+            setResolvedUser(updatedUser ?? null);
+            setReady(true);
         };
         activate();
     }, []);
 
+    const isFirstPurchase = ready && !isUpgrade && !resolvedUser?.onboarding_completed;
+
+    const title = isUpgrade
+        ? "You're on Lifetime."
+        : isFirstPurchase
+            ? "You're in."
+            : "Welcome back.";
+
+    const subtitle = isUpgrade
+        ? "Your record continues. No renewals, ever."
+        : isFirstPurchase
+            ? "This is your record. It starts today."
+            : "Your record continues.";
+
+    const ctaLabel = isFirstPurchase ? "Set up your arenas" : "Go to dashboard";
+
+    const handleCta = () => {
+        if (isFirstPurchase) {
+            navigate('/onboarding');
+        } else {
+            navigate('/dashboard');
+        }
+    };
+
     return (
-        <div className="login-page">
-            <div className="login-left">
-                <AuthHeader />
-                <div className="login-card">
-                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                        <div style={{
-                            width: '56px', height: '56px', borderRadius: '50%',
-                            background: '#f0fdf4', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', margin: '0 auto 16px'
-                        }}>
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="payment-success-page">
+            <div className="payment-success-header">
+                <BrandLogo size="sm" />
+            </div>
+
+            <div className="payment-success-card">
+                {!ready ? (
+                    <div className="payment-success-loading">
+                        <div className="spinner" />
+                        <p>Confirming your payment...</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="payment-success-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
                         </div>
-                        <h2 className="login-card-title">You're in.</h2>
-                        <p className="login-card-subtitle">Setting up your arenas...</p>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div className="spinner" />
-                    </div>
-                </div>
-            </div>
-            <div className="login-right">
-                <div className="login-right-text">
-                    <p className="login-right-quote">This is your record. It starts today.</p>
-                    <span className="login-right-cite">— Markilius</span>
-                </div>
+                        <h1 className="payment-success-title">{title}</h1>
+                        <p className="payment-success-subtitle">{subtitle}</p>
+                        <button className="payment-success-btn" onClick={handleCta}>
+                            {ctaLabel}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );

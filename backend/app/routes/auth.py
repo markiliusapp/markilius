@@ -1,6 +1,10 @@
+import os
+import stripe
 from fastapi import APIRouter, Request, status, Depends, HTTPException
 from app.limiter import limiter
 from app.logger import get_logger
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 logger = get_logger(__name__)
 from sqlalchemy.orm import Session
@@ -24,6 +28,8 @@ from app.utils.auth import (
     verify_password,
     create_access_token,
     get_current_user,
+    require_subscription,
+    require_write_access,
     verify_unsubscribe_token,
 )
 from google.oauth2 import id_token
@@ -158,6 +164,12 @@ def update_current_user(
         if existing:
             raise HTTPException(status_code=400, detail="Email already in use")
         current_user.email = user_update.email
+        # Keep Stripe customer email in sync so invoices reach the right address
+        if current_user.stripe_customer_id:
+            try:
+                stripe.Customer.modify(current_user.stripe_customer_id, email=user_update.email)
+            except stripe.error.InvalidRequestError:
+                pass  # Customer not found in Stripe — not a hard failure
 
     if user_update.first_name:
         current_user.first_name = user_update.first_name
@@ -183,6 +195,8 @@ def update_current_user(
         current_user.monthly_email = user_update.monthly_email
     if user_update.timezone:
         current_user.timezone = user_update.timezone
+    if user_update.onboarding_completed is not None:
+        current_user.onboarding_completed = user_update.onboarding_completed
 
     db.commit()
     db.refresh(current_user)
@@ -348,6 +362,13 @@ def delete_account(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Cancel active Stripe subscription so they stop being charged
+    if current_user.stripe_subscription_id and current_user.subscription_status in ("active", "past_due"):
+        try:
+            stripe.Subscription.cancel(current_user.stripe_subscription_id)
+        except stripe.error.InvalidRequestError:
+            pass  # Already cancelled or not found — proceed with deletion
+
     db.query(Task).filter(Task.user_id == current_user.id).delete()
     db.query(Arena).filter(Arena.user_id == current_user.id).delete()
     db.delete(current_user)
