@@ -189,6 +189,8 @@ def update_current_user(
         current_user.monthly_email = user_update.monthly_email
     if user_update.timezone:
         current_user.timezone = user_update.timezone
+    if user_update.onboarding_completed is not None:
+        current_user.onboarding_completed = user_update.onboarding_completed
 
     db.commit()
     db.refresh(current_user)

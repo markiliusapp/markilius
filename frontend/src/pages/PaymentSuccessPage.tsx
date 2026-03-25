@@ -17,8 +17,14 @@ const PaymentSuccessPage = () => {
             if (sessionId) {
                 await paymentAPI.verifySession(sessionId);
             }
-            await refreshUser();
-            navigate(isUpgrade ? '/pricing?upgraded=true' : '/onboarding');
+            const updatedUser = await refreshUser();
+            if (isUpgrade) {
+                navigate('/pricing?upgraded=true');
+            } else if (updatedUser?.onboarding_completed) {
+                navigate('/dashboard');
+            } else {
+                navigate('/onboarding');
+            }
         };
         activate();
     }, []);

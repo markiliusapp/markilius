@@ -106,7 +106,7 @@ export const authAPI = {
         });
         return handleResponse(response);
     },
-    updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string; weekly_email?: boolean; monthly_email?: boolean; timezone?: string }) => {
+    updateMe: async (data: { first_name?: string; last_name?: string; email?: string; current_password?: string; new_password?: string; weekly_email?: boolean; monthly_email?: boolean; timezone?: string; onboarding_completed?: boolean }) => {
         const response = await fetch(`${API_URL}/auth/me`, {
             method: 'PUT',
             headers: {

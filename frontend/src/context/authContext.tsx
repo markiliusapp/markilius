@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authAPI.getMe();
             setAuthState(prev => ({ ...prev, user: userData }));
+            return userData;
         } catch (err) {
             // silently fail
         }

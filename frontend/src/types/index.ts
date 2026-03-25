@@ -170,6 +170,7 @@ export interface User {
     timezone: string;
     subscription_status: 'inactive' | 'active' | 'lifetime' | 'past_due' | 'read_only';
     subscription_tier: 'monthly' | 'yearly' | 'lifetime' | null;
+    onboarding_completed: boolean;
 }
 
 export interface UserUpdate {
