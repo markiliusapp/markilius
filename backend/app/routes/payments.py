@@ -192,6 +192,15 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             # Fresh purchase
             await send_subscription_welcome_email(user.email, user.first_name, user.subscription_tier)
 
+    elif event["type"] == "invoice.paid":
+        # Payment succeeded (covers both initial and retry after past_due)
+        invoice = event["data"]["object"]
+        customer_id = invoice.get("customer")
+        user = db.query(User).filter(User.stripe_customer_id == customer_id).first()
+        if user and user.subscription_status == "past_due":
+            user.subscription_status = "active"
+            db.commit()
+
     elif event["type"] == "invoice.payment_failed":
         invoice = event["data"]["object"]
         customer_id = invoice.get("customer")
