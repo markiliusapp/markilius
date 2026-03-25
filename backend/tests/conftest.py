@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,6 +24,13 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def mock_resend_emails(mocker):
+    """Prevent real Resend API calls in all tests."""
+    mock = mocker.patch("resend.Emails.send", return_value={"id": "test_email_id"})
+    return mock
 
 
 @pytest.fixture()
