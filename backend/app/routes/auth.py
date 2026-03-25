@@ -1,6 +1,10 @@
+import os
+import stripe
 from fastapi import APIRouter, Request, status, Depends, HTTPException
 from app.limiter import limiter
 from app.logger import get_logger
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 logger = get_logger(__name__)
 from sqlalchemy.orm import Session
@@ -350,6 +354,13 @@ def delete_account(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Cancel active Stripe subscription so they stop being charged
+    if current_user.stripe_subscription_id and current_user.subscription_status in ("active", "past_due"):
+        try:
+            stripe.Subscription.cancel(current_user.stripe_subscription_id)
+        except stripe.error.InvalidRequestError:
+            pass  # Already cancelled or not found — proceed with deletion
+
     db.query(Task).filter(Task.user_id == current_user.id).delete()
     db.query(Arena).filter(Arena.user_id == current_user.id).delete()
     db.delete(current_user)

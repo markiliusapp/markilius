@@ -87,13 +87,6 @@ def upgrade_to_lifetime(
     if not price_id:
         raise HTTPException(status_code=500, detail="Lifetime plan not configured")
 
-    # Cancel existing subscription at period end so they keep access until expiry
-    if current_user.stripe_subscription_id:
-        stripe.Subscription.modify(
-            current_user.stripe_subscription_id,
-            cancel_at_period_end=True,
-        )
-
     session = stripe.checkout.Session.create(
         customer=current_user.stripe_customer_id,
         payment_method_types=["card"],
@@ -170,6 +163,12 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         old_tier = user.subscription_tier
 
         if mode == "payment":
+            # Cancel the existing subscription at period end now that lifetime payment is confirmed
+            if was_active and user.stripe_subscription_id:
+                stripe.Subscription.modify(
+                    user.stripe_subscription_id,
+                    cancel_at_period_end=True,
+                )
             user.subscription_status = "lifetime"
             user.subscription_tier = "lifetime"
         else:
@@ -231,6 +230,23 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             user.subscription_tier = None
             user.stripe_subscription_id = None
             db.commit()
+
+    elif event["type"] == "checkout.session.expired":
+        # If a lifetime upgrade checkout expires, the subscription was NOT yet marked for
+        # cancellation (we defer that to checkout.session.completed), so no reversal needed.
+        # This handler is a safety net: if for any reason cancel_at_period_end was set
+        # before payment, reverse it so the user's subscription is restored cleanly.
+        session = event["data"]["object"]
+        client_ref = session.get("client_reference_id")
+        if client_ref and session.get("mode") == "payment":
+            user = db.query(User).filter(User.id == int(client_ref)).first()
+            if user and user.stripe_subscription_id and user.subscription_status in ("active", "past_due"):
+                sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
+                if sub.get("cancel_at_period_end"):
+                    stripe.Subscription.modify(
+                        user.stripe_subscription_id,
+                        cancel_at_period_end=False,
+                    )
 
     return {"status": "ok"}
 
