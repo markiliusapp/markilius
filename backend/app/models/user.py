@@ -43,5 +43,6 @@ class User(Base):
     subscription_tier = Column(String(20), nullable=True)  # monthly | yearly | lifetime
     stripe_customer_id = Column(String(100), nullable=True, unique=True)
     stripe_subscription_id = Column(String(100), nullable=True)
+    subscription_cancel_at = Column(TIMESTAMP(timezone=True), nullable=True)  # set when cancel_at_period_end=True
 
     arenas = relationship("Arena", back_populates="user")

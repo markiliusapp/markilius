@@ -290,6 +290,13 @@
     color: var(--color-text-secondary);
 }
 
+.billing-cancel-notice {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
 .billing-hint {
     margin-top: 12px;
     font-size: 13px;

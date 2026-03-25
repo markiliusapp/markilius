@@ -356,6 +356,12 @@ const ProfilePage = () => {
                             )}
                         </div>
 
+                        {user?.subscription_cancel_at && (
+                            <p className="billing-cancel-notice">
+                                Access ends on {new Date(user.subscription_cancel_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. To keep access, reactivate via the billing portal.
+                            </p>
+                        )}
+
                         {user?.subscription_status === 'lifetime' ? (
                             <p className="billing-hint">
                                 For billing enquiries, contact <a href="mailto:support@markilius.com">support@markilius.com</a>

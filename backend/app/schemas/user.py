@@ -23,6 +23,7 @@ class UserResponse(BaseModel):
     timezone: str
     subscription_status: str
     subscription_tier: Optional[str] = None
+    subscription_cancel_at: Optional[datetime] = None
     onboarding_completed: bool
 
     class Config:
