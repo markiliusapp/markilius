@@ -22,7 +22,9 @@ def upgrade() -> None:
     op.add_column('users', sa.Column(
         'onboarding_completed', sa.Boolean(), nullable=False, server_default=sa.false()
     ))
+    op.drop_column('users', 'identity_statement')
 
 
 def downgrade() -> None:
+    op.add_column('users', sa.Column('identity_statement', sa.VARCHAR(length=500), nullable=True))
     op.drop_column('users', 'onboarding_completed')
