@@ -164,6 +164,12 @@ def update_current_user(
         if existing:
             raise HTTPException(status_code=400, detail="Email already in use")
         current_user.email = user_update.email
+        # Keep Stripe customer email in sync so invoices reach the right address
+        if current_user.stripe_customer_id:
+            try:
+                stripe.Customer.modify(current_user.stripe_customer_id, email=user_update.email)
+            except stripe.error.InvalidRequestError:
+                pass  # Customer not found in Stripe — not a hard failure
 
     if user_update.first_name:
         current_user.first_name = user_update.first_name
