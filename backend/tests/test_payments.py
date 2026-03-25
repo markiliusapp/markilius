@@ -223,9 +223,10 @@ def test_upgrade_lifetime_price_not_configured(client, active_headers, mocker):
 
 
 def test_upgrade_cancels_existing_subscription(client, active_user, active_headers, mocker):
+    # cancel_at_period_end is now set in the webhook (checkout.session.completed),
+    # not in the endpoint. The endpoint just creates a checkout session.
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
-    mock_sub_modify = mocker.patch("stripe.Subscription.modify")
-    mocker.patch(
+    mock_session_create = mocker.patch(
         "stripe.checkout.Session.create",
         return_value=MagicMock(url="https://checkout.stripe.com/upgrade"),
     )
@@ -233,9 +234,8 @@ def test_upgrade_cancels_existing_subscription(client, active_user, active_heade
     response = client.post(UPGRADE_URL, headers=active_headers)
 
     assert response.status_code == 200
-    mock_sub_modify.assert_called_once_with(
-        active_user.stripe_subscription_id, cancel_at_period_end=True
-    )
+    assert response.json()["url"] == "https://checkout.stripe.com/upgrade"
+    mock_session_create.assert_called_once()
 
 
 def test_upgrade_no_subscription_id_skips_cancel(client, db, active_user, active_headers, mocker):
