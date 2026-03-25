@@ -12,6 +12,9 @@ const handleResponse = async (response: Response) => {
         if (response.status === 401 && getToken()) {
             window.dispatchEvent(new CustomEvent('session-expired'));
         }
+        if (response.status === 403) {
+            window.dispatchEvent(new CustomEvent('subscription-required'));
+        }
         if (response.status === 429) {
             throw new Error('Rate limit exceeded')
         }
@@ -306,6 +309,13 @@ export const arenaAPI = {
 export const paymentAPI = {
     createCheckoutSession: async (plan: 'monthly' | 'yearly' | 'lifetime'): Promise<{ url: string }> => {
         const response = await fetch(`${API_URL}/payments/checkout?plan=${plan}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return handleResponse(response);
+    },
+    upgradeSubscription: async (plan: 'yearly'): Promise<{ status: string; tier: string }> => {
+        const response = await fetch(`${API_URL}/payments/upgrade-subscription?plan=${plan}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });

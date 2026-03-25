@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.utils.auth import get_current_user
+from app.services.email import send_payment_failed_email
+from datetime import datetime, timezone
 
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -98,11 +100,48 @@ def upgrade_to_lifetime(
         line_items=[{"price": price_id, "quantity": 1}],
         mode="payment",
         client_reference_id=str(current_user.id),
-        success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&upgrade=1",
         cancel_url=f"{get_frontend_url()}/dashboard/profile",
     )
 
     return {"url": session.url}
+
+
+@router.post("/upgrade-subscription")
+def upgrade_subscription(
+    plan: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.subscription_status != "active":
+        raise HTTPException(status_code=400, detail="No active subscription to upgrade")
+    if plan not in PRICE_IDS or plan == "lifetime":
+        raise HTTPException(status_code=400, detail="Invalid upgrade target")
+
+    tier_order = {"monthly": 1, "yearly": 2}
+    if tier_order.get(plan, 0) <= tier_order.get(current_user.subscription_tier, 0):
+        raise HTTPException(status_code=400, detail="Downgrades are not supported")
+
+    price_id = PRICE_IDS.get(plan)
+    if not price_id:
+        raise HTTPException(status_code=500, detail="Plan not configured")
+
+    if not current_user.stripe_subscription_id:
+        raise HTTPException(status_code=400, detail="No subscription found")
+
+    sub = stripe.Subscription.retrieve(current_user.stripe_subscription_id)
+    item_id = sub["items"]["data"][0]["id"]
+
+    stripe.Subscription.modify(
+        current_user.stripe_subscription_id,
+        items=[{"id": item_id, "price": price_id}],
+        proration_behavior="always_invoice",
+    )
+
+    current_user.subscription_tier = plan
+    db.commit()
+    db.refresh(current_user)
+    return {"status": "ok", "tier": plan}
 
 
 @router.post("/webhook")
@@ -140,6 +179,33 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                     user.subscription_tier = "monthly"
 
         db.commit()
+
+    elif event["type"] == "invoice.payment_failed":
+        invoice = event["data"]["object"]
+        customer_id = invoice.get("customer")
+        user = db.query(User).filter(User.stripe_customer_id == customer_id).first()
+        if user and user.subscription_status not in ("inactive", "lifetime"):
+            user.subscription_status = "past_due"
+            db.commit()
+            next_attempt_ts = invoice.get("next_payment_attempt")
+            next_retry = (
+                datetime.fromtimestamp(next_attempt_ts, tz=timezone.utc).strftime("%B %d, %Y")
+                if next_attempt_ts else None
+            )
+            await send_payment_failed_email(user.email, user.first_name, next_retry)
+
+    elif event["type"] == "customer.subscription.updated":
+        subscription = event["data"]["object"]
+        user = db.query(User).filter(
+            User.stripe_subscription_id == subscription["id"]
+        ).first()
+        if user and user.subscription_status != "lifetime":
+            price_id = subscription["items"]["data"][0]["price"]["id"]
+            if price_id == PRICE_IDS["yearly"]:
+                user.subscription_tier = "yearly"
+            elif price_id == PRICE_IDS["monthly"]:
+                user.subscription_tier = "monthly"
+            db.commit()
 
     elif event["type"] == "customer.subscription.deleted":
         subscription = event["data"]["object"]

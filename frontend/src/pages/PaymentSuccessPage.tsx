@@ -12,12 +12,13 @@ const PaymentSuccessPage = () => {
 
     useEffect(() => {
         const sessionId = searchParams.get('session_id');
+        const isUpgrade = searchParams.get('upgrade') === '1';
         const activate = async () => {
             if (sessionId) {
                 await paymentAPI.verifySession(sessionId);
             }
             await refreshUser();
-            navigate('/onboarding');
+            navigate(isUpgrade ? '/pricing?upgraded=true' : '/onboarding');
         };
         activate();
     }, []);

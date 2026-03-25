@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { paymentAPI } from '../../services/api';
 import { useAuth } from '../../context/authContext';
 import BrandLogo from '../../components/brandLogo/BrandLogo';
@@ -45,10 +45,12 @@ const FEATURES = [
 ];
 
 const PricingPage = () => {
-    const { user, logout, loading } = useAuth();
+    const { user, logout, loading, refreshUser } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [upgradeSuccess, setUpgradeSuccess] = useState(searchParams.get('upgraded') === 'true');
 
     if (loading) return (
         <div className="pricing-loading">
@@ -64,7 +66,7 @@ const PricingPage = () => {
         if (isLifetime) return 'Current plan';
         if (currentTier === planId && isActive) return 'Current plan';
         if (planId === 'monthly' && isActive) return 'Downgrade not available';
-        if (planId === 'yearly' && currentTier === 'yearly' && isActive) return 'Current plan';
+        if (planId === 'yearly' && isActive && currentTier === 'monthly') return 'Upgrade to Yearly';
         if (planId === 'lifetime' && isActive) return 'Upgrade to Lifetime';
         return 'Get started';
     };
@@ -82,14 +84,16 @@ const PricingPage = () => {
         if (isDisabled(plan)) return;
         setLoadingPlan(plan);
         setError(null);
+        setUpgradeSuccess(false);
         try {
             if (plan === 'lifetime' && isActive) {
                 const { url } = await paymentAPI.upgradeToLifetime();
                 window.location.href = url;
-            } else if (plan === 'yearly' && isActive) {
-                // Monthly → Yearly: use Stripe billing portal
-                const { url } = await paymentAPI.createPortalSession();
-                window.location.href = url;
+            } else if (plan === 'yearly' && isActive && currentTier === 'monthly') {
+                await paymentAPI.upgradeSubscription('yearly');
+                await refreshUser();
+                setUpgradeSuccess(true);
+                setLoadingPlan(null);
             } else {
                 const { url } = await paymentAPI.createCheckoutSession(plan);
                 window.location.href = url;
@@ -127,6 +131,18 @@ const PricingPage = () => {
                             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                         </svg>
                         <p>{error}</p>
+                    </div>
+                )}
+                {upgradeSuccess && (
+                    <div className="pricing-success">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <p>
+                            {user?.subscription_tier === 'lifetime'
+                                ? "You're now on Lifetime."
+                                : "You're now on the Yearly plan."}
+                        </p>
                     </div>
                 )}
 

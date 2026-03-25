@@ -271,6 +271,53 @@ async def send_verification_email(email: str, verification_token: str):
     })
 
 
+async def send_payment_failed_email(email: str, first_name: str, next_retry: str | None):
+    MAIL_FROM = _init()
+    C = _DARK
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    billing_url = f"{frontend_url}/dashboard/profile"
+
+    retry_line = (
+        f'<p style="margin:0 0 16px; color:{C["SECONDARY"]}; font-size:14px;">Stripe will retry on {next_retry}. Update your card before then to avoid losing access.</p>'
+        if next_retry else
+        f'<p style="margin:0 0 16px; color:{C["SECONDARY"]}; font-size:14px;">No further retries are scheduled. Update your payment method to restore access.</p>'
+    )
+
+    html_body = f"""
+    <html>
+    <body style="margin:0; padding:0; background:{C['BG']}; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <div style="max-width:560px; margin:40px auto; padding:0 16px;">
+        <div style="margin-bottom:32px;">
+            <span style="font-size:18px; font-weight:700; color:{C['ORANGE']}; letter-spacing:-0.3px;">Markilius</span>
+        </div>
+        <div style="background:{C['CARD']}; border:1px solid {C['BORDER']}; border-radius:12px; padding:32px;">
+            <h1 style="margin:0 0 8px; font-size:20px; font-weight:600; color:{C['TEXT']}; letter-spacing:-0.3px;">Payment failed</h1>
+            <p style="margin:0 0 24px; color:{C['SECONDARY']}; font-size:14px; line-height:1.6;">
+                {first_name}, your last payment didn't go through. Update your payment method to keep access to Markilius.
+            </p>
+            {retry_line}
+            <a href="{billing_url}"
+               style="display:inline-block; background:{C['ORANGE']}; color:#fff; font-size:14px;
+                      font-weight:600; padding:10px 24px; border-radius:8px; text-decoration:none; letter-spacing:-0.1px;">
+                Update payment method
+            </a>
+        </div>
+        <p style="margin:24px 0 0; font-size:12px; color:{C['MUTED']}; text-align:center;">
+            Markilius &mdash; noreply@markilius.com
+        </p>
+    </div>
+    </body>
+    </html>
+    """
+
+    resend.Emails.send({
+        "from": MAIL_FROM,
+        "to": [email],
+        "subject": "Payment failed — action required",
+        "html": html_body,
+    })
+
+
 async def send_weekly_summary_email(
     email: str,
     first_name: str,

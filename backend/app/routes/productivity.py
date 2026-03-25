@@ -15,7 +15,7 @@ from app.schemas.productivity import (
 
 from datetime import date, timedelta
 from app.models.user import User
-from app.utils.auth import get_current_user, get_db
+from app.utils.auth import require_subscription, get_db
 from sqlalchemy.orm import Session, contains_eager
 from app.models.task import Task
 from app.models.arena import Arena
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/productivity", tags=["Productivity"])
 @router.get("/day", response_model=DailyProductivityResponse)
 def get_daily_productivity(
     target_date: date,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
     tasks = (
@@ -99,7 +99,7 @@ def get_daily_productivity(
 @router.get("/week", response_model=WeeklyProductivityResponse)
 def get_weekly_productivity(
     start_date: date,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
     end_date = start_date + timedelta(days=6)
@@ -289,7 +289,7 @@ def get_weekly_productivity(
 def get_monthly_productivity(
     year: int,
     month: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
     first_day = date(year, month, 1)
@@ -476,7 +476,7 @@ def get_monthly_productivity(
 @router.get("/year", response_model=YearlyProductivityResponse)
 def get_yearly_productivity(
     year: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
     first_day = date(year, 1, 1)
@@ -732,7 +732,7 @@ def get_yearly_productivity(
 
 @router.get("/streaks", response_model=StreakResponse)
 def get_streaks(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
     tasks = (

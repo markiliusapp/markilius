@@ -4,6 +4,66 @@
     background-color: var(--color-bg-subtle);
 }
 
+.payment-failed-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 12px 14px;
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    border-radius: var(--radius-md);
+    color: var(--color-error);
+    font-size: 13px;
+}
+
+.payment-failed-banner__body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.payment-failed-banner__text {
+    color: var(--color-error);
+    line-height: 1.5;
+}
+
+.payment-failed-banner__action {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-error);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.payment-failed-banner__action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.payment-failed-banner__dismiss {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-error);
+    opacity: 0.6;
+}
+
+.payment-failed-banner__dismiss:hover {
+    opacity: 1;
+}
+
 /* ================================
    SIDEBAR
 ================================ */

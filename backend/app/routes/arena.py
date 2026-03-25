@@ -9,7 +9,7 @@ from app.schemas.arena import (
     ArenaColorUpdate,
 )
 from app.database import get_db
-from .auth import get_current_user
+from .auth import require_subscription
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 
 router = APIRouter(prefix="/arenas", tags=["arenas"])
@@ -20,7 +20,7 @@ ARENA_LIMIT = 8
 @router.get("/", response_model=list[ArenaResponse])
 def get_arenas(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     """
     Fetches all active (non-archived) arenas
@@ -51,7 +51,7 @@ def get_arenas(
 @router.get("/archived", response_model=list[ArenaResponse])
 def get_archived_arenas(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     """
     Fetches all archived arenas
@@ -85,7 +85,7 @@ def get_archived_arenas(
 def create_arena(
     arena: ArenaCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     # Only count active (non-archived) arenas toward the limit
     count = (
@@ -112,7 +112,7 @@ def update_arena(
     arena_id: int,
     arena: ArenaUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     db_arena = (
         db.query(Arena)
@@ -146,7 +146,7 @@ def update_arena_color(
     arena_id: int,
     body: ArenaColorUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     db_arena = (
         db.query(Arena)
@@ -172,7 +172,7 @@ def update_arena_color(
 def delete_arena(
     arena_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     """
     Archives an arena and all its tasks instead of permanently deleting them.
@@ -202,7 +202,7 @@ def delete_arena(
 def restore_arena(
     arena_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_subscription),
 ):
     """
     Restores an archived arena and makes its tasks active again.

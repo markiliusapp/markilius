@@ -95,3 +95,12 @@ def get_current_user(
         )
 
     return current_user
+
+
+def require_subscription(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.subscription_status not in ("active", "lifetime", "past_due"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="An active subscription is required to access this resource",
+        )
+    return current_user

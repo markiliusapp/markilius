@@ -353,10 +353,23 @@ const ProfilePage = () => {
                             )}
                         </div>
 
-                        {user?.subscription_status !== 'lifetime' && (
+                        {user?.subscription_status === 'lifetime' ? (
                             <p className="billing-hint">
-                                Update your payment method, view invoices, or cancel your subscription via the billing portal.
+                                For billing enquiries, contact <a href="mailto:support@markilius.com">support@markilius.com</a>
                             </p>
+                        ) : (
+                            <div className="billing-actions">
+                                <button
+                                    type="button"
+                                    className="profile-btn profile-btn--primary"
+                                    onClick={() => navigate('/pricing')}
+                                >
+                                    Upgrade Plan
+                                </button>
+                                <p className="billing-hint">
+                                    Update your payment method, view invoices, or cancel your subscription via the billing portal.
+                                </p>
+                            </div>
                         )}
                     </div>
 
