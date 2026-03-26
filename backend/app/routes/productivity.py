@@ -13,7 +13,8 @@ from app.schemas.productivity import (
     StreakResponse,
 )
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+import pytz
 from app.models.user import User
 from app.utils.auth import require_subscription, get_db
 from sqlalchemy.orm import Session, contains_eager
@@ -792,8 +793,12 @@ def get_streaks(
             else:
                 current_run = 1
 
-        # Compute current streak — must include today or yesterday
-        today = date.today()
+        # Compute current streak — must include today or yesterday (in user's local timezone)
+        try:
+            tz = pytz.timezone(current_user.timezone or "UTC")
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.UTC
+        today = datetime.now(tz).date()
         current = 0
         check = today
         while check in perfect_days or (

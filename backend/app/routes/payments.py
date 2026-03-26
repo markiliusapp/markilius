@@ -1,4 +1,5 @@
 import os
+import logging
 import stripe
 from stripe import InvalidRequestError, SignatureVerificationError
 from dotenv import load_dotenv
@@ -10,6 +11,8 @@ from app.utils.auth import get_current_user
 from app.services.email import send_payment_failed_email, send_subscription_welcome_email, send_plan_switched_email, send_subscription_cancelled_email
 from datetime import datetime, timezone
 
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
@@ -19,6 +22,9 @@ PRICE_IDS = {
     "yearly": os.getenv("STRIPE_PRICE_YEARLY"),
     "lifetime": os.getenv("STRIPE_PRICE_LIFETIME"),
 }
+
+logger.info("Stripe price IDs loaded — monthly=%s yearly=%s lifetime=%s",
+            PRICE_IDS["monthly"], PRICE_IDS["yearly"], PRICE_IDS["lifetime"])
 
 
 def get_frontend_url() -> str:
@@ -87,15 +93,18 @@ def upgrade_to_lifetime(
     if not price_id:
         raise HTTPException(status_code=500, detail="Lifetime plan not configured")
 
-    session = stripe.checkout.Session.create(
-        customer=current_user.stripe_customer_id,
-        payment_method_types=["card"],
-        line_items=[{"price": price_id, "quantity": 1}],
-        mode="payment",
-        client_reference_id=str(current_user.id),
-        success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&upgrade=1",
-        cancel_url=f"{get_frontend_url()}/dashboard/profile",
-    )
+    try:
+        session = stripe.checkout.Session.create(
+            customer=current_user.stripe_customer_id,
+            payment_method_types=["card"],
+            line_items=[{"price": price_id, "quantity": 1}],
+            mode="payment",
+            client_reference_id=str(current_user.id),
+            success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&upgrade=1",
+            cancel_url=f"{get_frontend_url()}/dashboard/profile",
+        )
+    except InvalidRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return {"url": session.url}
 
@@ -122,14 +131,21 @@ async def upgrade_subscription(
     if not current_user.stripe_subscription_id:
         raise HTTPException(status_code=400, detail="No subscription found")
 
-    sub = stripe.Subscription.retrieve(current_user.stripe_subscription_id)
+    try:
+        sub = stripe.Subscription.retrieve(current_user.stripe_subscription_id)
+    except InvalidRequestError:
+        raise HTTPException(status_code=400, detail="Subscription not found in Stripe")
+
     item_id = sub["items"]["data"][0]["id"]
 
-    stripe.Subscription.modify(
-        current_user.stripe_subscription_id,
-        items=[{"id": item_id, "price": price_id}],
-        proration_behavior="always_invoice",
-    )
+    try:
+        stripe.Subscription.modify(
+            current_user.stripe_subscription_id,
+            items=[{"id": item_id, "price": price_id}],
+            proration_behavior="always_invoice",
+        )
+    except InvalidRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     old_tier = current_user.subscription_tier
     current_user.subscription_tier = plan

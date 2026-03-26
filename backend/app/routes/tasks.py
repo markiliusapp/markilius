@@ -7,7 +7,8 @@ from app.database import get_db
 from app.models.task import Task
 from app.models.arena import Arena
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
+import pytz
 from app.services.locking_tasks import lock_overdue_tasks
 from sqlalchemy.orm import joinedload, contains_eager
 from app.services.frequency_management import generate_due_dates
@@ -101,7 +102,7 @@ def get_task(
 
     # Order by due_date (most recent first), then created_at
     tasks = query.order_by(Task.due_date.desc(), Task.created_at.desc()).all()
-    tasks = lock_overdue_tasks(tasks, db)
+    tasks = lock_overdue_tasks(tasks, db, current_user.timezone)
 
     return tasks
 
@@ -284,12 +285,18 @@ def delete_task_series(
             status_code=400, detail="Task is not part of a series"
         )
 
-    # Delete all incomplete future tasks in the series
+    # Delete all incomplete future tasks in the series (use user's local date)
+    try:
+        tz = pytz.timezone(current_user.timezone or "UTC")
+    except pytz.UnknownTimeZoneError:
+        tz = pytz.UTC
+    today_local = datetime.now(tz).date()
+
     db.query(Task).filter(
         Task.group_id == task.group_id,
         Task.user_id == current_user.id,
         Task.is_completed == False,
-        Task.due_date >= date.today(),
+        Task.due_date >= today_local,
     ).delete(synchronize_session=False)
 
     db.commit()
