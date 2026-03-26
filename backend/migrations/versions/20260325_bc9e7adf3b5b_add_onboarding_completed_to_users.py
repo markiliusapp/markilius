@@ -22,7 +22,8 @@ def upgrade() -> None:
     op.add_column('users', sa.Column(
         'onboarding_completed', sa.Boolean(), nullable=False, server_default=sa.false()
     ))
-    op.drop_column('users', 'identity_statement')
+    # identity_statement was never added to production — drop only if it exists
+    op.execute("ALTER TABLE users DROP COLUMN IF EXISTS identity_statement")
 
 
 def downgrade() -> None:
