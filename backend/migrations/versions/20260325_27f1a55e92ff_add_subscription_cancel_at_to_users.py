@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('users', sa.Column('subscription_cancel_at', sa.TIMESTAMP(timezone=True), nullable=True))
+    op.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_cancel_at TIMESTAMPTZ")
 
 
 def downgrade() -> None:

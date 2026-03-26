@@ -19,10 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('users', sa.Column(
-        'onboarding_completed', sa.Boolean(), nullable=False, server_default=sa.false()
-    ))
-    # identity_statement was never added to production — drop only if it exists
+    op.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE")
     op.execute("ALTER TABLE users DROP COLUMN IF EXISTS identity_statement")
 
 
