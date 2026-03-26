@@ -333,11 +333,19 @@
 
 @media (max-width: 768px) {
     .month-header {
-        justify-content: space-between;
+        justify-content: center;
     }
 
     .month-header .header-actions {
         position: static;
+    }
+
+    .month-nav {
+        justify-content: center;
+    }
+
+    .month-nav button {
+        margin: 0 auto;
     }
 
     .month-content {

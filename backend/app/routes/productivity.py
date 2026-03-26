@@ -57,6 +57,7 @@ def get_daily_productivity(
         else 0
     )
     total_hours = sum((t.duration or 0) for t in tasks if t.is_completed) / 60
+    active_hours = sum((t.duration or 0) for t in tasks if not t.is_completed) / 60
 
     # Arena breakdown
     arena_map = {}
@@ -92,6 +93,7 @@ def get_daily_productivity(
         completed_tasks=completed_tasks,
         completion_percentage=round(completion_percentage, 1),
         total_hours=round(total_hours, 2),
+        active_hours=round(active_hours, 2),
         arenas=arenas,
     )
 

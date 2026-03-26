@@ -13,6 +13,14 @@ import type { StreakResponse } from '@/types';
 import Streaks from '@/components/streaks/Streaks'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
+const formatHours = (hours: number): string => {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+};
+
 const DashboardPage = () => {
     const [searchParams] = useSearchParams()
     const [refreshKey, setRefreshKey] = useState<number>(0)
@@ -84,14 +92,19 @@ const DashboardPage = () => {
             <div className="dashboard-today">
                 {/* Header */}
                 <div className="dashboard-header">
-                    <div className="date-nav">
-                        <button onClick={handlePrevDay} aria-label="Previous day">←</button>
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                        />
-                        <button onClick={handleNextDay} aria-label="Next day">→</button>
+                    <div className="date-nav-wrapper">
+                        <div className="date-nav">
+                            <button onClick={handlePrevDay} aria-label="Previous day">←</button>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                            />
+                            <button onClick={handleNextDay} aria-label="Next day">→</button>
+                        </div>
+                        {selectedDate !== new Date().toLocaleDateString('en-CA') && (
+                            <button className="today-btn" onClick={() => setSelectedDate(new Date().toLocaleDateString('en-CA'))}>Today</button>
+                        )}
                     </div>
                     <div className="header-actions">
                         <button className={`compact-toggle ${compact ? 'active' : ''}`} onClick={() => setCompact(v => { localStorage.setItem('taskCompact', String(!v)); return !v })} title={compact ? 'Expand' : 'Compact'}>
@@ -137,8 +150,14 @@ const DashboardPage = () => {
                 {/* Two Panes */}
                 <div className='panes'>
                     <div className='activePane'>
-                        <h1>Active Tasks</h1>
+                        <h1>
+                            Active Tasks
+                            {productivity && productivity.active_hours > 0 && <span className="pane-hours">{formatHours(productivity.active_hours)}</span>}
+                        </h1>
                         <div className="task-list-container">
+                            {productivity && productivity.total_tasks - productivity.completed_tasks > 0 && (
+                                <p className="pane-task-count">{productivity.total_tasks - productivity.completed_tasks} tasks</p>
+                            )}
                             <ActiveTasks
                                 refreshKey={refreshKey}
                                 onToggle={handleTaskCreated}
@@ -150,8 +169,14 @@ const DashboardPage = () => {
                     </div>
 
                     <div className='completedPane'>
-                        <h1>Completed Tasks</h1>
+                        <h1>
+                            Completed Tasks
+                            {productivity && productivity.total_hours > 0 && <span className="pane-hours">{formatHours(productivity.total_hours)}</span>}
+                        </h1>
                         <div className="task-list-container">
+                            {productivity && productivity.completed_tasks > 0 && (
+                                <p className="pane-task-count">{productivity.completed_tasks} tasks</p>
+                            )}
                             <CompletedTasks
                                 refreshKey={refreshKey}
                                 onToggle={handleTaskCreated}

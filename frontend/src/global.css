@@ -128,6 +128,20 @@ input {
   }
 }
 
+@media (max-width: 480px) {
+  :is(.date-nav, .week-nav, .month-nav, .year-nav) button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .compact-toggle {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+}
+
 /* ================================
    SECTION HEADING (shared h2 across all pages)
 ================================ */
@@ -157,7 +171,8 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  height: 44px;
+  padding: 0 16px;
   background-color: transparent;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);

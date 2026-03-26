@@ -17,6 +17,12 @@
 }
 
 /* Date navigation */
+.date-nav-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .date-nav {
     display: flex;
     align-items: center;
@@ -60,6 +66,23 @@
     outline: none;
 }
 
+.today-btn {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.today-btn:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
 /* Task panes */
 .panes {
     display: grid;
@@ -88,6 +111,21 @@
     border-bottom: 1px solid var(--color-border);
     margin: 0;
     background-color: var(--color-bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pane-hours {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.pane-task-count {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 0 0 8px 4px;
 }
 
 .task-list-container {
@@ -273,6 +311,18 @@
 }
 
 @media (max-width: 768px) {
+    .dashboard-header {
+        justify-content: space-between;
+    }
+
+    .dashboard-header .header-actions {
+        position: static;
+    }
+
+    .dashboard-header .header-actions .add-task-btn {
+        display: none;
+    }
+
     .panes {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -286,14 +336,14 @@
 
 @media (max-width: 480px) {
     .date-nav input[type="date"] {
-        font-size: 13px;
-        padding: 6px 8px;
+        font-size: 12px;
+        padding: 4px 6px;
     }
 
-    .date-nav button {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
+    .today-btn {
+        height: 36px;
+        padding: 0 10px;
+        font-size: 12px;
     }
 
     .activePane h1,
