@@ -12,6 +12,7 @@ class ArenaBreakdown(BaseModel):
     completed_tasks: int
     completion_percentage: float
     total_hours: float
+    active_hours: float = 0.0
 
 
 class DailyProductivityResponse(BaseModel):

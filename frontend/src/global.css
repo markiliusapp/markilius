@@ -369,3 +369,34 @@ input {
   font-size: 14px;
   color: #16a34a;
 }
+
+/* ================================
+   SHARED PROGRESS BAR
+================================ */
+.day-stats-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-completion {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.day-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.day-progress-bar {
+  height: 4px;
+  background-color: var(--color-bg-muted);
+}
+
+.day-progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width 0.3s ease;
+}

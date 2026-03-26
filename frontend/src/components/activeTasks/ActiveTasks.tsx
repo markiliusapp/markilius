@@ -83,13 +83,8 @@ const ActiveTasks = ({ refreshKey, onToggle, selectedDate, selectedArenaId, comp
 
     return (
         <div className="tasks-list">
-            {displayed.map((task) => (
-                <IndividualTask
-                    key={task.id}
-                    task={task}
-                    onToggle={onToggle}
-                    compact={compact}
-                />
+            {displayed.map(task => (
+                <IndividualTask key={task.id} task={task} onToggle={onToggle} compact={compact} />
             ))}
         </div>
     )

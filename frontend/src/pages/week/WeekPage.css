@@ -117,34 +117,6 @@
     color: var(--color-text);
 }
 
-.day-stats-mini {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.day-completion {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--color-primary);
-}
-
-.day-count {
-    font-size: 11px;
-    color: var(--color-text-muted);
-}
-
-/* Day progress bar */
-.day-progress-bar {
-    height: 4px;
-    background-color: var(--color-bg-subtle);
-}
-
-.day-progress-fill {
-    height: 100%;
-    background-color: var(--color-primary);
-    transition: width 0.3s ease;
-}
 
 /* Day Tasks */
 .day-tasks {

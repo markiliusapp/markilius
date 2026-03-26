@@ -73,11 +73,14 @@ def get_daily_productivity(
                     "total_tasks": 0,
                     "completed_tasks": 0,
                     "total_hours": 0.0,
+                    "active_hours": 0.0,
                 }
             arena_map[arena_id]["total_tasks"] += 1
             if task.is_completed:
                 arena_map[arena_id]["completed_tasks"] += 1
                 arena_map[arena_id]["total_hours"] += (task.duration or 0) / 60
+            else:
+                arena_map[arena_id]["active_hours"] += (task.duration or 0) / 60
 
     arenas = []
     for arena_data in arena_map.values():

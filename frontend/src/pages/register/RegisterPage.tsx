@@ -185,7 +185,7 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="form-field">
-                            <label htmlFor="email">Email <span style={{color: '#dc2626'}}>*</span></label>
+                            <label htmlFor="email">Email</label>
                             <input
                                 id="email"
                                 name="email"

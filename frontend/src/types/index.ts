@@ -211,6 +211,7 @@ export interface ArenaBreakdown {
     completed_tasks: number;
     completion_percentage: number;
     total_hours: number;
+    active_hours: number;
 }
 
 export interface ArenaStreak {

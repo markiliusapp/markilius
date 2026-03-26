@@ -3,7 +3,7 @@ import TaskInput from '@/components/taskinput/TaskInput';
 import './DashboardPage.css'
 import ActiveTasks from '@/components/activeTasks/ActiveTasks';
 import CompletedTasks from '@/components/completedTasks/CompletedTasks';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { productivityAPI } from '@/services/api';
 import type { DailyProductivityResponse } from '@/types';
 import { useSearchParams } from 'react-router-dom'
@@ -21,6 +21,17 @@ const formatHours = (hours: number): string => {
     return `${h}h ${m}m`;
 };
 
+const formatDateDisplay = (dateStr: string): string => {
+    const today = new Date().toLocaleDateString('en-CA');
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (dateStr === today) return 'Today';
+    if (dateStr === yesterday.toLocaleDateString('en-CA')) return 'Yesterday';
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+};
+
 const DashboardPage = () => {
     const [searchParams] = useSearchParams()
     const [refreshKey, setRefreshKey] = useState<number>(0)
@@ -33,6 +44,7 @@ const DashboardPage = () => {
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
     const [compact, setCompact] = useState(() => localStorage.getItem('taskCompact') === 'true')
+    const dateInputRef = useRef<HTMLInputElement>(null)
 
 
     useEffect(() => {
@@ -87,6 +99,26 @@ const DashboardPage = () => {
         setSelectedDate(date.toLocaleDateString('en-CA'))
     }
 
+    const filteredArena = selectedArenaId && productivity
+        ? productivity.arenas.find(a => a.arena_id === selectedArenaId) ?? null
+        : null
+
+    const accentColor = filteredArena?.arena_color ?? 'var(--color-primary)'
+
+    const displayStats = filteredArena ? {
+        total_tasks: filteredArena.total_tasks,
+        completed_tasks: filteredArena.completed_tasks,
+        completion_percentage: filteredArena.completion_percentage,
+        total_hours: filteredArena.total_hours,
+        active_hours: filteredArena.active_hours,
+    } : productivity ? {
+        total_tasks: productivity.total_tasks,
+        completed_tasks: productivity.completed_tasks,
+        completion_percentage: productivity.completion_percentage,
+        total_hours: productivity.total_hours,
+        active_hours: productivity.active_hours,
+    } : null
+
     return (
         <DashboardLayout>
             <div className="dashboard-today">
@@ -95,11 +127,16 @@ const DashboardPage = () => {
                     <div className="date-nav-wrapper">
                         <div className="date-nav">
                             <button onClick={handlePrevDay} aria-label="Previous day">←</button>
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={handleDateChange}
-                            />
+                            <div className="date-display-wrapper" onClick={() => dateInputRef.current?.showPicker?.()}>
+                                <span className="date-display-label">{formatDateDisplay(selectedDate)}</span>
+                                <input
+                                    ref={dateInputRef}
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
+                                    className="date-display-input"
+                                />
+                            </div>
                             <button onClick={handleNextDay} aria-label="Next day">→</button>
                         </div>
                         {selectedDate !== new Date().toLocaleDateString('en-CA') && (
@@ -138,6 +175,7 @@ const DashboardPage = () => {
                     />
                 )}
 
+
                 {/* Arena Filter */}
                 {productivity && (
                     <ArenaFilter
@@ -152,11 +190,14 @@ const DashboardPage = () => {
                     <div className='activePane'>
                         <h1>
                             Active Tasks
-                            {productivity && productivity.active_hours > 0 && <span className="pane-hours">{formatHours(productivity.active_hours)}</span>}
+                            {displayStats && displayStats.active_hours > 0 && <span className="pane-hours">{formatHours(displayStats.active_hours)}</span>}
                         </h1>
+                        <div className="day-progress-bar">
+                            <div className="day-progress-fill" style={{ width: '0%', backgroundColor: accentColor }} />
+                        </div>
                         <div className="task-list-container">
-                            {productivity && productivity.total_tasks - productivity.completed_tasks > 0 && (
-                                <p className="pane-task-count">{productivity.total_tasks - productivity.completed_tasks} tasks</p>
+                            {displayStats && displayStats.total_tasks - displayStats.completed_tasks > 0 && (
+                                <p className="pane-task-count">{displayStats.total_tasks - displayStats.completed_tasks} tasks</p>
                             )}
                             <ActiveTasks
                                 refreshKey={refreshKey}
@@ -171,11 +212,17 @@ const DashboardPage = () => {
                     <div className='completedPane'>
                         <h1>
                             Completed Tasks
-                            {productivity && productivity.total_hours > 0 && <span className="pane-hours">{formatHours(productivity.total_hours)}</span>}
+                            <span className="pane-hours">
+                                {displayStats && displayStats.total_tasks > 0 && <span style={{ color: accentColor }}>{Math.round(displayStats.completion_percentage)}%</span>}
+                                {displayStats && displayStats.total_hours > 0 && <> · {formatHours(displayStats.total_hours)}</>}
+                            </span>
                         </h1>
+                        <div className="day-progress-bar">
+                            <div className="day-progress-fill" style={{ width: `${displayStats?.completion_percentage ?? 0}%`, backgroundColor: accentColor }} />
+                        </div>
                         <div className="task-list-container">
-                            {productivity && productivity.completed_tasks > 0 && (
-                                <p className="pane-task-count">{productivity.completed_tasks} tasks</p>
+                            {displayStats && displayStats.completed_tasks > 0 && (
+                                <p className="pane-task-count">{displayStats.completed_tasks} tasks</p>
                             )}
                             <CompletedTasks
                                 refreshKey={refreshKey}
