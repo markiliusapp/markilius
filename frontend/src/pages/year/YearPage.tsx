@@ -460,7 +460,7 @@ const YearPage = () => {
                         )}
                         <div className="share-dropdown-wrapper" ref={viewRef}>
                             <button
-                                className={`compact-toggle ${viewOpen ? 'active' : ''}`}
+                                className={`view-toggle ${viewOpen ? 'active' : ''}`}
                                 onClick={() => setViewOpen(o => !o)}
                             >
                                 View

@@ -17,7 +17,9 @@ const MONTH_ABBREVS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', '
 
 const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArenaId, refreshKey = 0 }: MonthNavStripProps) => {
     const [months, setMonths] = useState<MonthlySummary[]>([])
+    const [tooltip, setTooltip] = useState<{ x: number; bottom: number; pct: number } | null>(null)
     const cellsRef = useRef<HTMLDivElement>(null)
+    const navRef = useRef<HTMLDivElement>(null)
 
     const today = new Date()
     const thisYear = today.getFullYear()
@@ -53,9 +55,28 @@ const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArena
         return { pct: Math.round(m.completion_percentage) }
     }
 
+    const handleCellMouseEnter = (e: React.MouseEvent<HTMLDivElement>, pct: number) => {
+        if (pct === 0 || !navRef.current) return
+        const cellRect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        const navRect = navRef.current.getBoundingClientRect()
+        setTooltip({
+            x: cellRect.left - navRect.left + cellRect.width / 2,
+            bottom: navRect.bottom - cellRect.top + 6,
+            pct,
+        })
+    }
+
     return (
         <div className="month-nav-strip-wrapper">
-            <div className="month-nav-strip-nav">
+            <div className="month-nav-strip-nav" ref={navRef}>
+                {tooltip && (
+                    <div
+                        className="month-nav-strip-tooltip"
+                        style={{ left: tooltip.x, bottom: tooltip.bottom }}
+                    >
+                        {tooltip.pct}%
+                    </div>
+                )}
                 <div className="month-nav-strip-top">
                     <span className="month-nav-strip-year">{currentYear}</span>
                     {!(currentYear === thisYear && currentMonth === thisMonth) && (
@@ -70,7 +91,8 @@ const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArena
                                 <line x1="16" y1="2" x2="16" y2="6" />
                                 <line x1="8" y1="2" x2="8" y2="6" />
                                 <line x1="3" y1="10" x2="21" y2="10" />
-                                <circle cx="12" cy="16" r="2" fill="currentColor" stroke="none" />
+                                <line x1="12" y1="14" x2="12" y2="19" />
+                                <polyline points="9 16 12 19 15 16" />
                             </svg>
                         </button>
                     )}
@@ -96,14 +118,13 @@ const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArena
                             const squareBg = pct === 0
                                 ? 'var(--color-bg-subtle)'
                                 : getIntensityColor(pct, arenaRgb)
-                            const tooltipText = pct > 0 ? `${pct}%` : undefined
-
                             return (
                                 <div
                                     key={month}
                                     className={`month-nav-strip-cell${isSelected ? ' month-nav-strip-selected' : ''}`}
                                     onClick={() => onSelectMonth(currentYear, month)}
-                                    {...(tooltipText ? { 'data-tooltip': tooltipText } : {})}
+                                    onMouseEnter={(e) => handleCellMouseEnter(e, pct)}
+                                    onMouseLeave={() => setTooltip(null)}
                                 >
                                     <div className="month-nav-strip-square" style={{ backgroundColor: squareBg }} />
                                     <span className="month-nav-strip-abbrev">{abbrev}</span>

@@ -16,6 +16,33 @@
     right: 0;
 }
 
+.view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.view-toggle:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.view-toggle.active {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
 .year-nav {
     display: flex;
     align-items: center;
