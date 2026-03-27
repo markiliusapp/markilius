@@ -350,7 +350,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
                     </div>
                 </div>
             </div>
-            <div className="mac-chart-container">
+            <div className="mac-chart-container" onMouseDown={e => e.preventDefault()}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
@@ -394,6 +394,8 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
                         <Bar
                             dataKey="_yAnchor"
                             shape={layout === 'grouped' ? groupedShape : stackedShape}
+                            activeBar={false}
+                            background={false}
                         />
                     </BarChart>
                 </ResponsiveContainer>
