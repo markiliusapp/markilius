@@ -639,6 +639,12 @@ const YearPage = () => {
                         <div className="year-overview">
                             <h2 className="year-overview-title">Year Summary</h2>
                             <div className="overview-card overview-card-large">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="9 12 11 14 15 10" />
+                                    </svg>
+                                </div>
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{displayStats.completion_percentage}%</span>
                                     <span className="overview-card-label">Year Completion Rate</span>
@@ -646,6 +652,15 @@ const YearPage = () => {
                             </div>
 
                             <div className="overview-card overview-card-large">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                        <polyline points="9 15 11 17 15 13" />
+                                    </svg>
+                                </div>
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{displayStats.active_days}</span>
                                     <span className="overview-card-label">Active Days</span>
@@ -710,7 +725,8 @@ const YearPage = () => {
                             {displayStats.best_month && (
                                 <div
                                     className="overview-card overview-card-highlight overview-card-clickable"
-                                    onClick={() => navigate(`/dashboard/month?year=${currentYear}&month=${displayStats.best_month!.month}`)}
+                                    style={{ '--overview-highlight-bg': `${accentColor}14`, '--overview-highlight-border': `${accentColor}35` } as React.CSSProperties}
+                                    onClick={() => navigate(`/dashboard/month?year=${currentYear}&month=${displayStats.best_month!.month}${selectedArenaId ? `&arena=${selectedArenaId}` : ''}`)}
                                 >
                                     <div className="overview-card-icon" style={{ color: accentColor }}>
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -727,6 +743,7 @@ const YearPage = () => {
                             {displayStats.best_day && (
                                 <div
                                     className="overview-card overview-card-highlight overview-card-clickable"
+                                    style={{ '--overview-highlight-bg': `${accentColor}14`, '--overview-highlight-border': `${accentColor}35` } as React.CSSProperties}
                                     onClick={() => navigate(`/dashboard?date=${displayStats.best_day!.date}`)}
                                 >
                                     <div className="overview-card-icon" style={{ color: accentColor }}>

@@ -31,7 +31,10 @@ const MonthPage = () => {
         const m = parseInt(searchParams.get('month') ?? '')
         return isNaN(m) || m < 1 || m > 12 ? new Date().getMonth() + 1 : m
     });
-    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
+    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(() => {
+        const a = parseInt(searchParams.get('arena') ?? '')
+        return isNaN(a) ? null : a
+    });
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [copied, setCopied] = useState(false)
     const [shareOpen, setShareOpen] = useState(false)

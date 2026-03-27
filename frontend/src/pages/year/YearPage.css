@@ -165,13 +165,9 @@
     gap: 12px;
 }
 
-.overview-card-large {
-    justify-content: center;
-}
-
 .overview-card-highlight {
-    background-color: rgba(249, 115, 22, 0.08);
-    border: 1px solid rgba(249, 115, 22, 0.2);
+    background-color: var(--overview-highlight-bg, rgba(249, 115, 22, 0.08));
+    border: 1px solid var(--overview-highlight-border, rgba(249, 115, 22, 0.2));
 }
 
 .overview-card-clickable {
@@ -208,8 +204,7 @@
 }
 
 .overview-card-large .overview-card-value {
-    font-size: 32px;
-    color: var(--color-primary);
+    font-size: 28px;
 }
 
 .overview-card-label {
