@@ -78,9 +78,8 @@ const makeYearGroupedShape = (
         )
         if (activeArenas.length === 0) return <g />
         const gap = 2
-        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
-        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
-        const totalW = activeArenas.length * barW + totalGap
+        const barW = Math.min(28, Math.max(4, Math.floor((width - Math.max(0, (visibleArenas.length - 1) * gap)) / visibleArenas.length)))
+        const totalW = activeArenas.length * barW + Math.max(0, (activeArenas.length - 1) * gap)
         const startX = Math.round(x + (width - totalW) / 2)
         const r = Math.min(3, barW / 2)
         return (
@@ -179,10 +178,9 @@ const YearPage = () => {
     const [showDates, setShowDates] = useState(true)
     const [showPercentage, setShowPercentage] = useState(false)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
-    const [selectedChartArenaId, setSelectedChartArenaId] = useState<number | null>(null)
     const [chartLayout, setChartLayout] = useState<ChartLayout>('grouped')
     const [chartSortOrder, setChartSortOrder] = useState<ChartSortOrder>(null)
-    const effectiveChartSortOrder: ChartSortOrder = selectedChartArenaId ? null : chartSortOrder
+    const effectiveChartSortOrder: ChartSortOrder = selectedArenaId ? null : chartSortOrder
     const [copied, setCopied] = useState(false)
     const [shareOpen, setShareOpen] = useState(false)
     const [viewOpen, setViewOpen] = useState(false)
@@ -241,6 +239,8 @@ const YearPage = () => {
     useEffect(() => {
         fetchStreaks();
     }, []);
+
+    useEffect(() => { setChartSortOrder(null) }, [selectedArenaId])
 
     const fetchStreaks = async () => {
         try {
@@ -307,14 +307,14 @@ const YearPage = () => {
     // Computed before early returns so hooks are never called conditionally
     const arenas = getArenas()
     const monthlyChartData = getMonthlyChartData()
-    const visibleChartArenas = selectedChartArenaId
-        ? arenas.filter(a => a.arena_id === selectedChartArenaId)
+    const visibleChartArenas = selectedArenaId
+        ? arenas.filter(a => a.arena_id === selectedArenaId)
         : arenas
-    const chartAverage = selectedChartArenaId
-        ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedChartArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
+    const chartAverage = selectedArenaId
+        ? monthlyChartData.reduce((sum, d) => sum + (d[`arena_${selectedArenaId}`] || 0), 0) / (monthlyChartData.length || 1)
         : monthlyChartData.reduce((sum, d) => sum + (d.total || 0), 0) / (monthlyChartData.length || 1)
-    const chartVisibleMax = selectedChartArenaId
-        ? Math.max(...monthlyChartData.map(d => d[`arena_${selectedChartArenaId}`] || 0), chartAverage)
+    const chartVisibleMax = selectedArenaId
+        ? Math.max(...monthlyChartData.map(d => d[`arena_${selectedArenaId}`] || 0), chartAverage)
         : chartLayout === 'grouped'
             ? Math.max(...monthlyChartData.flatMap(d => arenas.map(a => d[`arena_${a.arena_id}`] || 0)), chartAverage)
             : Math.max(...monthlyChartData.map(d => d.total || 0), chartAverage)
@@ -328,6 +328,69 @@ const YearPage = () => {
         () => makeYearStackedShape(visibleChartArenas, chartYMax, effectiveChartSortOrder),
         [visibleChartArenas, chartYMax, effectiveChartSortOrder]
     )
+
+    const summaryArena = selectedArenaId
+        ? yearData?.summary.arenas.find(a => a.arena_id === selectedArenaId) ?? null
+        : null
+
+    const accentColor = summaryArena?.arena_color ?? 'var(--color-primary)'
+
+    const displayStats = (() => {
+        if (summaryArena && yearData) {
+            const total_tasks = summaryArena.total_tasks
+            const completed_tasks = summaryArena.completed_tasks
+            const completion_percentage = total_tasks > 0 ? Math.round((completed_tasks / total_tasks) * 100) : 0
+            const total_hours = summaryArena.total_hours
+            const daysWithArena = yearData.daily_breakdown
+                .map(day => ({ date: day.date, arena: day.arenas.find(a => a.arena_id === selectedArenaId) }))
+                .filter((d): d is { date: string; arena: ArenaBreakdownType } => !!d.arena && d.arena.total_tasks > 0)
+            const active_days = daysWithArena.length
+            const active_months = yearData.months.filter(m => {
+                const a = m.arenas.find(a => a.arena_id === selectedArenaId)
+                return a && a.total_tasks > 0
+            }).length
+            const avg_tasks_per_active_day = active_days > 0 ? total_tasks / active_days : 0
+            const monthsWithArena = yearData.months
+                .map(m => ({ month: m.month, arena: m.arenas.find(a => a.arena_id === selectedArenaId) }))
+                .filter((m): m is { month: number; arena: ArenaBreakdownType } => !!m.arena && m.arena.total_tasks > 0)
+            const bestMonthEntry = monthsWithArena.length > 0
+                ? monthsWithArena.reduce((best, m) => {
+                    if (m.arena.completion_percentage > best.arena.completion_percentage) return m
+                    if (m.arena.completion_percentage === best.arena.completion_percentage && m.arena.total_hours > best.arena.total_hours) return m
+                    return best
+                })
+                : null
+            const best_month = bestMonthEntry
+                ? { month: bestMonthEntry.month, completion_percentage: Math.round(bestMonthEntry.arena.completion_percentage), subtitle: `${bestMonthEntry.arena.total_hours.toFixed(1)}h` }
+                : null
+            const bestDayEntry = daysWithArena.length > 0
+                ? daysWithArena.reduce((best, d) => {
+                    if (d.arena.completion_percentage > best.arena.completion_percentage) return d
+                    if (d.arena.completion_percentage === best.arena.completion_percentage && d.arena.total_hours > best.arena.total_hours) return d
+                    return best
+                })
+                : null
+            const best_day = bestDayEntry
+                ? { date: bestDayEntry.date, completion_percentage: Math.round(bestDayEntry.arena.completion_percentage), total_hours: bestDayEntry.arena.total_hours }
+                : null
+            return { completion_percentage, completed_tasks, total_tasks, total_hours, active_days, active_months, avg_tasks_per_active_day, best_month, best_day }
+        }
+        const total_hours = yearData?.months.reduce((sum, m) => sum + m.total_duration_hours, 0) ?? 0
+        const active_days = yearData?.months.reduce((sum, m) => sum + m.days_with_tasks, 0) ?? 0
+        const best_month_raw = yearData?.best_month ?? null
+        const best_day_raw = yearData?.best_day ?? null
+        return {
+            completion_percentage: yearData?.summary.completion_percentage ?? 0,
+            completed_tasks: yearData?.summary.completed_tasks ?? 0,
+            total_tasks: yearData?.summary.total_tasks ?? 0,
+            total_hours,
+            active_days,
+            active_months: yearData?.months.filter(m => m.total_tasks > 0).length ?? 0,
+            avg_tasks_per_active_day: active_days > 0 ? (yearData?.summary.total_tasks ?? 0) / active_days : 0,
+            best_month: best_month_raw ? { month: best_month_raw.month, completion_percentage: best_month_raw.completion_percentage, subtitle: `${best_month_raw.average_duration_per_day}h/day` } : null,
+            best_day: best_day_raw,
+        }
+    })()
 
     if (loading) {
         return (
@@ -474,7 +537,7 @@ const YearPage = () => {
                         <div className="year-chart-title-row">
                             <h2>Monthly Hours by Arena</h2>
                             <div className="year-chart-control-group">
-                                {!selectedChartArenaId && (
+                                {!selectedArenaId && (
                                     <>
                                         <button
                                             className={`year-chart-icon-btn ${effectiveChartSortOrder === 'asc' ? 'active' : ''}`}
@@ -509,31 +572,6 @@ const YearPage = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="mac-legend">
-                            <button
-                                className={`mac-pill ${!selectedChartArenaId ? 'active' : ''}`}
-                                onClick={() => { setSelectedChartArenaId(null); setChartSortOrder(null) }}
-                            >
-                                All
-                            </button>
-                            {arenas.map(arena => (
-                                <button
-                                    key={arena.arena_id}
-                                    className={`mac-pill ${selectedChartArenaId === arena.arena_id ? 'active' : ''}`}
-                                    style={{
-                                        borderColor: selectedChartArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                        backgroundColor: selectedChartArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                        color: selectedChartArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                                    }}
-                                    onClick={() => {
-                                        setSelectedChartArenaId(selectedChartArenaId === arena.arena_id ? null : arena.arena_id)
-                                        setChartSortOrder(null)
-                                    }}
-                                >
-                                    {arena.arena_name}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                     {arenas.length === 0 ? (
                         <div className="year-chart-empty">
@@ -544,7 +582,7 @@ const YearPage = () => {
                             <p className="year-chart-empty-sub">Track time on tasks to see your monthly breakdown</p>
                         </div>
                     ) : (
-                    <div className="year-bar-chart">
+                    <div className="year-bar-chart" onMouseDown={e => e.preventDefault()}>
                         <div className="year-bar-chart-inner">
                         <ResponsiveContainer width="100%" height={250}>
                             <BarChart data={chartDataWithAnchor} margin={{ top: 16, right: 0, left: 0, bottom: 0 }} barCategoryGap="20%">
@@ -580,6 +618,8 @@ const YearPage = () => {
                                 <Bar
                                     dataKey="_yAnchor"
                                     shape={chartLayout === 'grouped' ? chartGroupedShape : chartStackedShape}
+                                    activeBar={false}
+                                    background={false}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
@@ -600,50 +640,46 @@ const YearPage = () => {
                             <h2 className="year-overview-title">Year Summary</h2>
                             <div className="overview-card overview-card-large">
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">{yearData.summary.completion_percentage}%</span>
+                                    <span className="overview-card-value">{displayStats.completion_percentage}%</span>
                                     <span className="overview-card-label">Year Completion Rate</span>
                                 </div>
                             </div>
 
                             <div className="overview-card overview-card-large">
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">
-                                        {yearData.months.reduce((sum, m) => sum + m.days_with_tasks, 0)}
-                                    </span>
+                                    <span className="overview-card-value">{displayStats.active_days}</span>
                                     <span className="overview-card-label">Active Days</span>
                                 </div>
                             </div>
 
                             <div className="overview-card">
-                                <div className="overview-card-icon">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M9 11l3 3L22 4" />
                                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">{yearData.summary.completed_tasks}/{yearData.summary.total_tasks}</span>
+                                    <span className="overview-card-value">{displayStats.completed_tasks}/{displayStats.total_tasks}</span>
                                     <span className="overview-card-label">Tasks Completed</span>
                                 </div>
                             </div>
 
                             <div className="overview-card">
-                                <div className="overview-card-icon">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="12" cy="12" r="10" />
                                         <polyline points="12 6 12 12 16 14" />
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">
-                                        {yearData.months.reduce((sum, m) => sum + m.total_duration_hours, 0).toFixed(1)}h
-                                    </span>
+                                    <span className="overview-card-value">{displayStats.total_hours.toFixed(1)}h</span>
                                     <span className="overview-card-label">Total Hours Spent</span>
                                 </div>
                             </div>
 
                             <div className="overview-card">
-                                <div className="overview-card-icon">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                         <line x1="16" y1="2" x2="16" y2="6" />
@@ -652,15 +688,13 @@ const YearPage = () => {
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">
-                                        {yearData.months.filter(m => m.total_tasks > 0).length}/12
-                                    </span>
+                                    <span className="overview-card-value">{displayStats.active_months}/12</span>
                                     <span className="overview-card-label">Active Months</span>
                                 </div>
                             </div>
 
                             <div className="overview-card">
-                                <div className="overview-card-icon">
+                                <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <line x1="18" y1="20" x2="18" y2="10" />
                                         <line x1="12" y1="20" x2="12" y2="4" />
@@ -668,32 +702,34 @@ const YearPage = () => {
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
-                                    <span className="overview-card-value">
-                                        {yearData.summary.total_tasks > 0
-                                            ? (yearData.summary.total_tasks / Math.max(yearData.months.reduce((sum, m) => sum + m.days_with_tasks, 0), 1)).toFixed(1)
-                                            : 0}
-                                    </span>
+                                    <span className="overview-card-value">{displayStats.avg_tasks_per_active_day.toFixed(1)}</span>
                                     <span className="overview-card-label">Avg Tasks / Active Day</span>
                                 </div>
                             </div>
 
-                            {yearData.best_month && (
-                                <div className="overview-card overview-card-highlight">
-                                    <div className="overview-card-icon">
+                            {displayStats.best_month && (
+                                <div
+                                    className="overview-card overview-card-highlight overview-card-clickable"
+                                    onClick={() => navigate(`/dashboard/month?year=${currentYear}&month=${displayStats.best_month!.month}`)}
+                                >
+                                    <div className="overview-card-icon" style={{ color: accentColor }}>
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>
                                     </div>
                                     <div className="overview-card-content">
-                                        <span className="overview-card-value">{getMonthName(yearData.best_month.month)}</span>
-                                        <span className="overview-card-label">Best Month · {yearData.best_month.completion_percentage}% · {yearData.best_month.average_duration_per_day}h/day</span>
+                                        <span className="overview-card-value">{getMonthName(displayStats.best_month.month)}</span>
+                                        <span className="overview-card-label">Best Month · {displayStats.best_month.completion_percentage}% · {displayStats.best_month.subtitle}</span>
                                     </div>
                                 </div>
                             )}
 
-                            {yearData.best_day && (
-                                <div className="overview-card overview-card-highlight">
-                                    <div className="overview-card-icon">
+                            {displayStats.best_day && (
+                                <div
+                                    className="overview-card overview-card-highlight overview-card-clickable"
+                                    onClick={() => navigate(`/dashboard?date=${displayStats.best_day!.date}`)}
+                                >
+                                    <div className="overview-card-icon" style={{ color: accentColor }}>
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                         </svg>
@@ -701,11 +737,11 @@ const YearPage = () => {
                                     <div className="overview-card-content">
                                         <span className="overview-card-value">
                                             {(() => {
-                                                const [y, m, d] = yearData.best_day!.date.split('-').map(Number)
+                                                const [y, m, d] = displayStats.best_day!.date.split('-').map(Number)
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
-                                        <span className="overview-card-label">Best Day · {yearData.best_day.completion_percentage}% . {yearData.best_day.total_hours}h</span>
+                                        <span className="overview-card-label">Best Day · {displayStats.best_day.completion_percentage}% · {displayStats.best_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
                             )}

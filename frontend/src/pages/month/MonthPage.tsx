@@ -4,7 +4,7 @@ import { productivityAPI } from '@/services/api';
 import type { MonthlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
 import Heatmap from '@/components/heatmap/Heatmap';
 import './MonthPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
@@ -19,11 +19,18 @@ import { useAuth } from '@/context/authContext'
 const MonthPage = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const [searchParams] = useSearchParams()
     const [monthData, setMonthData] = useState<MonthlyProductivity | null>(null);
     const [prevMonthData, setPrevMonthData] = useState<MonthlyProductivity | null>(null);
     const [loading, setLoading] = useState(true);
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+    const [currentYear, setCurrentYear] = useState(() => {
+        const y = parseInt(searchParams.get('year') ?? '')
+        return isNaN(y) ? new Date().getFullYear() : y
+    });
+    const [currentMonth, setCurrentMonth] = useState(() => {
+        const m = parseInt(searchParams.get('month') ?? '')
+        return isNaN(m) || m < 1 || m > 12 ? new Date().getMonth() + 1 : m
+    });
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [copied, setCopied] = useState(false)
