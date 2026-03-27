@@ -15,6 +15,7 @@ import { useState, useMemo } from 'react'
 interface WeeklyChartProps {
     dailyBreakdown: DailyBreakDownWithTasks[]
     averageDuration: number
+    selectedArenaId: number | null
 }
 
 interface ChartDataPoint {
@@ -129,9 +130,8 @@ const makeGroupedShape = (
         if (activeArenas.length === 0) return <g />
 
         const gap = 2
-        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
-        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
-        const totalW = activeArenas.length * barW + totalGap
+        const barW = Math.min(28, Math.max(4, Math.floor((width - Math.max(0, (visibleArenas.length - 1) * gap)) / visibleArenas.length)))
+        const totalW = activeArenas.length * barW + Math.max(0, (activeArenas.length - 1) * gap)
         const startX = Math.round(x + (width - totalW) / 2)
         const r = Math.min(3, barW / 2)
 
@@ -213,8 +213,7 @@ const makeStackedShape = (
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
-    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
+const WeeklyChart = ({ dailyBreakdown, averageDuration, selectedArenaId }: WeeklyChartProps) => {
     const [layout, setLayout] = useState<Layout>('stacked')
     const [sortOrder, setSortOrder] = useState<SortOrder>(null)
 
@@ -284,9 +283,9 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
     // _yAnchor = yMax on every point so Recharts computes props.height = full chart height
     const chartData = baseChartData.map(p => ({ ...p, _yAnchor: yMax }))
 
-    const barSize = layout === 'stacked'
-        ? Math.max(28, Math.min(80, Math.floor(280 / chartData.length)))
-        : Math.max(40, Math.min(120, Math.floor(380 / chartData.length)))
+    const barSize = visibleArenas.length <= 1 || layout === 'stacked'
+        ? Math.max(28, Math.min(80, Math.floor(260 / chartData.length)))
+        : Math.max(60, Math.min(160, Math.floor(500 / chartData.length)))
 
     const groupedShape = useMemo(
         () => makeGroupedShape(visibleArenas, yMax, effectiveSortOrder),
@@ -296,11 +295,6 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
         () => makeStackedShape(visibleArenas, yMax, effectiveSortOrder),
         [visibleArenas, yMax, effectiveSortOrder]
     )
-
-    const handleArenaClick = (arenaId: number) => {
-        setSelectedArenaId(prev => prev === arenaId ? null : arenaId)
-        setSortOrder(null)
-    }
 
     return (
         <div className="weekly-chart-wrapper">
@@ -343,36 +337,14 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                         </button>
                     </div>
                 </div>
-                <div className="weekly-chart-legend">
-                    <button
-                        className={`weekly-chart-pill ${!selectedArenaId ? 'active' : ''}`}
-                        onClick={() => { setSelectedArenaId(null); setSortOrder(null) }}
-                    >
-                        All
-                    </button>
-                    {allArenas.map(arena => (
-                        <button
-                            key={arena.arena_id}
-                            className={`weekly-chart-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
-                            style={{
-                                borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                            }}
-                            onClick={() => handleArenaClick(arena.arena_id)}
-                        >
-                            {arena.arena_name}
-                        </button>
-                    ))}
-                </div>
             </div>
-            <div className="week-chart-container">
+            <div className="week-chart-container" onMouseDown={e => e.preventDefault()}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
                         margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
                         barSize={barSize}
-                        barCategoryGap="30%"
+                        barCategoryGap="20%"
                     >
                         <XAxis
                             dataKey="day"
@@ -410,6 +382,8 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration }: WeeklyChartProps) => {
                         <Bar
                             dataKey="_yAnchor"
                             shape={layout === 'grouped' ? groupedShape : stackedShape}
+                            activeBar={false}
+                            background={false}
                         />
                     </BarChart>
                 </ResponsiveContainer>
