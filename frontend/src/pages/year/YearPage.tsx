@@ -725,7 +725,7 @@ const YearPage = () => {
                             {displayStats.best_month && (
                                 <div
                                     className="overview-card overview-card-highlight overview-card-clickable"
-                                    style={{ '--overview-highlight-bg': `${accentColor}14`, '--overview-highlight-border': `${accentColor}35` } as React.CSSProperties}
+                                    style={summaryArena ? { '--overview-highlight-bg': `${summaryArena.arena_color}14`, '--overview-highlight-border': `${summaryArena.arena_color}35` } as React.CSSProperties : undefined}
                                     onClick={() => navigate(`/dashboard/month?year=${currentYear}&month=${displayStats.best_month!.month}${selectedArenaId ? `&arena=${selectedArenaId}` : ''}`)}
                                 >
                                     <div className="overview-card-icon" style={{ color: accentColor }}>
@@ -743,7 +743,7 @@ const YearPage = () => {
                             {displayStats.best_day && (
                                 <div
                                     className="overview-card overview-card-highlight overview-card-clickable"
-                                    style={{ '--overview-highlight-bg': `${accentColor}14`, '--overview-highlight-border': `${accentColor}35` } as React.CSSProperties}
+                                    style={summaryArena ? { '--overview-highlight-bg': `${summaryArena.arena_color}14`, '--overview-highlight-border': `${summaryArena.arena_color}35` } as React.CSSProperties : undefined}
                                     onClick={() => navigate(`/dashboard?date=${displayStats.best_day!.date}`)}
                                 >
                                     <div className="overview-card-icon" style={{ color: accentColor }}>
