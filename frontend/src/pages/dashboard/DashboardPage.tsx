@@ -3,15 +3,14 @@ import TaskInput from '@/components/taskinput/TaskInput';
 import './DashboardPage.css'
 import ActiveTasks from '@/components/activeTasks/ActiveTasks';
 import CompletedTasks from '@/components/completedTasks/CompletedTasks';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { productivityAPI } from '@/services/api';
 import type { DailyProductivityResponse } from '@/types';
 import { useSearchParams } from 'react-router-dom'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
-import type { StreakResponse } from '@/types';
-import Streaks from '@/components/streaks/Streaks'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
+import WeekStrip from '@/components/weekStrip/WeekStrip'
 
 const formatHours = (hours: number): string => {
     const h = Math.floor(hours);
@@ -21,16 +20,6 @@ const formatHours = (hours: number): string => {
     return `${h}h ${m}m`;
 };
 
-const formatDateDisplay = (dateStr: string): string => {
-    const today = new Date().toLocaleDateString('en-CA');
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (dateStr === today) return 'Today';
-    if (dateStr === yesterday.toLocaleDateString('en-CA')) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-};
 
 const DashboardPage = () => {
     const [searchParams] = useSearchParams()
@@ -41,19 +30,13 @@ const DashboardPage = () => {
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [productivity, setProductivity] = useState<DailyProductivityResponse | null>(null)
     const [loading, setLoading] = useState(true)
-    const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
     const [compact, setCompact] = useState(() => localStorage.getItem('taskCompact') === 'true')
-    const dateInputRef = useRef<HTMLInputElement>(null)
 
 
     useEffect(() => {
         fetchProductivity();
     }, [selectedDate, refreshKey]);
-
-    useEffect(() => {
-        fetchStreaks();
-    }, [refreshKey]);
 
     const fetchProductivity = async () => {
         setLoading(true)
@@ -67,36 +50,9 @@ const DashboardPage = () => {
         }
     };
 
-    const fetchStreaks = async () => {
-        try {
-            const data = await productivityAPI.getStreaks();
-            setStreaks(data);
-        } catch (err) {
-            console.error('Failed to fetch streaks:', err);
-        }
-    };
-
     const handleTaskCreated = () => {
         setRefreshKey(prev => prev + 1)
         setShowTaskInput(false)
-    }
-
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedDate(e.target.value)
-    }
-
-    const handlePrevDay = () => {
-        const [year, month, day] = selectedDate.split('-').map(Number)
-        const date = new Date(year, month - 1, day)
-        date.setDate(date.getDate() - 1)
-        setSelectedDate(date.toLocaleDateString('en-CA'))
-    }
-
-    const handleNextDay = () => {
-        const [year, month, day] = selectedDate.split('-').map(Number)
-        const date = new Date(year, month - 1, day)
-        date.setDate(date.getDate() + 1)
-        setSelectedDate(date.toLocaleDateString('en-CA'))
     }
 
     const filteredArena = selectedArenaId && productivity
@@ -124,25 +80,12 @@ const DashboardPage = () => {
             <div className="dashboard-today">
                 {/* Header */}
                 <div className="dashboard-header">
-                    <div className="date-nav-wrapper">
-                        <div className="date-nav">
-                            <button onClick={handlePrevDay} aria-label="Previous day">←</button>
-                            <div className="date-display-wrapper" onClick={() => dateInputRef.current?.showPicker?.()}>
-                                <span className="date-display-label">{formatDateDisplay(selectedDate)}</span>
-                                <input
-                                    ref={dateInputRef}
-                                    type="date"
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
-                                    className="date-display-input"
-                                />
-                            </div>
-                            <button onClick={handleNextDay} aria-label="Next day">→</button>
-                        </div>
-                        {selectedDate !== new Date().toLocaleDateString('en-CA') && (
-                            <button className="today-btn" onClick={() => setSelectedDate(new Date().toLocaleDateString('en-CA'))}>Today</button>
-                        )}
-                    </div>
+                    <WeekStrip
+                        selectedDate={selectedDate}
+                        onSelectDate={setSelectedDate}
+                        selectedArenaId={selectedArenaId}
+                        refreshKey={refreshKey}
+                    />
                     <div className="header-actions">
                         <button className={`compact-toggle ${compact ? 'active' : ''}`} onClick={() => setCompact(v => { localStorage.setItem('taskCompact', String(!v)); return !v })} title={compact ? 'Expand' : 'Compact'}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -174,7 +117,6 @@ const DashboardPage = () => {
                         onArenaChange={() => setRefreshKey(prev => prev + 1)}
                     />
                 )}
-
 
                 {/* Arena Filter */}
                 {productivity && (
@@ -243,8 +185,6 @@ const DashboardPage = () => {
                     </div>
                 ) : (
                     <div className='streaks-and-stats'>
-                        {/* Streaks */}
-                        {streaks && <Streaks streaks={streaks} />}
                         {productivity && (
                             <div className="stats-section">
                                 <h2>Arena Breakdown</h2>
