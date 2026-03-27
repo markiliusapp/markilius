@@ -155,6 +155,60 @@ const WeekPage = () => {
         return `${formatNavDate(weekData.start_date, { month: 'short', day: 'numeric' })} – ${formatNavDate(weekData.end_date, { month: 'short', day: 'numeric', year: 'numeric' })}`
     }
 
+    const summaryArena = selectedArenaId
+        ? weekData?.summary.arenas.find(a => a.arena_id === selectedArenaId) ?? null
+        : null
+
+    const displayStats = (() => {
+        if (summaryArena && weekData) {
+            const total_tasks = summaryArena.total_tasks
+            const completed_tasks = summaryArena.completed_tasks
+            const completion_percentage = total_tasks > 0 ? Math.round((completed_tasks / total_tasks) * 100) : 0
+            const total_duration_hours = summaryArena.total_hours
+            const average_tasks_per_day = total_tasks / 7
+            const average_duration_per_day = total_duration_hours / 7
+            const daysWithArena = weekData.daily_breakdown
+                .map(day => ({ date: day.date, arena: day.arenas.find(a => a.arena_id === selectedArenaId) }))
+                .filter((d): d is { date: string; arena: NonNullable<typeof d.arena> } => !!d.arena)
+            const days_with_tasks = daysWithArena.filter(d => d.arena.total_tasks > 0).length
+            const mostProd = daysWithArena.length > 0
+                ? daysWithArena.reduce((best, d) => {
+                    if (d.arena.completion_percentage > best.arena.completion_percentage) return d
+                    if (d.arena.completion_percentage === best.arena.completion_percentage && d.arena.total_hours > best.arena.total_hours) return d
+                    return best
+                })
+                : null
+            const most_productive_day = mostProd
+                ? { date: mostProd.date, completion_percentage: Math.round(mostProd.arena.completion_percentage), total_hours: mostProd.arena.total_hours }
+                : null
+            return { completion_percentage, completed_tasks, total_tasks, total_duration_hours, average_tasks_per_day, average_duration_per_day, days_with_tasks, most_productive_day }
+        }
+        return {
+            completion_percentage: weekData?.summary.completion_percentage ?? 0,
+            completed_tasks: weekData?.summary.completed_tasks ?? 0,
+            total_tasks: weekData?.summary.total_tasks ?? 0,
+            total_duration_hours: weekData?.summary.total_duration_hours ?? 0,
+            average_tasks_per_day: weekData?.summary.average_tasks_per_day ?? 0,
+            average_duration_per_day: weekData?.summary.average_duration_per_day ?? 0,
+            days_with_tasks: weekData?.summary.days_with_tasks ?? 0,
+            most_productive_day: weekData?.most_productive_day ?? null,
+        }
+    })()
+
+    const accentColor = summaryArena?.arena_color ?? 'var(--color-primary)'
+
+    const prevSummaryArena = selectedArenaId
+        ? prevWeekData?.summary.arenas.find(a => a.arena_id === selectedArenaId) ?? null
+        : null
+
+    const prevCompletionPct = prevSummaryArena
+        ? prevSummaryArena.total_tasks > 0 ? Math.round((prevSummaryArena.completed_tasks / prevSummaryArena.total_tasks) * 100) : 0
+        : prevWeekData?.summary.completion_percentage ?? 0
+
+    const prevTotalHours = prevSummaryArena
+        ? prevSummaryArena.total_hours
+        : prevWeekData?.summary.total_duration_hours ?? 0
+
     if (loading) {
         return (
             <DashboardLayout>
@@ -341,6 +395,7 @@ const WeekPage = () => {
                     <WeeklyChart
                         dailyBreakdown={weekData.daily_breakdown}
                         averageDuration={weekData.summary.average_duration_per_day}
+                        selectedArenaId={selectedArenaId}
                     />
                     <div className="week-chart-section">
                         <ArenaBreakdown
@@ -356,18 +411,18 @@ const WeekPage = () => {
                             {/* Completion Rate */}
                             {(() => {
                                 const delta = prevWeekData
-                                    ? getDelta(weekData.summary.completion_percentage, prevWeekData.summary.completion_percentage)
+                                    ? getDelta(displayStats.completion_percentage, prevCompletionPct)
                                     : null
                                 return (
                                     <div className="summary-card">
-                                        <div className="summary-card-icon">
+                                        <div className="summary-card-icon" style={{ color: accentColor }}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                                             </svg>
                                         </div>
                                         <div className="summary-card-content">
                                             <div className="summary-card-value-row">
-                                                <span className="summary-card-value">{weekData.summary.completion_percentage}%</span>
+                                                <span className="summary-card-value">{displayStats.completion_percentage}%</span>
                                                 {delta && (
                                                     <span
                                                         className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
@@ -387,14 +442,14 @@ const WeekPage = () => {
 
                             {/* Tasks Completed */}
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M9 11l3 3L22 4" />
                                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{weekData.summary.completed_tasks}/{weekData.summary.total_tasks}</span>
+                                    <span className="summary-card-value">{displayStats.completed_tasks}/{displayStats.total_tasks}</span>
                                     <span className="summary-card-label">Tasks Completed</span>
                                 </div>
                             </div>
@@ -402,11 +457,11 @@ const WeekPage = () => {
                             {/* Total Time */}
                             {(() => {
                                 const delta = prevWeekData
-                                    ? getDelta(weekData.summary.total_duration_hours, prevWeekData.summary.total_duration_hours)
+                                    ? getDelta(displayStats.total_duration_hours, prevTotalHours)
                                     : null
                                 return (
                                     <div className="summary-card">
-                                        <div className="summary-card-icon">
+                                        <div className="summary-card-icon" style={{ color: accentColor }}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <circle cx="12" cy="12" r="10" />
                                                 <polyline points="12 6 12 12 16 14" />
@@ -414,7 +469,7 @@ const WeekPage = () => {
                                         </div>
                                         <div className="summary-card-content">
                                             <div className="summary-card-value-row">
-                                                <span className="summary-card-value">{weekData.summary.total_duration_hours.toFixed(1)}h</span>
+                                                <span className="summary-card-value">{displayStats.total_duration_hours.toFixed(1)}h</span>
                                                 {delta && (
                                                     <span
                                                         className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
@@ -432,24 +487,23 @@ const WeekPage = () => {
                                 )
                             })()}
 
-
                             {/* Avg Tasks/Day */}
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <line x1="12" y1="1" x2="12" y2="23" />
                                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{weekData.summary.average_tasks_per_day.toFixed(1)}</span>
+                                    <span className="summary-card-value">{displayStats.average_tasks_per_day.toFixed(1)}</span>
                                     <span className="summary-card-label">Avg Tasks/Day</span>
                                 </div>
                             </div>
 
                             {/* Active Days */}
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                         <line x1="16" y1="2" x2="16" y2="6" />
@@ -458,24 +512,28 @@ const WeekPage = () => {
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{weekData.summary.days_with_tasks}</span>
+                                    <span className="summary-card-value">{displayStats.days_with_tasks}</span>
                                     <span className="summary-card-label">Active Days</span>
                                 </div>
                             </div>
 
-                            {/* Most Productive Day */}
-                            {weekData.most_productive_day && (
-                                <div className="summary-card summary-card-highlight">
-                                    <div className="summary-card-icon">
+                            {/* Best Day */}
+                            {displayStats.most_productive_day && (
+                                <div
+                                    className="summary-card summary-card-highlight summary-card-clickable"
+                                    onClick={() => navigate(`/dashboard?date=${displayStats.most_productive_day!.date}`)}
+                                >
+                                    <div className="summary-card-icon" style={{ color: accentColor }}>
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>
                                     </div>
                                     <div className="summary-card-content">
                                         <span className="summary-card-value">
-                                            {getDayName(weekData.most_productive_day.date)}
+                                            {getDayName(displayStats.most_productive_day.date)}
                                         </span>
-                                        <span className="summary-card-label">Most Productive ({weekData.most_productive_day.completion_percentage}%)</span>
+                                        <span className="summary-card-label">Best Day</span>
+                                        <span className="summary-card-sub">{displayStats.most_productive_day.completion_percentage}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
                             )}

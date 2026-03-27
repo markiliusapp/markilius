@@ -4,7 +4,7 @@ import { productivityAPI } from '@/services/api';
 import type { MonthlyProductivity, ArenaBreakdown as ArenaBreakdownType } from '@/types';
 import Heatmap from '@/components/heatmap/Heatmap';
 import './MonthPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
@@ -19,12 +19,22 @@ import { useAuth } from '@/context/authContext'
 const MonthPage = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const [searchParams] = useSearchParams()
     const [monthData, setMonthData] = useState<MonthlyProductivity | null>(null);
     const [prevMonthData, setPrevMonthData] = useState<MonthlyProductivity | null>(null);
     const [loading, setLoading] = useState(true);
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
-    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null);
+    const [currentYear, setCurrentYear] = useState(() => {
+        const y = parseInt(searchParams.get('year') ?? '')
+        return isNaN(y) ? new Date().getFullYear() : y
+    });
+    const [currentMonth, setCurrentMonth] = useState(() => {
+        const m = parseInt(searchParams.get('month') ?? '')
+        return isNaN(m) || m < 1 || m > 12 ? new Date().getMonth() + 1 : m
+    });
+    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(() => {
+        const a = parseInt(searchParams.get('arena') ?? '')
+        return isNaN(a) ? null : a
+    });
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [copied, setCopied] = useState(false)
     const [shareOpen, setShareOpen] = useState(false)
@@ -373,31 +383,6 @@ const MonthPage = () => {
                                 </div>
                             </div>
 
-                            <div className="summary-card">
-                                <div className="summary-card-icon" style={{ color: accentColor }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
-                                    </svg>
-                                </div>
-                                <div className="summary-card-content">
-                                    <span className="summary-card-value">{displayStats.busiest_day_tasks}</span>
-                                    <span className="summary-card-label">Busiest Day Tasks</span>
-                                </div>
-                            </div>
-
-                            <div className="summary-card">
-                                <div className="summary-card-icon" style={{ color: accentColor }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                </div>
-                                <div className="summary-card-content">
-                                    <span className="summary-card-value">{displayStats.perfect_days}</span>
-                                    <span className="summary-card-label">Perfect Days</span>
-                                </div>
-                            </div>
-
                             {/* Total Time */}
                             {(() => {
                                 const delta = prevTotalHours ? getDelta(displayStats.total_duration_hours, prevTotalHours) : null
@@ -445,8 +430,9 @@ const MonthPage = () => {
                             <div className="summary-card">
                                 <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
+                                        <path d="M5 22h14" /><path d="M5 2h14" />
+                                        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                                        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
@@ -469,6 +455,31 @@ const MonthPage = () => {
                                 </div>
                             </div>
 
+                            <div className="summary-card">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </div>
+                                <div className="summary-card-content">
+                                    <span className="summary-card-value">{displayStats.perfect_days}</span>
+                                    <span className="summary-card-label">Perfect Days</span>
+                                </div>
+                            </div>
+
+                            <div className="summary-card">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+                                    </svg>
+                                </div>
+                                <div className="summary-card-content">
+                                    <span className="summary-card-value">{displayStats.busiest_day_tasks}</span>
+                                    <span className="summary-card-label">Busiest Day Tasks</span>
+                                </div>
+                            </div>
+
                             {displayStats.most_productive_day && (
                                 <div
                                     className="summary-card summary-card-highlight summary-card-clickable"
@@ -486,7 +497,7 @@ const MonthPage = () => {
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
-                                        <span className="summary-card-label">Most Productive</span>
+                                        <span className="summary-card-label">Best Day</span>
                                         <span className="summary-card-sub">{Math.round(displayStats.most_productive_day.completion_percentage)}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
