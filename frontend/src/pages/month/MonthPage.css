@@ -9,6 +9,7 @@
     align-items: center;
     position: relative;
     margin-bottom: 24px;
+    min-width: 0;
 }
 
 .month-header .header-actions {

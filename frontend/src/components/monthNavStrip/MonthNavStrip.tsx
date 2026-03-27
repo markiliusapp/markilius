@@ -1,6 +1,6 @@
 // src/components/monthNavStrip/MonthNavStrip.tsx
 import './MonthNavStrip.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { productivityAPI } from '@/services/api'
 import { getIntensityColor, hexToRgb } from '@/services/colorIntensity'
 import type { MonthlySummary } from '@/types'
@@ -17,10 +17,21 @@ const MONTH_ABBREVS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', '
 
 const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArenaId, refreshKey = 0 }: MonthNavStripProps) => {
     const [months, setMonths] = useState<MonthlySummary[]>([])
+    const cellsRef = useRef<HTMLDivElement>(null)
 
     const today = new Date()
     const thisYear = today.getFullYear()
     const thisMonth = today.getMonth() + 1
+
+    useLayoutEffect(() => {
+        const container = cellsRef.current
+        if (!container) return
+        const selected = container.children[currentMonth - 1] as HTMLElement
+        if (!selected) return
+        const containerCenter = container.offsetWidth / 2
+        const cellCenter = selected.offsetLeft + selected.offsetWidth / 2
+        container.scrollLeft = cellCenter - containerCenter
+    }, [currentMonth])
 
     useEffect(() => {
         productivityAPI.getYearly(currentYear)
@@ -77,7 +88,7 @@ const MonthNavStrip = ({ currentYear, currentMonth, onSelectMonth, selectedArena
                         ←
                     </button>
 
-                    <div className="month-nav-strip-cells">
+                    <div className="month-nav-strip-cells" ref={cellsRef}>
                         {MONTH_ABBREVS.map((abbrev, idx) => {
                             const month = idx + 1
                             const isSelected = month === currentMonth
