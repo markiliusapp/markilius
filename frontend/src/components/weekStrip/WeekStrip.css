@@ -1,36 +1,86 @@
 .week-strip-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.week-strip-wrapper .today-btn {
-    height: 36px;
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
-}
-
-.week-strip-wrapper .today-btn:hover {
-    color: var(--color-text);
-    background-color: var(--color-bg-subtle);
 }
 
 .week-strip-nav {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: 6px;
+}
+
+.week-strip-top {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.week-strip-month {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.week-strip-compact-icon {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.week-strip-compact-icon:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+.week-strip-compact-icon.active {
+    color: var(--color-primary);
+}
+
+.week-strip-today-icon {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.week-strip-today-icon:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+.week-strip-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .week-strip-arrow {

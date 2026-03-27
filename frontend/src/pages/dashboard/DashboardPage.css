@@ -330,7 +330,7 @@
     }
 
     .dashboard-header {
-        justify-content: space-between;
+        justify-content: center;
     }
 
     .dashboard-header .header-actions {

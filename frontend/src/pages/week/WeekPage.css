@@ -297,7 +297,7 @@
 
 @media (max-width: 768px) {
     .week-header {
-        justify-content: space-between;
+        justify-content: center;
     }
 
     .week-header .header-actions {

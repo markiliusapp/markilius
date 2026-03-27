@@ -6,6 +6,7 @@
 
 .week-nav-strip-nav {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 4px;
     background-color: var(--color-bg);
@@ -14,9 +15,79 @@
     padding: 6px;
 }
 
+.week-nav-strip-top {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.week-nav-strip-month {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.week-nav-strip-compact-icon {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.week-nav-strip-compact-icon:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+.week-nav-strip-compact-icon.active {
+    color: var(--color-primary);
+}
+
+.week-nav-strip-today-icon {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.week-nav-strip-today-icon:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+.week-nav-strip-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+}
+
 .week-nav-strip-arrow {
     width: 28px;
-    height: 28px;
+    height: 24px;
+    margin-top: 4px;
     border: none;
     background-color: transparent;
     color: var(--color-text-secondary);
@@ -58,21 +129,12 @@
     background-color: var(--color-bg-subtle);
 }
 
-.week-nav-strip-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    line-height: 1;
-    text-transform: uppercase;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-}
-
 .week-nav-strip-square {
     width: 24px;
     height: 24px;
     border-radius: 4px;
     flex-shrink: 0;
+    position: relative;
 }
 
 .week-nav-strip-date {
@@ -83,8 +145,7 @@
     transition: opacity 0.15s ease;
 }
 
-/* Selected: always show labels, outline on square */
-.week-nav-strip-selected .week-nav-strip-label,
+/* Selected: always show date, outline on square */
 .week-nav-strip-selected .week-nav-strip-date {
     opacity: 1;
     color: var(--color-text);
@@ -96,34 +157,9 @@
     outline-offset: 1px;
 }
 
-/* Reveal all labels on strip hover */
-.week-nav-strip-nav:hover .week-nav-strip-label,
+/* Reveal dates on strip hover */
 .week-nav-strip-nav:hover .week-nav-strip-date {
     opacity: 1;
-}
-
-.week-nav-strip-square {
-    position: relative;
-}
-
-/* This week button */
-.week-nav-strip-this-week-btn {
-    height: 36px;
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
-}
-
-.week-nav-strip-this-week-btn:hover {
-    color: var(--color-text);
-    background-color: var(--color-bg-subtle);
 }
 
 /* Tooltip */

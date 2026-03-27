@@ -10,6 +10,8 @@ interface WeekNavStripProps {
     onSelectWeek: (sunday: string) => void
     selectedArenaId: number | null
     refreshKey: number
+    compact?: boolean
+    onToggleCompact?: () => void
 }
 
 const addDays = (dateStr: string, n: number): string => {
@@ -40,7 +42,7 @@ const getWeeksOfMonth = (year: number, month: number): string[] => {
     return weeks
 }
 
-const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey }: WeekNavStripProps) => {
+const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey, compact, onToggleCompact }: WeekNavStripProps) => {
     const [allDayData, setAllDayData] = useState<DailyProductivityResponse[]>([])
 
     const [y, m] = currentSunday.split('-').map(Number)
@@ -86,57 +88,88 @@ const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey
         return { pct }
     }
 
+    const monthLabel = new Date(y, m - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+
     return (
         <div className="week-nav-strip-wrapper">
             <div className="week-nav-strip-nav">
-                <button
-                    className="week-nav-strip-arrow"
-                    onClick={() => onSelectWeek(addDays(currentSunday, -7))}
-                    aria-label="Previous week"
-                >
-                    ←
-                </button>
-
-                <div className="week-nav-strip-cells">
-                    {weeks.map((sunday) => {
-                        const [sy, sm, sd] = sunday.split('-').map(Number)
-                        const monthLabel = new Date(sy, sm - 1, sd).toLocaleDateString('en-US', { month: 'short' })
-                        const isSelected = sunday === currentSunday
-                        const { pct, arenaRgb } = getWeekCompletion(sunday)
-                        const squareBg = pct === 0
-                            ? 'var(--color-bg-subtle)'
-                            : getIntensityColor(pct, arenaRgb)
-                        const tooltipText = pct > 0 ? `${pct}%` : undefined
-
-                        return (
-                            <div
-                                key={sunday}
-                                className={`week-nav-strip-cell${isSelected ? ' week-nav-strip-selected' : ''}`}
-                                onClick={() => onSelectWeek(sunday)}
-                                {...(tooltipText ? { 'data-tooltip': tooltipText } : {})}
-                            >
-                                <span className="week-nav-strip-label">{monthLabel}</span>
-                                <div className="week-nav-strip-square" style={{ backgroundColor: squareBg }} />
-                                <span className="week-nav-strip-date">{sd}</span>
-                            </div>
-                        )
-                    })}
+                <div className="week-nav-strip-top">
+                    {onToggleCompact && (
+                        <button
+                            className={`week-nav-strip-compact-icon${compact ? ' active' : ''}`}
+                            onClick={onToggleCompact}
+                            title={compact ? 'Expand' : 'Compact'}
+                        >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                {compact ? (
+                                    <><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="7" y1="9" x2="17" y2="9" /><line x1="7" y1="13" x2="13" y2="13" /></>
+                                ) : (
+                                    <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
+                                )}
+                            </svg>
+                        </button>
+                    )}
+                    <span className="week-nav-strip-month">{monthLabel}</span>
+                    {currentSunday !== thisWeekSunday && (
+                        <button
+                            className="week-nav-strip-today-icon"
+                            onClick={() => onSelectWeek(thisWeekSunday)}
+                            aria-label="This week"
+                            title="This Week"
+                        >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                                <circle cx="12" cy="16" r="2" fill="currentColor" stroke="none" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
 
-                <button
-                    className="week-nav-strip-arrow"
-                    onClick={() => onSelectWeek(addDays(currentSunday, 7))}
-                    aria-label="Next week"
-                >
-                    →
-                </button>
-            </div>
+                <div className="week-nav-strip-controls">
+                    <button
+                        className="week-nav-strip-arrow"
+                        onClick={() => onSelectWeek(addDays(currentSunday, -7))}
+                        aria-label="Previous week"
+                    >
+                        ←
+                    </button>
 
-            {currentSunday !== thisWeekSunday && (
-                <button className="week-nav-strip-this-week-btn" onClick={() => onSelectWeek(thisWeekSunday)}>
-                    This Week
-                </button>
-            )}
+                    <div className="week-nav-strip-cells">
+                        {weeks.map((sunday) => {
+                            const [sy, sm, sd] = sunday.split('-').map(Number)
+                            const isSelected = sunday === currentSunday
+                            const { pct, arenaRgb } = getWeekCompletion(sunday)
+                            const squareBg = pct === 0
+                                ? 'var(--color-bg-subtle)'
+                                : getIntensityColor(pct, arenaRgb)
+                            const tooltipText = pct > 0 ? `${pct}%` : undefined
+
+                            return (
+                                <div
+                                    key={sunday}
+                                    className={`week-nav-strip-cell${isSelected ? ' week-nav-strip-selected' : ''}`}
+                                    onClick={() => onSelectWeek(sunday)}
+                                    {...(tooltipText ? { 'data-tooltip': tooltipText } : {})}
+                                >
+                                    <div className="week-nav-strip-square" style={{ backgroundColor: squareBg }} />
+                                    <span className="week-nav-strip-date">{sd}</span>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <button
+                        className="week-nav-strip-arrow"
+                        onClick={() => onSelectWeek(addDays(currentSunday, 7))}
+                        aria-label="Next week"
+                    >
+                        →
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }
