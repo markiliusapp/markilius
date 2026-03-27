@@ -274,7 +274,7 @@ const MonthPage = () => {
                                         </div>
                                         <div className="summary-card-content">
                                             <div className="summary-card-value-row">
-                                                <span className="summary-card-value">{monthData.summary.completion_percentage}%</span>
+                                                <span className="summary-card-value">{Math.round(monthData.summary.completion_percentage)}%</span>
                                                 {delta && (
                                                     <span
                                                         className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
@@ -312,7 +312,7 @@ const MonthPage = () => {
                                 </div>
                                 <div className="summary-card-content">
                                     <span className="summary-card-value">
-                                        {Math.max(...monthData.daily_breakdown.map(d => d.total_tasks))}
+                                        {monthData.daily_breakdown.length > 0 ? Math.max(...monthData.daily_breakdown.map(d => d.total_tasks)) : 0}
                                     </span>
                                     <span className="summary-card-label">Busiest Day Tasks</span>
                                 </div>
@@ -327,7 +327,7 @@ const MonthPage = () => {
                                 </div>
                                 <div className="summary-card-content">
                                     <span className="summary-card-value">
-                                        {monthData.daily_breakdown.filter(d => d.completion_percentage === 100).length}
+                                        {monthData.daily_breakdown.filter(d => Math.round(d.completion_percentage) === 100).length}
                                     </span>
                                     <span className="summary-card-label">Perfect Days</span>
                                 </div>
@@ -420,7 +420,7 @@ const MonthPage = () => {
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
-                                        <span className="summary-card-label">Most Productive ({monthData.most_productive_day.completion_percentage}%)</span>
+                                        <span className="summary-card-label">Most Productive ({Math.round(monthData.most_productive_day.completion_percentage)}%)</span>
                                     </div>
                                 </div>
                             )}
