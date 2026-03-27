@@ -321,6 +321,7 @@ const MonthPage = () => {
                             dailyBreakdown={monthData.daily_breakdown}
                             year={currentYear}
                             month={currentMonth}
+                            selectedArenaId={selectedArenaId}
                         />
                     </div>
 

@@ -16,6 +16,7 @@ interface MonthlyArenaChartProps {
     dailyBreakdown: DailyProductivityResponse[]
     year: number
     month: number
+    selectedArenaId: number | null
 }
 
 interface WeekDataPoint {
@@ -214,8 +215,7 @@ const makeStackedShape = (
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartProps) => {
-    const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
+const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: MonthlyArenaChartProps) => {
     const [layout, setLayout] = useState<Layout>('grouped')
     const [sortOrder, setSortOrder] = useState<SortOrder>(null)
 
@@ -292,11 +292,6 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
         [visibleArenas, yMax, effectiveSortOrder]
     )
 
-    const handleArenaClick = (arenaId: number) => {
-        setSelectedArenaId(prev => prev === arenaId ? null : arenaId)
-        setSortOrder(null)
-    }
-
     if (allArenas.length === 0) {
         return (
             <div className="mac-wrapper">
@@ -354,28 +349,6 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month }: MonthlyArenaChartPro
                             <IconStacked />
                         </button>
                     </div>
-                </div>
-                <div className="mac-legend">
-                    <button
-                        className={`mac-pill ${!selectedArenaId ? 'active' : ''}`}
-                        onClick={() => { setSelectedArenaId(null); setSortOrder(null) }}
-                    >
-                        All
-                    </button>
-                    {allArenas.map(arena => (
-                        <button
-                            key={arena.arena_id}
-                            className={`mac-pill ${selectedArenaId === arena.arena_id ? 'active' : ''}`}
-                            style={{
-                                borderColor: selectedArenaId === arena.arena_id ? arena.arena_color : `${arena.arena_color}40`,
-                                backgroundColor: selectedArenaId === arena.arena_id ? `${arena.arena_color}25` : `${arena.arena_color}12`,
-                                color: selectedArenaId === arena.arena_id ? arena.arena_color : 'var(--color-text-secondary)',
-                            }}
-                            onClick={() => handleArenaClick(arena.arena_id)}
-                        >
-                            {arena.arena_name}
-                        </button>
-                    ))}
                 </div>
             </div>
             <div className="mac-chart-container">
