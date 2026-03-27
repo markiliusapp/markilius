@@ -468,3 +468,98 @@ def test_streaks_excludes_archived_arenas(
 def test_streaks_requires_auth(client):
     response = client.get("/productivity/streaks")
     assert response.status_code == 403
+
+
+def test_streaks_current_yesterday_only_still_alive(
+    client, db, test_user, test_arena, auth_headers, mocker
+):
+    # Fix "today" to a known date so YESTERDAY is reliably 1 day before the streak code's today
+    from datetime import datetime as dt_type
+    import pytz
+
+    fixed_today = date(2026, 3, 10)   # streak code's "today"
+    fixed_yesterday = date(2026, 3, 9)
+
+    mock_dt = mocker.patch("app.routes.productivity.datetime")
+    mock_dt.now.return_value = dt_type(2026, 3, 10, 12, 0, 0, tzinfo=pytz.UTC)
+
+    seed_task(db, test_user.id, test_arena.id, fixed_yesterday, is_completed=True)
+
+    response = client.get("/productivity/streaks", headers=auth_headers)
+    assert response.json()["current_streak"] >= 1
+
+
+# ---------------------------------------------------------------------------
+# Tiebreaker: most productive day (equal % → more hours wins)
+# ---------------------------------------------------------------------------
+
+
+def test_weekly_most_productive_day_tiebreaker_by_hours(
+    client, db, test_user, test_arena, auth_headers
+):
+    # Monday and Wednesday both 100% — Wednesday has more hours
+    seed_task(db, test_user.id, test_arena.id, PAST_MONDAY, is_completed=True, duration=30)
+    wednesday = PAST_MONDAY + timedelta(days=2)
+    seed_task(db, test_user.id, test_arena.id, wednesday, is_completed=True, duration=120)
+
+    response = client.get(
+        "/productivity/week",
+        params={"start_date": str(PAST_MONDAY)},
+        headers=auth_headers,
+    )
+    mpd = response.json()["most_productive_day"]
+    assert mpd["date"] == str(wednesday)
+
+
+def test_monthly_most_productive_day_tiebreaker_by_hours(
+    client, db, test_user, test_arena, auth_headers
+):
+    # Jan 5 and Jan 10 both 100% — Jan 10 has more hours
+    seed_task(db, test_user.id, test_arena.id, date(2026, 1, 5), is_completed=True, duration=30)
+    seed_task(db, test_user.id, test_arena.id, date(2026, 1, 10), is_completed=True, duration=120)
+
+    response = client.get(
+        "/productivity/month",
+        params={"year": 2026, "month": 1},
+        headers=auth_headers,
+    )
+    mpd = response.json()["most_productive_day"]
+    assert mpd["date"] == "2026-01-10"
+
+
+def test_yearly_best_day_tiebreaker_by_hours(
+    client, db, test_user, test_arena, auth_headers
+):
+    # March 1 and June 15 both 100% — June 15 has more hours
+    seed_task(db, test_user.id, test_arena.id, date(2025, 3, 1), is_completed=True, duration=30)
+    seed_task(db, test_user.id, test_arena.id, date(2025, 6, 15), is_completed=True, duration=120)
+
+    response = client.get(
+        "/productivity/year", params={"year": 2025}, headers=auth_headers
+    )
+    best = response.json()["best_day"]
+    assert best["date"] == "2025-06-15"
+
+
+# ---------------------------------------------------------------------------
+# Productivity endpoints respect user timezone in lock_overdue_tasks
+# ---------------------------------------------------------------------------
+
+
+def test_productivity_endpoints_work_with_user_timezone(
+    client, db, test_user, test_arena, auth_headers
+):
+    test_user.timezone = "America/New_York"
+    db.commit()
+
+    seed_task(db, test_user.id, test_arena.id, PAST_MONDAY, is_completed=True)
+
+    for url, params in [
+        ("/productivity/day", {"target_date": str(PAST_MONDAY)}),
+        ("/productivity/week", {"start_date": str(PAST_MONDAY)}),
+        ("/productivity/month", {"year": 2026, "month": 3}),
+        ("/productivity/year", {"year": 2026}),
+        ("/productivity/streaks", {}),
+    ]:
+        response = client.get(url, params=params, headers=auth_headers)
+        assert response.status_code == 200, f"Failed for {url}"

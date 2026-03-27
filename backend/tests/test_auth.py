@@ -198,6 +198,38 @@ def test_update_password_missing_current(client, test_user, auth_headers):
     assert response.status_code == 400
 
 
+def test_update_timezone(client, test_user, auth_headers):
+    response = client.put(
+        ME_URL, json={"timezone": "Europe/London"}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    assert response.json()["timezone"] == "Europe/London"
+
+
+def test_update_weekly_email_preference(client, test_user, auth_headers):
+    response = client.put(
+        ME_URL, json={"weekly_email": False}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    assert response.json()["weekly_email"] is False
+
+
+def test_update_monthly_email_preference(client, test_user, auth_headers):
+    response = client.put(
+        ME_URL, json={"monthly_email": False}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    assert response.json()["monthly_email"] is False
+
+
+def test_update_onboarding_completed(client, test_user, auth_headers):
+    response = client.put(
+        ME_URL, json={"onboarding_completed": True}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    assert response.json()["onboarding_completed"] is True
+
+
 # ---------------------------------------------------------------------------
 # Forgot password
 # ---------------------------------------------------------------------------
@@ -395,3 +427,303 @@ def test_resend_verification_unknown_email_is_silent(client, mocker):
     response = client.post(RESEND_VERIFICATION_URL, json={"email": "ghost@example.com"})
     assert response.status_code == 200
     assert not mock_send.called
+
+
+# ---------------------------------------------------------------------------
+# POST /auth/unsubscribe
+# ---------------------------------------------------------------------------
+
+UNSUBSCRIBE_URL = "/auth/unsubscribe"
+
+
+def test_unsubscribe_weekly_sets_flag_false(client, db, test_user):
+    from app.utils.auth import generate_unsubscribe_token
+
+    test_user.weekly_email = True
+    db.commit()
+
+    token = generate_unsubscribe_token(test_user.email, "weekly")
+    response = client.post(f"{UNSUBSCRIBE_URL}?token={token}&type=weekly")
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Unsubscribed"
+    db.refresh(test_user)
+    assert test_user.weekly_email is False
+
+
+def test_unsubscribe_monthly_sets_flag_false(client, db, test_user):
+    from app.utils.auth import generate_unsubscribe_token
+
+    test_user.monthly_email = True
+    db.commit()
+
+    token = generate_unsubscribe_token(test_user.email, "monthly")
+    response = client.post(f"{UNSUBSCRIBE_URL}?token={token}&type=monthly")
+
+    assert response.status_code == 200
+    db.refresh(test_user)
+    assert test_user.monthly_email is False
+
+
+def test_unsubscribe_invalid_token_rejected(client):
+    response = client.post(f"{UNSUBSCRIBE_URL}?token=notavalidtoken&type=weekly")
+    assert response.status_code == 400
+    assert "Invalid unsubscribe link" in response.json()["detail"]
+
+
+def test_unsubscribe_type_mismatch_rejected(client, test_user):
+    from app.utils.auth import generate_unsubscribe_token
+
+    # Token is for "weekly" but request says "monthly"
+    token = generate_unsubscribe_token(test_user.email, "weekly")
+    response = client.post(f"{UNSUBSCRIBE_URL}?token={token}&type=monthly")
+
+    assert response.status_code == 400
+    assert "Invalid unsubscribe link" in response.json()["detail"]
+
+
+def test_unsubscribe_unknown_email_returns_ok_silently(client):
+    from app.utils.auth import generate_unsubscribe_token
+
+    token = generate_unsubscribe_token("ghost@example.com", "weekly")
+    response = client.post(f"{UNSUBSCRIBE_URL}?token={token}&type=weekly")
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Unsubscribed"
+
+
+def test_unsubscribe_invalid_email_type_rejected(client, test_user):
+    from app.utils.auth import generate_unsubscribe_token
+
+    token = generate_unsubscribe_token(test_user.email, "sms")
+    response = client.post(f"{UNSUBSCRIBE_URL}?token={token}&type=sms")
+
+    assert response.status_code == 400
+    assert "Invalid email type" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# POST /auth/google  (Google OAuth)
+# ---------------------------------------------------------------------------
+
+GOOGLE_URL = "/auth/google"
+
+
+def test_google_missing_token_rejected(client):
+    response = client.post(GOOGLE_URL, json={"some_other_field": "value"})
+    assert response.status_code == 400
+    assert "Missing Google token" in response.json()["detail"]
+
+
+def test_google_id_token_new_user_creates_account(client, db, mocker):
+    from app.models.user import User
+    from app.models.arena import Arena
+
+    mocker.patch(
+        "app.routes.auth.id_token.verify_oauth2_token",
+        return_value={
+            "email": "newgoogle@example.com",
+            "given_name": "Google",
+            "family_name": "User",
+        },
+    )
+
+    response = client.post(GOOGLE_URL, json={"credential": "valid_id_token"})
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+    user = db.query(User).filter(User.email == "newgoogle@example.com").first()
+    assert user is not None
+    assert user.is_verified is True
+
+    arenas = db.query(Arena).filter(Arena.user_id == user.id).all()
+    assert len(arenas) == 6  # default arenas created
+
+
+def test_google_id_token_existing_user_logs_in(client, db, test_user, mocker):
+    from app.models.user import User
+
+    mocker.patch(
+        "app.routes.auth.id_token.verify_oauth2_token",
+        return_value={
+            "email": test_user.email,
+            "given_name": "Test",
+            "family_name": "User",
+        },
+    )
+
+    response = client.post(GOOGLE_URL, json={"credential": "valid_id_token"})
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+    # No duplicate user created
+    count = db.query(User).filter(User.email == test_user.email).count()
+    assert count == 1
+
+
+def test_google_access_token_new_user_creates_account(client, db, mocker):
+    from app.models.user import User
+    from unittest.mock import MagicMock
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "email": "accesstoken@example.com",
+        "given_name": "Access",
+        "family_name": "Token",
+    }
+    mocker.patch("app.routes.auth.http_requests.get", return_value=mock_resp)
+
+    response = client.post(GOOGLE_URL, json={"access_token": "valid_access_token"})
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+    user = db.query(User).filter(User.email == "accesstoken@example.com").first()
+    assert user is not None
+    assert user.is_verified is True
+
+
+def test_google_access_token_existing_user_logs_in(client, db, test_user, mocker):
+    from unittest.mock import MagicMock
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "email": test_user.email,
+        "given_name": "Test",
+        "family_name": "User",
+    }
+    mocker.patch("app.routes.auth.http_requests.get", return_value=mock_resp)
+
+    response = client.post(GOOGLE_URL, json={"access_token": "valid_access_token"})
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+
+def test_google_access_token_invalid_returns_401(client, mocker):
+    from unittest.mock import MagicMock
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 401
+    mocker.patch("app.routes.auth.http_requests.get", return_value=mock_resp)
+
+    response = client.post(GOOGLE_URL, json={"access_token": "bad_token"})
+
+    assert response.status_code == 401
+    assert "Invalid Google token" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# DELETE /auth/me  (account deletion)
+# ---------------------------------------------------------------------------
+
+
+DELETE_ME_URL = "/auth/me"
+
+
+def test_delete_account_requires_auth(client):
+    response = client.delete(DELETE_ME_URL)
+    assert response.status_code == 403
+
+
+def test_delete_account_removes_user(client, db, test_user, auth_headers):
+    from app.models.user import User
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    assert response.status_code == 204
+
+    assert db.query(User).filter(User.id == test_user.id).first() is None
+
+
+def test_delete_account_removes_tasks_and_arenas(
+    client, db, test_user, test_arena, auth_headers
+):
+    from app.models.task import Task
+    from app.models.arena import Arena
+    from datetime import date, timedelta
+
+    task = Task(
+        user_id=test_user.id,
+        arena_id=test_arena.id,
+        title="To be deleted",
+        frequency="once",
+        due_date=date.today() + timedelta(days=1),
+    )
+    db.add(task)
+    db.commit()
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    assert response.status_code == 204
+
+    assert db.query(Task).filter(Task.user_id == test_user.id).count() == 0
+    assert db.query(Arena).filter(Arena.user_id == test_user.id).count() == 0
+
+
+def test_delete_account_cancels_active_stripe_subscription(
+    client, db, test_user, auth_headers, mocker
+):
+    test_user.stripe_subscription_id = "sub_active_to_cancel"
+    test_user.subscription_status = "active"
+    db.commit()
+
+    mock_cancel = mocker.patch("stripe.Subscription.cancel")
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    assert response.status_code == 204
+
+    mock_cancel.assert_called_once_with("sub_active_to_cancel")
+
+
+def test_delete_account_cancels_past_due_stripe_subscription(
+    client, db, test_user, auth_headers, mocker
+):
+    test_user.stripe_subscription_id = "sub_past_due_to_cancel"
+    test_user.subscription_status = "past_due"
+    db.commit()
+
+    mock_cancel = mocker.patch("stripe.Subscription.cancel")
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    assert response.status_code == 204
+
+    mock_cancel.assert_called_once_with("sub_past_due_to_cancel")
+
+
+def test_delete_account_no_subscription_skips_stripe_cancel(
+    client, db, test_user, auth_headers, mocker
+):
+    test_user.stripe_subscription_id = None
+    test_user.subscription_status = "inactive"
+    db.commit()
+
+    mock_cancel = mocker.patch("stripe.Subscription.cancel")
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    assert response.status_code == 204
+
+    mock_cancel.assert_not_called()
+
+
+def test_delete_account_stripe_error_proceeds_with_deletion(
+    client, db, test_user, auth_headers, mocker
+):
+    from app.models.user import User
+    import stripe
+
+    test_user.stripe_subscription_id = "sub_stale"
+    test_user.subscription_status = "active"
+    db.commit()
+
+    mocker.patch(
+        "stripe.Subscription.cancel",
+        side_effect=stripe.error.InvalidRequestError("No such subscription", "id"),
+    )
+
+    response = client.delete(DELETE_ME_URL, headers=auth_headers)
+    # Should still delete the account despite Stripe error
+    assert response.status_code == 204
+    assert db.query(User).filter(User.id == test_user.id).first() is None

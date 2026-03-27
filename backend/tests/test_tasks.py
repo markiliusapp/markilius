@@ -445,3 +445,56 @@ def test_delete_series_non_recurring_task_rejected(
 def test_delete_series_task_not_found(client, test_user, auth_headers):
     response = client.delete(series_url(9999), headers=auth_headers)
     assert response.status_code == 404
+
+
+def test_delete_series_keeps_past_and_locked_tasks(
+    client, db, test_user, test_arena, auth_headers
+):
+    import uuid
+
+    group = str(uuid.uuid4())
+    # 1 past locked task — should survive
+    past_locked = make_task(
+        db, test_user.id, test_arena.id,
+        due_date=YESTERDAY,
+        group_id=group,
+        is_locked=True,
+        is_completed=False,
+    )
+    # 1 future incomplete task — should be deleted
+    future = make_task(
+        db, test_user.id, test_arena.id,
+        due_date=TOMORROW,
+        group_id=group,
+    )
+
+    response = client.delete(series_url(future.id), headers=auth_headers)
+    assert response.status_code == 204
+
+    remaining = db.query(Task).filter(Task.group_id == group).all()
+    assert len(remaining) == 1
+    assert remaining[0].id == past_locked.id
+
+
+# ---------------------------------------------------------------------------
+# PUT /tasks/{id}  — additional edge cases
+# ---------------------------------------------------------------------------
+
+
+def test_update_task_in_archived_arena_rejected(
+    client, db, test_user, auth_headers
+):
+    """Task whose current arena is archived cannot be updated."""
+    from app.models.arena import Arena
+
+    archived = Arena(
+        user_id=test_user.id, name="Dead", color="#fff", is_archived=True
+    )
+    db.add(archived)
+    db.commit()
+    task = make_task(db, test_user.id, archived.id)
+
+    response = client.put(
+        task_url(task.id), json={"title": "Try anyway"}, headers=auth_headers
+    )
+    assert response.status_code == 409
