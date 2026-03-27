@@ -11,6 +11,7 @@ import TaskInput from '@/components/taskinput/TaskInput';
 import WeeklyChart from '@/components/weeklyChart/WeeklyChart'
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
+import WeekNavStrip from '@/components/weekNavStrip/WeekNavStrip'
 
 
 const WeekPage = () => {
@@ -235,16 +236,12 @@ const WeekPage = () => {
             <div className="week-page">
                 {/* Header */}
                 <div className="week-header">
-                    <div className="week-nav-wrapper">
-                        <div className="week-nav">
-                            <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
-                            <span className="week-range">{formatWeekLabel()}</span>
-                            <button onClick={handleNextWeek} aria-label="Next week">→</button>
-                        </div>
-                        {currentSunday !== getSundayOfWeek(new Date()) && (
-                            <button className="today-btn" onClick={() => setCurrentSunday(getSundayOfWeek(new Date()))}>This Week</button>
-                        )}
-                    </div>
+                    <WeekNavStrip
+                        currentSunday={currentSunday}
+                        onSelectWeek={setCurrentSunday}
+                        selectedArenaId={selectedArenaId}
+                        refreshKey={refreshKey}
+                    />
                     <div className="header-actions">
                         <button className={`compact-toggle ${compact ? 'active' : ''}`} onClick={() => setCompact(v => { localStorage.setItem('taskCompact', String(!v)); return !v })} title={compact ? 'Expand' : 'Compact'}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

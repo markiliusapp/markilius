@@ -1,0 +1,130 @@
+// src/components/weekNavStrip/WeekNavStrip.tsx
+import './WeekNavStrip.css'
+import { useState, useEffect } from 'react'
+import { productivityAPI } from '@/services/api'
+import { getIntensityColor, hexToRgb } from '@/services/colorIntensity'
+import type { MonthlyProductivity } from '@/types'
+
+interface WeekNavStripProps {
+    currentSunday: string
+    onSelectWeek: (sunday: string) => void
+    selectedArenaId: number | null
+    refreshKey: number
+}
+
+const addDays = (dateStr: string, n: number): string => {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const date = new Date(y, m - 1, d)
+    date.setDate(date.getDate() + n)
+    return date.toLocaleDateString('en-CA')
+}
+
+const getSundayOfWeek = (dateStr: string): string => {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const date = new Date(y, m - 1, d)
+    date.setDate(date.getDate() - date.getDay())
+    return date.toLocaleDateString('en-CA')
+}
+
+const getWeeksOfMonth = (year: number, month: number): string[] => {
+    const firstDay = new Date(year, month - 1, 1)
+    const firstSunday = new Date(firstDay)
+    firstSunday.setDate(firstDay.getDate() - firstDay.getDay())
+    const lastDay = new Date(year, month, 0)
+    const weeks: string[] = []
+    const current = new Date(firstSunday)
+    while (current <= lastDay) {
+        weeks.push(current.toLocaleDateString('en-CA'))
+        current.setDate(current.getDate() + 7)
+    }
+    return weeks
+}
+
+const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey }: WeekNavStripProps) => {
+    const [monthData, setMonthData] = useState<MonthlyProductivity | null>(null)
+
+    const [y, m] = currentSunday.split('-').map(Number)
+    const thisWeekSunday = getSundayOfWeek(new Date().toLocaleDateString('en-CA'))
+    const weeks = getWeeksOfMonth(y, m)
+
+    useEffect(() => {
+        productivityAPI.getMonthly(y, m).then(setMonthData).catch(() => setMonthData(null))
+    }, [y, m, refreshKey])
+
+    const getWeekCompletion = (sunday: string): { pct: number; arenaRgb?: string } => {
+        if (!monthData) return { pct: 0 }
+        const weekDays = Array.from({ length: 7 }, (_, i) => addDays(sunday, i))
+        const days = monthData.daily_breakdown.filter(d => weekDays.includes(d.date.toString()))
+
+        if (selectedArenaId) {
+            const arenaDays = days.map(d => d.arenas.find(a => a.arena_id === selectedArenaId)).filter(Boolean) as any[]
+            if (arenaDays.length === 0) return { pct: 0 }
+            const completed = arenaDays.reduce((s, a) => s + a.completed_tasks, 0)
+            const total = arenaDays.reduce((s, a) => s + a.total_tasks, 0)
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+            const rgb = arenaDays[0]?.arena_color ? hexToRgb(arenaDays[0].arena_color) : undefined
+            return { pct, arenaRgb: rgb }
+        }
+
+        const completed = days.reduce((s, d) => s + d.completed_tasks, 0)
+        const total = days.reduce((s, d) => s + d.total_tasks, 0)
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+        return { pct }
+    }
+
+    return (
+        <div className="week-nav-strip-wrapper">
+            <div className="week-nav-strip-nav">
+                <button
+                    className="week-nav-strip-arrow"
+                    onClick={() => onSelectWeek(addDays(currentSunday, -7))}
+                    aria-label="Previous week"
+                >
+                    ←
+                </button>
+
+                <div className="week-nav-strip-cells">
+                    {weeks.map((sunday) => {
+                        const [, , sd] = sunday.split('-').map(Number)
+                        const isSelected = sunday === currentSunday
+                        const isThisWeek = sunday === thisWeekSunday
+                        const { pct, arenaRgb } = getWeekCompletion(sunday)
+                        const squareBg = pct === 0
+                            ? 'var(--color-bg-subtle)'
+                            : getIntensityColor(pct, arenaRgb)
+                        const tooltipText = pct > 0 ? `${pct}%` : undefined
+
+                        return (
+                            <div
+                                key={sunday}
+                                className={`week-nav-strip-cell${isSelected ? ' week-nav-strip-selected' : ''}${isThisWeek ? ' week-nav-strip-thisweek' : ''}`}
+                                onClick={() => onSelectWeek(sunday)}
+                                {...(tooltipText ? { 'data-tooltip': tooltipText } : {})}
+                            >
+                                <span className="week-nav-strip-label">W</span>
+                                <div className="week-nav-strip-square" style={{ backgroundColor: squareBg }} />
+                                <span className="week-nav-strip-date">{sd}</span>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                <button
+                    className="week-nav-strip-arrow"
+                    onClick={() => onSelectWeek(addDays(currentSunday, 7))}
+                    aria-label="Next week"
+                >
+                    →
+                </button>
+            </div>
+
+            {currentSunday !== thisWeekSunday && (
+                <button className="week-nav-strip-this-week-btn" onClick={() => onSelectWeek(thisWeekSunday)}>
+                    This Week
+                </button>
+            )}
+        </div>
+    )
+}
+
+export default WeekNavStrip
