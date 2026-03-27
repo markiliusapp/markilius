@@ -131,10 +131,9 @@ const makeGroupedShape = (
         if (activeArenas.length === 0) return <g />
 
         const gap = 2
-        const slotCount = Math.max(activeArenas.length, visibleArenas.length)
-        const totalGap = Math.max(0, (slotCount - 1) * gap)
-        const barW = Math.max(4, Math.floor((width - totalGap) / slotCount))
-        const totalW = activeArenas.length * barW + Math.max(0, (activeArenas.length - 1) * gap)
+        const activeGap = Math.max(0, (activeArenas.length - 1) * gap)
+        const barW = Math.min(28, Math.max(4, Math.floor((width - activeGap) / activeArenas.length)))
+        const totalW = activeArenas.length * barW + activeGap
         const startX = Math.round(x + (width - totalW) / 2)
         const r = Math.min(3, barW / 2)
 
@@ -282,7 +281,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
     const weekCount = chartData.length
     const barSize = visibleArenas.length <= 1 || layout === 'stacked'
         ? Math.max(28, Math.min(60, Math.floor(260 / weekCount)))
-        : Math.max(36, Math.min(100, Math.floor(340 / weekCount)))
+        : Math.max(60, Math.min(160, Math.floor(500 / weekCount)))
 
     const groupedShape = useMemo(
         () => makeGroupedShape(visibleArenas, yMax, effectiveSortOrder),
@@ -358,7 +357,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
                         data={chartData}
                         margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
                         barSize={barSize}
-                        barCategoryGap="30%"
+                        barCategoryGap="20%"
                     >
                         <XAxis
                             dataKey="week"
