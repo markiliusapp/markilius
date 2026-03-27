@@ -100,6 +100,8 @@ const MonthPage = () => {
         return new Date(currentYear, currentMonth - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     };
 
+    const isCurrentMonth = currentYear === new Date().getFullYear() && currentMonth === new Date().getMonth() + 1;
+
     const handleDayClick = (date: string) => navigate(`/dashboard?date=${date}`);
 
     const getArenas = (): ArenaBreakdownType[] => {
@@ -148,10 +150,17 @@ const MonthPage = () => {
             <div className="month-page">
                 {/* Header */}
                 <div className="month-header">
-                    <div className="month-nav">
-                        <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
-                        <span className="month-name">{getMonthName()}</span>
-                        <button onClick={handleNextMonth} aria-label="Next month">→</button>
+                    <div className="month-nav-wrapper">
+                        <div className="month-nav">
+                            <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
+                            <span className="month-name">{getMonthName()}</span>
+                            <button onClick={handleNextMonth} aria-label="Next month">→</button>
+                        </div>
+                        {!isCurrentMonth && (
+                            <button className="today-btn" onClick={() => { setCurrentYear(new Date().getFullYear()); setCurrentMonth(new Date().getMonth() + 1); }}>
+                                This Month
+                            </button>
+                        )}
                     </div>
                     <div className="header-actions">
                         <AddTaskButton onClick={() => setShowTaskInput(true)} />
