@@ -6,17 +6,25 @@
 
 .month-nav-strip-nav {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 4px;
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 6px;
+    padding: 6px 6px 6px;
+}
+
+.month-nav-strip-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
 }
 
 .month-nav-strip-arrow {
     width: 28px;
-    height: 28px;
+    height: 24px;
+    margin-top: 4px; /* align with cell top-padding so arrow sits level with the squares */
     border: none;
     background-color: transparent;
     color: var(--color-text-secondary);
@@ -33,6 +41,43 @@
 .month-nav-strip-arrow:hover {
     background-color: var(--color-bg-subtle);
     color: var(--color-text);
+}
+
+.month-nav-strip-top {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-nav-strip-year {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.month-nav-strip-today-icon {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.month-nav-strip-today-icon:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
 }
 
 .month-nav-strip-cells {
@@ -58,15 +103,6 @@
     background-color: var(--color-bg-subtle);
 }
 
-.month-nav-strip-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    line-height: 1;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-}
-
 .month-nav-strip-square {
     width: 24px;
     height: 24px;
@@ -83,8 +119,7 @@
     transition: opacity 0.15s ease;
 }
 
-/* Selected: always show labels, outline on square */
-.month-nav-strip-selected .month-nav-strip-label,
+/* Selected: always show abbrev, outline on square */
 .month-nav-strip-selected .month-nav-strip-abbrev {
     opacity: 1;
     color: var(--color-text);
@@ -96,31 +131,11 @@
     outline-offset: 1px;
 }
 
-/* Reveal all labels on strip hover */
-.month-nav-strip-nav:hover .month-nav-strip-label,
+/* Reveal all abbrevs on strip hover */
 .month-nav-strip-nav:hover .month-nav-strip-abbrev {
     opacity: 1;
 }
 
-/* This Month button */
-.month-nav-strip-this-month-btn {
-    height: 36px;
-    padding: 0 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
-}
-
-.month-nav-strip-this-month-btn:hover {
-    color: var(--color-text);
-    background-color: var(--color-bg-subtle);
-}
 
 /* Tooltip */
 .month-nav-strip-cell[data-tooltip]::after {
