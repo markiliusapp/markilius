@@ -131,9 +131,10 @@ const makeGroupedShape = (
         if (activeArenas.length === 0) return <g />
 
         const gap = 2
-        const totalGap = Math.max(0, (activeArenas.length - 1) * gap)
-        const barW = Math.max(4, Math.floor((width - totalGap) / activeArenas.length))
-        const totalW = activeArenas.length * barW + totalGap
+        const slotCount = Math.max(activeArenas.length, visibleArenas.length)
+        const totalGap = Math.max(0, (slotCount - 1) * gap)
+        const barW = Math.max(4, Math.floor((width - totalGap) / slotCount))
+        const totalW = activeArenas.length * barW + Math.max(0, (activeArenas.length - 1) * gap)
         const startX = Math.round(x + (width - totalW) / 2)
         const r = Math.min(3, barW / 2)
 
