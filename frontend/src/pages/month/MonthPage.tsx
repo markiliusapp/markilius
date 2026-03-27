@@ -156,10 +156,11 @@ const MonthPage = () => {
                 .filter((d): d is { date: string; arena: ArenaBreakdownType } => !!d.arena)
 
             const daysWithTasks = daysWithArena.filter(d => d.arena.total_tasks > 0).length
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate()
             const busiestDayTasks = daysWithArena.length > 0 ? Math.max(...daysWithArena.map(d => d.arena.total_tasks)) : 0
             const perfectDays = daysWithArena.filter(d => Math.round(d.arena.completion_percentage) === 100).length
-            const avgTasksPerDay = daysWithTasks > 0 ? summaryArena.total_tasks / daysWithTasks : 0
-            const avgTimePerDay = daysWithTasks > 0 ? summaryArena.total_hours / daysWithTasks : 0
+            const avgTasksPerDay = summaryArena.total_tasks / daysInMonth
+            const avgTimePerDay = summaryArena.total_hours / daysInMonth
             const mostProductiveDay = daysWithArena.reduce<{ date: string; completion_percentage: number; total_hours: number } | null>((best, d) => {
                 if (d.arena.total_tasks === 0) return best
                 if (!best || d.arena.completion_percentage > best.completion_percentage ||
@@ -325,10 +326,7 @@ const MonthPage = () => {
 
                     {/* Section 4: Month Summary */}
                     <div className="month-summary">
-                        <h2>
-                            Month Summary
-                            {summaryArena && <span className="summary-arena-label" style={{ color: accentColor }}> · {summaryArena.arena_name}</span>}
-                        </h2>
+                        <h2>Month Summary</h2>
                         <div className="summary-grid">
 
                             {/* Completion Rate */}

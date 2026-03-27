@@ -242,12 +242,8 @@ def get_weekly_productivity(
     days_with_tasks = sum(
         1 for day_tasks in tasks_by_date.values() if len(day_tasks) > 0
     )
-    average_tasks_per_day = round(
-        total_tasks / days_with_tasks if days_with_tasks > 0 else 0, 2
-    )
-    average_duration_per_day = round(
-        total_duration_hours / days_with_tasks if days_with_tasks > 0 else 0, 2
-    )
+    average_tasks_per_day = round(total_tasks / 7, 2)
+    average_duration_per_day = round(total_duration_hours / 7, 2)
 
     # Arena breakdown for weekly summary
     arena_map = {}
@@ -435,12 +431,8 @@ def get_monthly_productivity(
     days_with_tasks = sum(
         1 for day_tasks in tasks_by_date.values() if len(day_tasks) > 0
     )
-    average_tasks_per_day = round(
-        total_tasks / days_with_tasks if days_with_tasks > 0 else 0, 2
-    )
-    average_duration_per_day = round(
-        total_duration_hours / days_with_tasks if days_with_tasks > 0 else 0, 2
-    )
+    average_tasks_per_day = round(total_tasks / last_day_number, 2)
+    average_duration_per_day = round(total_duration_hours / last_day_number, 2)
 
     # Arena breakdown for summary
     arena_map = {}
