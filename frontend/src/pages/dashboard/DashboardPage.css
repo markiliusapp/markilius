@@ -341,6 +341,10 @@
         display: none;
     }
 
+    .dashboard-header .compact-toggle {
+        display: none;
+    }
+
     .panes {
         grid-template-columns: 1fr;
         gap: 16px;

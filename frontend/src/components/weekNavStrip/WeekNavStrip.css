@@ -31,9 +31,9 @@
 }
 
 .week-nav-strip-compact-icon {
+    display: none;
     position: absolute;
     left: 0;
-    display: flex;
     align-items: center;
     justify-content: center;
     width: 18px;
@@ -54,6 +54,12 @@
 
 .week-nav-strip-compact-icon.active {
     color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .week-nav-strip-compact-icon {
+        display: flex;
+    }
 }
 
 .week-nav-strip-today-icon {

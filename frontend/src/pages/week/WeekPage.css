@@ -308,6 +308,10 @@
         display: none;
     }
 
+    .week-header .compact-toggle {
+        display: none;
+    }
+
     .week-nav button {
         width: 32px;
         height: 32px;
