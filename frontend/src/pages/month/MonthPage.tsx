@@ -383,31 +383,6 @@ const MonthPage = () => {
                                 </div>
                             </div>
 
-                            <div className="summary-card">
-                                <div className="summary-card-icon" style={{ color: accentColor }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
-                                    </svg>
-                                </div>
-                                <div className="summary-card-content">
-                                    <span className="summary-card-value">{displayStats.busiest_day_tasks}</span>
-                                    <span className="summary-card-label">Busiest Day Tasks</span>
-                                </div>
-                            </div>
-
-                            <div className="summary-card">
-                                <div className="summary-card-icon" style={{ color: accentColor }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                </div>
-                                <div className="summary-card-content">
-                                    <span className="summary-card-value">{displayStats.perfect_days}</span>
-                                    <span className="summary-card-label">Perfect Days</span>
-                                </div>
-                            </div>
-
                             {/* Total Time */}
                             {(() => {
                                 const delta = prevTotalHours ? getDelta(displayStats.total_duration_hours, prevTotalHours) : null
@@ -480,6 +455,31 @@ const MonthPage = () => {
                                 </div>
                             </div>
 
+                            <div className="summary-card">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </div>
+                                <div className="summary-card-content">
+                                    <span className="summary-card-value">{displayStats.perfect_days}</span>
+                                    <span className="summary-card-label">Perfect Days</span>
+                                </div>
+                            </div>
+
+                            <div className="summary-card">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
+                                    </svg>
+                                </div>
+                                <div className="summary-card-content">
+                                    <span className="summary-card-value">{displayStats.busiest_day_tasks}</span>
+                                    <span className="summary-card-label">Busiest Day Tasks</span>
+                                </div>
+                            </div>
+
                             {displayStats.most_productive_day && (
                                 <div
                                     className="summary-card summary-card-highlight summary-card-clickable"
@@ -497,7 +497,7 @@ const MonthPage = () => {
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
-                                        <span className="summary-card-label">Most Productive</span>
+                                        <span className="summary-card-label">Best Day</span>
                                         <span className="summary-card-sub">{Math.round(displayStats.most_productive_day.completion_percentage)}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>

@@ -67,7 +67,7 @@
 }
 
 .heatmap-cell-clickable:hover {
-    border-color: var(--color-primary);
+    border-color: var(--hover-border-color, var(--color-primary));
     transform: scale(1.05);
 }
 

@@ -34,13 +34,13 @@ const PLANS = [
 ];
 
 const FEATURES = [
-    'Unlimited arenas',
+    'Up to 8 arenas',
     'Unlimited tasks',
     'Recurring tasks',
     'Productivity stats (daily, weekly, monthly, yearly)',
     'Heatmaps',
     'Consistency tracking',
-    'Weekly email summaries',
+    'Weekly & monthly email summaries',
     'Public profile',
 ];
 

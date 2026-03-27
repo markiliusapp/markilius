@@ -64,7 +64,10 @@ const Heatmap = ({ year, month, data, completion, selectedArenaId, onDayClick, s
     const displayCompletion = getMonthArenaCompletion();
 
     return (
-        <div className={`heatmap-container${showDates ? '' : ' heatmap-dates-hidden'}${showPercentage ? ' heatmap-pct-visible' : ''}`}>
+        <div
+            className={`heatmap-container${showDates ? '' : ' heatmap-dates-hidden'}${showPercentage ? ' heatmap-pct-visible' : ''}`}
+            style={selectedArena ? { '--hover-border-color': selectedArena.arena_color } as React.CSSProperties : undefined}
+        >
             <div className="heatmap-month-header">
                 <p className="month-completion">{Math.round(displayCompletion)|| 0}%</p>
                 <p className="heatmap-month-title">

@@ -517,7 +517,7 @@ const WeekPage = () => {
                                 </div>
                             </div>
 
-                            {/* Most Productive Day */}
+                            {/* Best Day */}
                             {displayStats.most_productive_day && (
                                 <div
                                     className="summary-card summary-card-highlight summary-card-clickable"
@@ -532,7 +532,7 @@ const WeekPage = () => {
                                         <span className="summary-card-value">
                                             {getDayName(displayStats.most_productive_day.date)}
                                         </span>
-                                        <span className="summary-card-label">Most Productive</span>
+                                        <span className="summary-card-label">Best Day</span>
                                         <span className="summary-card-sub">{displayStats.most_productive_day.completion_percentage}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
