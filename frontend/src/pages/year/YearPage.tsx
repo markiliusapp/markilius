@@ -554,22 +554,22 @@ const YearPage = () => {
                                             <IconSortDesc />
                                         </button>
                                         <div className="year-chart-control-divider" />
+                                        <button
+                                            className={`year-chart-icon-btn ${chartLayout === 'grouped' ? 'active' : ''}`}
+                                            onClick={() => setChartLayout('grouped')}
+                                            title="Grouped"
+                                        >
+                                            <IconGrouped />
+                                        </button>
+                                        <button
+                                            className={`year-chart-icon-btn ${chartLayout === 'stacked' ? 'active' : ''}`}
+                                            onClick={() => setChartLayout('stacked')}
+                                            title="Stacked"
+                                        >
+                                            <IconStacked />
+                                        </button>
                                     </>
                                 )}
-                                <button
-                                    className={`year-chart-icon-btn ${chartLayout === 'grouped' ? 'active' : ''}`}
-                                    onClick={() => setChartLayout('grouped')}
-                                    title="Grouped"
-                                >
-                                    <IconGrouped />
-                                </button>
-                                <button
-                                    className={`year-chart-icon-btn ${chartLayout === 'stacked' ? 'active' : ''}`}
-                                    onClick={() => setChartLayout('stacked')}
-                                    title="Stacked"
-                                >
-                                    <IconStacked />
-                                </button>
                             </div>
                         </div>
                     </div>

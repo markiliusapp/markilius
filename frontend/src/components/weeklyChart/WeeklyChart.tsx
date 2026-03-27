@@ -319,22 +319,22 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration, selectedArenaId }: Weekl
                                     <IconSortDesc />
                                 </button>
                                 <div className="weekly-chart-control-divider" />
+                                <button
+                                    className={`weekly-chart-icon-btn ${layout === 'grouped' ? 'active' : ''}`}
+                                    onClick={() => setLayout('grouped')}
+                                    title="Grouped"
+                                >
+                                    <IconGrouped />
+                                </button>
+                                <button
+                                    className={`weekly-chart-icon-btn ${layout === 'stacked' ? 'active' : ''}`}
+                                    onClick={() => setLayout('stacked')}
+                                    title="Stacked"
+                                >
+                                    <IconStacked />
+                                </button>
                             </>
                         )}
-                        <button
-                            className={`weekly-chart-icon-btn ${layout === 'grouped' ? 'active' : ''}`}
-                            onClick={() => setLayout('grouped')}
-                            title="Grouped"
-                        >
-                            <IconGrouped />
-                        </button>
-                        <button
-                            className={`weekly-chart-icon-btn ${layout === 'stacked' ? 'active' : ''}`}
-                            onClick={() => setLayout('stacked')}
-                            title="Stacked"
-                        >
-                            <IconStacked />
-                        </button>
                     </div>
                 </div>
             </div>

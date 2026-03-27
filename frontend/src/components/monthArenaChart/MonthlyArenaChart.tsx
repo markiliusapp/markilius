@@ -331,22 +331,22 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
                                     <IconSortDesc />
                                 </button>
                                 <div className="mac-control-divider" />
+                                <button
+                                    className={`mac-icon-btn ${layout === 'grouped' ? 'active' : ''}`}
+                                    onClick={() => setLayout('grouped')}
+                                    title="Grouped"
+                                >
+                                    <IconGrouped />
+                                </button>
+                                <button
+                                    className={`mac-icon-btn ${layout === 'stacked' ? 'active' : ''}`}
+                                    onClick={() => setLayout('stacked')}
+                                    title="Stacked"
+                                >
+                                    <IconStacked />
+                                </button>
                             </>
                         )}
-                        <button
-                            className={`mac-icon-btn ${layout === 'grouped' ? 'active' : ''}`}
-                            onClick={() => setLayout('grouped')}
-                            title="Grouped"
-                        >
-                            <IconGrouped />
-                        </button>
-                        <button
-                            className={`mac-icon-btn ${layout === 'stacked' ? 'active' : ''}`}
-                            onClick={() => setLayout('stacked')}
-                            title="Stacked"
-                        >
-                            <IconStacked />
-                        </button>
                     </div>
                 </div>
             </div>
