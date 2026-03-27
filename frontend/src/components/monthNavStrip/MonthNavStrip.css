@@ -1,0 +1,150 @@
+.month-nav-strip-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.month-nav-strip-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 6px;
+}
+
+.month-nav-strip-arrow {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.month-nav-strip-arrow:hover {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+}
+
+.month-nav-strip-cells {
+    display: flex;
+    gap: 2px;
+}
+
+.month-nav-strip-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 36px;
+    padding: 4px 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    position: relative;
+    user-select: none;
+}
+
+.month-nav-strip-cell:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.month-nav-strip-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.month-nav-strip-square {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.month-nav-strip-abbrev {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+/* Selected: always show labels, outline on square */
+.month-nav-strip-selected .month-nav-strip-label,
+.month-nav-strip-selected .month-nav-strip-abbrev {
+    opacity: 1;
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.month-nav-strip-selected .month-nav-strip-square {
+    outline: 2px solid var(--color-text);
+    outline-offset: 1px;
+}
+
+/* Reveal all labels on strip hover */
+.month-nav-strip-nav:hover .month-nav-strip-label,
+.month-nav-strip-nav:hover .month-nav-strip-abbrev {
+    opacity: 1;
+}
+
+/* This Month button */
+.month-nav-strip-this-month-btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.month-nav-strip-this-month-btn:hover {
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+}
+
+/* Tooltip */
+.month-nav-strip-cell[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background-color: var(--color-bg-elevated, var(--color-bg-muted));
+    color: var(--color-text);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 3px 7px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 20;
+}
+
+.month-nav-strip-cell[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

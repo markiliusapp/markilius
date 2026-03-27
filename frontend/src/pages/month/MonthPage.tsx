@@ -14,6 +14,7 @@ import MonthlyArenaChart from '@/components/monthArenaChart/MonthlyArenaChart';
 import ArenaBreakdown from '@/components/arenaBreakdown/ArenaBreakdown'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 import { useAuth } from '@/context/authContext'
+import MonthNavStrip from '@/components/monthNavStrip/MonthNavStrip'
 
 
 const MonthPage = () => {
@@ -220,18 +221,12 @@ const MonthPage = () => {
             <div className="month-page">
                 {/* Header */}
                 <div className="month-header">
-                    <div className="month-nav-wrapper">
-                        <div className="month-nav">
-                            <button onClick={handlePrevMonth} aria-label="Previous month">←</button>
-                            <span className="month-name">{getMonthName()}</span>
-                            <button onClick={handleNextMonth} aria-label="Next month">→</button>
-                        </div>
-                        {!isCurrentMonth && (
-                            <button className="today-btn" onClick={() => { setCurrentYear(new Date().getFullYear()); setCurrentMonth(new Date().getMonth() + 1); }}>
-                                This Month
-                            </button>
-                        )}
-                    </div>
+                        <MonthNavStrip
+                        currentYear={currentYear}
+                        currentMonth={currentMonth}
+                        onSelectMonth={(y, m) => { setCurrentYear(y); setCurrentMonth(m); }}
+                        selectedArenaId={selectedArenaId}
+                    />
                     <div className="header-actions">
                         <AddTaskButton onClick={() => setShowTaskInput(true)} />
                     </div>
