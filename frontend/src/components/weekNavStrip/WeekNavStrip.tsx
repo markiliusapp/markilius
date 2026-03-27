@@ -3,7 +3,7 @@ import './WeekNavStrip.css'
 import { useState, useEffect } from 'react'
 import { productivityAPI } from '@/services/api'
 import { getIntensityColor, hexToRgb } from '@/services/colorIntensity'
-import type { MonthlyProductivity } from '@/types'
+import type { DailyProductivityResponse } from '@/types'
 
 interface WeekNavStripProps {
     currentSunday: string
@@ -41,20 +41,34 @@ const getWeeksOfMonth = (year: number, month: number): string[] => {
 }
 
 const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey }: WeekNavStripProps) => {
-    const [monthData, setMonthData] = useState<MonthlyProductivity | null>(null)
+    const [allDayData, setAllDayData] = useState<DailyProductivityResponse[]>([])
 
     const [y, m] = currentSunday.split('-').map(Number)
     const thisWeekSunday = getSundayOfWeek(new Date().toLocaleDateString('en-CA'))
     const weeks = getWeeksOfMonth(y, m)
 
     useEffect(() => {
-        productivityAPI.getMonthly(y, m).then(setMonthData).catch(() => setMonthData(null))
+        // Collect all unique year-month combos touched by any day in any week of the strip
+        const monthSet = new Set<string>()
+        for (const sunday of weeks) {
+            for (let i = 0; i < 7; i++) {
+                const day = addDays(sunday, i)
+                const [dy, dm] = day.split('-').map(Number)
+                monthSet.add(`${dy}-${dm}`)
+            }
+        }
+        const fetches = Array.from(monthSet).map(ym => {
+            const [my, mm] = ym.split('-').map(Number)
+            return productivityAPI.getMonthly(my, mm)
+        })
+        Promise.all(fetches)
+            .then(results => setAllDayData(results.flatMap(r => r.daily_breakdown)))
+            .catch(() => setAllDayData([]))
     }, [y, m, refreshKey])
 
     const getWeekCompletion = (sunday: string): { pct: number; arenaRgb?: string } => {
-        if (!monthData) return { pct: 0 }
         const weekDays = Array.from({ length: 7 }, (_, i) => addDays(sunday, i))
-        const days = monthData.daily_breakdown.filter(d => weekDays.includes(d.date.toString()))
+        const days = allDayData.filter(d => weekDays.includes(d.date.toString()))
 
         if (selectedArenaId) {
             const arenaDays = days.map(d => d.arenas.find(a => a.arena_id === selectedArenaId)).filter(Boolean) as any[]
@@ -85,9 +99,9 @@ const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey
 
                 <div className="week-nav-strip-cells">
                     {weeks.map((sunday) => {
-                        const [, , sd] = sunday.split('-').map(Number)
+                        const [sy, sm, sd] = sunday.split('-').map(Number)
+                        const monthLabel = new Date(sy, sm - 1, sd).toLocaleDateString('en-US', { month: 'short' })
                         const isSelected = sunday === currentSunday
-                        const isThisWeek = sunday === thisWeekSunday
                         const { pct, arenaRgb } = getWeekCompletion(sunday)
                         const squareBg = pct === 0
                             ? 'var(--color-bg-subtle)'
@@ -97,11 +111,11 @@ const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey
                         return (
                             <div
                                 key={sunday}
-                                className={`week-nav-strip-cell${isSelected ? ' week-nav-strip-selected' : ''}${isThisWeek ? ' week-nav-strip-thisweek' : ''}`}
+                                className={`week-nav-strip-cell${isSelected ? ' week-nav-strip-selected' : ''}`}
                                 onClick={() => onSelectWeek(sunday)}
                                 {...(tooltipText ? { 'data-tooltip': tooltipText } : {})}
                             >
-                                <span className="week-nav-strip-label">W</span>
+                                <span className="week-nav-strip-label">{monthLabel}</span>
                                 <div className="week-nav-strip-square" style={{ backgroundColor: squareBg }} />
                                 <span className="week-nav-strip-date">{sd}</span>
                             </div>
