@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashBoardLayout';
 import { productivityAPI } from '@/services/api';
-import type { WeeklyProductivityResponse, TaskResponse } from '@/types';
+import type { WeeklyProductivityResponse, DailyBreakDownWithTasks, TaskResponse } from '@/types';
 import IndividualTask from '@/components/individualTask/IndividualTask';
 import './WeekPage.css';
 import { useNavigate } from 'react-router-dom';
@@ -106,7 +106,7 @@ const WeekPage = () => {
         return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    const getDayStats = (day: typeof weekData.daily_breakdown[0]) => {
+    const getDayStats = (day: DailyBreakDownWithTasks) => {
         if (selectedArenaId) {
             const arena = day.arenas.find(a => a.arena_id === selectedArenaId)
             if (!arena) return null
@@ -151,6 +151,7 @@ const WeekPage = () => {
         const lastWeek = getPrevSunday(thisWeek)
         if (currentSunday === thisWeek) return 'This Week'
         if (currentSunday === lastWeek) return 'Last Week'
+        if (!weekData) return ''
         return `${formatNavDate(weekData.start_date, { month: 'short', day: 'numeric' })} – ${formatNavDate(weekData.end_date, { month: 'short', day: 'numeric', year: 'numeric' })}`
     }
 
