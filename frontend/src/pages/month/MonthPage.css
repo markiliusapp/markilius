@@ -208,6 +208,19 @@
 
 
 /* Month Summary */
+.month-summary h2 {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+}
+
+.summary-arena-label {
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

@@ -145,6 +145,65 @@ const MonthPage = () => {
     const selectedArena = arenas.find(a => a.arena_id === selectedArenaId)
     const rgbColor = selectedArena ? hexToRgb(selectedArena.arena_color) : undefined
 
+    // Arena-aware summary stats
+    const summaryArena = monthData.summary.arenas.find(a => a.arena_id === selectedArenaId) ?? null
+    const accentColor = summaryArena?.arena_color ?? 'var(--color-primary)'
+
+    const displayStats = (() => {
+        if (summaryArena) {
+            const daysWithArena = monthData.daily_breakdown
+                .map(day => ({ date: day.date, arena: day.arenas.find(a => a.arena_id === selectedArenaId) }))
+                .filter((d): d is { date: string; arena: ArenaBreakdownType } => !!d.arena)
+
+            const daysWithTasks = daysWithArena.filter(d => d.arena.total_tasks > 0).length
+            const busiestDayTasks = daysWithArena.length > 0 ? Math.max(...daysWithArena.map(d => d.arena.total_tasks)) : 0
+            const perfectDays = daysWithArena.filter(d => Math.round(d.arena.completion_percentage) === 100).length
+            const avgTasksPerDay = daysWithTasks > 0 ? summaryArena.total_tasks / daysWithTasks : 0
+            const avgTimePerDay = daysWithTasks > 0 ? summaryArena.total_hours / daysWithTasks : 0
+            const mostProductiveDay = daysWithArena.reduce<{ date: string; completion_percentage: number; total_hours: number } | null>((best, d) => {
+                if (d.arena.total_tasks === 0) return best
+                if (!best || d.arena.completion_percentage > best.completion_percentage ||
+                    (d.arena.completion_percentage === best.completion_percentage && d.arena.total_hours > best.total_hours))
+                    return { date: d.date, completion_percentage: d.arena.completion_percentage, total_hours: d.arena.total_hours }
+                return best
+            }, null)
+
+            return {
+                completion_percentage: summaryArena.completion_percentage,
+                completed_tasks: summaryArena.completed_tasks,
+                total_tasks: summaryArena.total_tasks,
+                total_duration_hours: summaryArena.total_hours,
+                average_tasks_per_day: avgTasksPerDay,
+                average_duration_per_day: avgTimePerDay,
+                days_with_tasks: daysWithTasks,
+                busiest_day_tasks: busiestDayTasks,
+                perfect_days: perfectDays,
+                most_productive_day: mostProductiveDay,
+            }
+        }
+        return {
+            completion_percentage: monthData.summary.completion_percentage,
+            completed_tasks: monthData.summary.completed_tasks,
+            total_tasks: monthData.summary.total_tasks,
+            total_duration_hours: monthData.summary.total_duration_hours,
+            average_tasks_per_day: monthData.summary.average_tasks_per_day,
+            average_duration_per_day: monthData.summary.average_duration_per_day,
+            days_with_tasks: monthData.summary.days_with_tasks,
+            busiest_day_tasks: monthData.daily_breakdown.length > 0 ? Math.max(...monthData.daily_breakdown.map(d => d.total_tasks)) : 0,
+            perfect_days: monthData.daily_breakdown.filter(d => Math.round(d.completion_percentage) === 100).length,
+            most_productive_day: monthData.most_productive_day
+                ? { date: monthData.most_productive_day.date, completion_percentage: monthData.most_productive_day.completion_percentage, total_hours: monthData.most_productive_day.total_hours }
+                : null,
+        }
+    })()
+
+    const prevCompletionPct = selectedArenaId
+        ? prevMonthData?.summary.arenas.find(a => a.arena_id === selectedArenaId)?.completion_percentage ?? 0
+        : prevMonthData?.summary.completion_percentage ?? 0
+    const prevTotalHours = selectedArenaId
+        ? prevMonthData?.summary.arenas.find(a => a.arena_id === selectedArenaId)?.total_hours ?? 0
+        : prevMonthData?.summary.total_duration_hours ?? 0
+
     return (
         <DashboardLayout>
             <div className="month-page">
@@ -266,24 +325,25 @@ const MonthPage = () => {
 
                     {/* Section 4: Month Summary */}
                     <div className="month-summary">
-                        <h2>Month Summary</h2>
+                        <h2>
+                            Month Summary
+                            {summaryArena && <span className="summary-arena-label" style={{ color: accentColor }}> · {summaryArena.arena_name}</span>}
+                        </h2>
                         <div className="summary-grid">
 
                             {/* Completion Rate */}
                             {(() => {
-                                const delta = prevMonthData
-                                    ? getDelta(monthData.summary.completion_percentage, prevMonthData.summary.completion_percentage)
-                                    : null
+                                const delta = prevCompletionPct ? getDelta(displayStats.completion_percentage, prevCompletionPct) : null
                                 return (
                                     <div className="summary-card">
-                                        <div className="summary-card-icon">
+                                        <div className="summary-card-icon" style={{ color: accentColor }}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                                             </svg>
                                         </div>
                                         <div className="summary-card-content">
                                             <div className="summary-card-value-row">
-                                                <span className="summary-card-value">{Math.round(monthData.summary.completion_percentage)}%</span>
+                                                <span className="summary-card-value">{Math.round(displayStats.completion_percentage)}%</span>
                                                 {delta && (
                                                     <span
                                                         className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
@@ -302,54 +362,49 @@ const MonthPage = () => {
                             })()}
 
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M9 11l3 3L22 4" />
                                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{monthData.summary.completed_tasks}/{monthData.summary.total_tasks}</span>
+                                    <span className="summary-card-value">{displayStats.completed_tasks}/{displayStats.total_tasks}</span>
                                     <span className="summary-card-label">Tasks Completed</span>
                                 </div>
                             </div>
+
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">
-                                        {monthData.daily_breakdown.length > 0 ? Math.max(...monthData.daily_breakdown.map(d => d.total_tasks)) : 0}
-                                    </span>
+                                    <span className="summary-card-value">{displayStats.busiest_day_tasks}</span>
                                     <span className="summary-card-label">Busiest Day Tasks</span>
                                 </div>
                             </div>
 
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                         <polyline points="22 4 12 14.01 9 11.01" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">
-                                        {monthData.daily_breakdown.filter(d => Math.round(d.completion_percentage) === 100).length}
-                                    </span>
+                                    <span className="summary-card-value">{displayStats.perfect_days}</span>
                                     <span className="summary-card-label">Perfect Days</span>
                                 </div>
                             </div>
 
                             {/* Total Time */}
                             {(() => {
-                                const delta = prevMonthData
-                                    ? getDelta(monthData.summary.total_duration_hours, prevMonthData.summary.total_duration_hours)
-                                    : null
+                                const delta = prevTotalHours ? getDelta(displayStats.total_duration_hours, prevTotalHours) : null
                                 return (
                                     <div className="summary-card">
-                                        <div className="summary-card-icon">
+                                        <div className="summary-card-icon" style={{ color: accentColor }}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <circle cx="12" cy="12" r="10" />
                                                 <polyline points="12 6 12 12 16 14" />
@@ -357,7 +412,7 @@ const MonthPage = () => {
                                         </div>
                                         <div className="summary-card-content">
                                             <div className="summary-card-value-row">
-                                                <span className="summary-card-value">{monthData.summary.total_duration_hours.toFixed(1)}h</span>
+                                                <span className="summary-card-value">{displayStats.total_duration_hours.toFixed(1)}h</span>
                                                 {delta && (
                                                     <span
                                                         className={`summary-delta ${delta.positive ? 'positive' : 'negative'}`}
@@ -376,33 +431,33 @@ const MonthPage = () => {
                             })()}
 
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <line x1="12" y1="1" x2="12" y2="23" />
                                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{monthData.summary.average_tasks_per_day.toFixed(1)}</span>
+                                    <span className="summary-card-value">{displayStats.average_tasks_per_day.toFixed(1)}</span>
                                     <span className="summary-card-label">Avg Tasks/Day</span>
                                 </div>
                             </div>
 
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="12" cy="12" r="10" />
                                         <polyline points="12 6 12 12 16 14" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{monthData.summary.average_duration_per_day.toFixed(1)}h</span>
+                                    <span className="summary-card-value">{displayStats.average_duration_per_day.toFixed(1)}h</span>
                                     <span className="summary-card-label">Avg Time/Day</span>
                                 </div>
                             </div>
 
                             <div className="summary-card">
-                                <div className="summary-card-icon">
+                                <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                         <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
@@ -410,17 +465,17 @@ const MonthPage = () => {
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
-                                    <span className="summary-card-value">{monthData.summary.days_with_tasks}</span>
+                                    <span className="summary-card-value">{displayStats.days_with_tasks}</span>
                                     <span className="summary-card-label">Active Days</span>
                                 </div>
                             </div>
 
-                            {monthData.most_productive_day && (
+                            {displayStats.most_productive_day && (
                                 <div
                                     className="summary-card summary-card-highlight summary-card-clickable"
-                                    onClick={() => handleDayClick(monthData.most_productive_day!.date)}
+                                    onClick={() => handleDayClick(displayStats.most_productive_day!.date)}
                                 >
-                                    <div className="summary-card-icon">
+                                    <div className="summary-card-icon" style={{ color: accentColor }}>
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>
@@ -428,12 +483,12 @@ const MonthPage = () => {
                                     <div className="summary-card-content">
                                         <span className="summary-card-value">
                                             {(() => {
-                                                const [y, m, d] = monthData.most_productive_day.date.split('-').map(Number)
+                                                const [y, m, d] = displayStats.most_productive_day.date.split('-').map(Number)
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
                                         <span className="summary-card-label">Most Productive</span>
-                                        <span className="summary-card-sub">{Math.round(monthData.most_productive_day.completion_percentage)}% · {monthData.most_productive_day.total_hours.toFixed(1)}h</span>
+                                        <span className="summary-card-sub">{Math.round(displayStats.most_productive_day.completion_percentage)}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
                             )}
