@@ -519,7 +519,10 @@ const WeekPage = () => {
 
                             {/* Most Productive Day */}
                             {displayStats.most_productive_day && (
-                                <div className="summary-card summary-card-highlight">
+                                <div
+                                    className="summary-card summary-card-highlight summary-card-clickable"
+                                    onClick={() => navigate(`/dashboard?date=${displayStats.most_productive_day!.date}`)}
+                                >
                                     <div className="summary-card-icon" style={{ color: accentColor }}>
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -529,7 +532,8 @@ const WeekPage = () => {
                                         <span className="summary-card-value">
                                             {getDayName(displayStats.most_productive_day.date)}
                                         </span>
-                                        <span className="summary-card-label">Most Productive ({displayStats.most_productive_day.completion_percentage}%)</span>
+                                        <span className="summary-card-label">Most Productive</span>
+                                        <span className="summary-card-sub">{displayStats.most_productive_day.completion_percentage}% · {displayStats.most_productive_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
                             )}
