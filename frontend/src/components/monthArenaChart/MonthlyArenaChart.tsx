@@ -279,9 +279,9 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
     const chartData = baseChartData.map(p => ({ ...p, _yAnchor: yMax }))
 
     const weekCount = chartData.length
-    const barSize = layout === 'stacked'
-        ? Math.max(28, Math.min(80, Math.floor(280 / weekCount)))
-        : Math.max(40, Math.min(120, Math.floor(380 / weekCount)))
+    const barSize = visibleArenas.length <= 1 || layout === 'stacked'
+        ? Math.max(28, Math.min(60, Math.floor(260 / weekCount)))
+        : Math.max(36, Math.min(100, Math.floor(340 / weekCount)))
 
     const groupedShape = useMemo(
         () => makeGroupedShape(visibleArenas, yMax, effectiveSortOrder),
