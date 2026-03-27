@@ -48,7 +48,7 @@ def get_daily_productivity(
         .all()
     )
 
-    tasks = lock_overdue_tasks(tasks, db)
+    tasks = lock_overdue_tasks(tasks, db, current_user.timezone)
 
     total_tasks = len(tasks)
     completed_tasks = sum(1 for t in tasks if t.is_completed)
@@ -123,7 +123,7 @@ def get_weekly_productivity(
         .all()
     )
 
-    tasks = lock_overdue_tasks(tasks, db)
+    tasks = lock_overdue_tasks(tasks, db, current_user.timezone)
 
     # Group tasks by date
     tasks_by_date = {}
@@ -160,11 +160,16 @@ def get_weekly_productivity(
                         "total_tasks": 0,
                         "completed_tasks": 0,
                         "total_hours": 0.0,
+                        "active_hours": 0.0,
                     }
                 day_arena_map[arena_id]["total_tasks"] += 1
                 if task.is_completed:
                     day_arena_map[arena_id]["completed_tasks"] += 1
                     day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+                else:
+                    day_arena_map[arena_id]["active_hours"] += round(
                         (task.duration or 0) / 60, 2
                     )
 
@@ -231,6 +236,9 @@ def get_weekly_productivity(
     total_duration_hours = round(
         sum((t.duration or 0) for t in tasks if t.is_completed) / 60, 2
     )
+    active_hours = round(
+        sum((t.duration or 0) for t in tasks if not t.is_completed) / 60, 2
+    )
     days_with_tasks = sum(
         1 for day_tasks in tasks_by_date.values() if len(day_tasks) > 0
     )
@@ -276,6 +284,7 @@ def get_weekly_productivity(
         completed_tasks=completed_tasks,
         completion_percentage=completion_percentage,
         total_duration_hours=total_duration_hours,
+        active_hours=active_hours,
         average_tasks_per_day=average_tasks_per_day,
         average_duration_per_day=average_duration_per_day,
         days_with_tasks=days_with_tasks,
@@ -315,7 +324,7 @@ def get_monthly_productivity(
         .all()
     )
 
-    tasks = lock_overdue_tasks(tasks, db)
+    tasks = lock_overdue_tasks(tasks, db, current_user.timezone)
 
     # Group tasks by date
     tasks_by_date = {}
@@ -352,11 +361,16 @@ def get_monthly_productivity(
                         "total_tasks": 0,
                         "completed_tasks": 0,
                         "total_hours": 0.0,
+                        "active_hours": 0.0,
                     }
                 day_arena_map[arena_id]["total_tasks"] += 1
                 if task.is_completed:
                     day_arena_map[arena_id]["completed_tasks"] += 1
                     day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+                else:
+                    day_arena_map[arena_id]["active_hours"] += round(
                         (task.duration or 0) / 60, 2
                     )
 
@@ -501,7 +515,7 @@ def get_yearly_productivity(
         .all()
     )
 
-    tasks = lock_overdue_tasks(tasks, db)
+    tasks = lock_overdue_tasks(tasks, db, current_user.timezone)
 
     # Group tasks by date and month
     tasks_by_date = {}
@@ -539,11 +553,16 @@ def get_yearly_productivity(
                         "total_tasks": 0,
                         "completed_tasks": 0,
                         "total_hours": 0.0,
+                        "active_hours": 0.0,
                     }
                 day_arena_map[arena_id]["total_tasks"] += 1
                 if task.is_completed:
                     day_arena_map[arena_id]["completed_tasks"] += 1
                     day_arena_map[arena_id]["total_hours"] += round(
+                        (task.duration or 0) / 60, 2
+                    )
+                else:
+                    day_arena_map[arena_id]["active_hours"] += round(
                         (task.duration or 0) / 60, 2
                     )
 

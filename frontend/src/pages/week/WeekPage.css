@@ -16,6 +16,12 @@
     right: 0;
 }
 
+.week-nav-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .week-nav {
     display: flex;
     align-items: center;
@@ -296,6 +302,35 @@
 
     .week-header .header-actions {
         position: static;
+    }
+
+    .week-header .header-actions .add-task-btn {
+        display: none;
+    }
+
+    .week-nav button {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    .week-range {
+        font-size: 12px;
+        min-width: unset;
+        padding: 0 8px;
+    }
+
+    .today-btn {
+        height: 36px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .week-header .compact-toggle {
+        height: 36px;
+        width: 36px;
+        padding: 0;
+        justify-content: center;
     }
 
     .week-grid {

@@ -106,12 +106,32 @@ const WeekPage = () => {
         return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
     }
 
+    const getDayStats = (day: typeof weekData.daily_breakdown[0]) => {
+        if (selectedArenaId) {
+            const arena = day.arenas.find(a => a.arena_id === selectedArenaId)
+            if (!arena) return null
+            return {
+                completion_percentage: arena.completion_percentage,
+                completed_tasks: arena.completed_tasks,
+                total_tasks: arena.total_tasks,
+                color: arena.arena_color,
+            }
+        }
+        return {
+            completion_percentage: day.completion_percentage,
+            completed_tasks: day.completed_tasks,
+            total_tasks: day.total_tasks,
+            color: 'var(--color-primary)',
+        }
+    }
+
     const filterAndSort = (tasks: TaskResponse[]) => {
         if (selectedArenaId) return tasks.filter(t => t.arena?.id === selectedArenaId)
         return [...tasks].sort((a, b) => (a.arena?.name ?? '').localeCompare(b.arena?.name ?? ''))
     }
 
-    const getDayName = (dateStr: string) => {
+    const getDayName = (dateStr: string, useToday = false) => {
+        if (useToday && dateStr === new Date().toLocaleDateString('en-CA')) return 'Today'
         const [year, month, day] = dateStr.split('-').map(Number)
         const date = new Date(year, month - 1, day)
         return date.toLocaleDateString('en-US', { weekday: 'short' })
@@ -124,6 +144,14 @@ const WeekPage = () => {
     const formatNavDate = (dateStr: string, options: Intl.DateTimeFormatOptions) => {
         const [year, month, day] = dateStr.split('-').map(Number)
         return new Date(year, month - 1, day).toLocaleDateString('en-US', options)
+    }
+
+    const formatWeekLabel = (): string => {
+        const thisWeek = getSundayOfWeek(new Date())
+        const lastWeek = getPrevSunday(thisWeek)
+        if (currentSunday === thisWeek) return 'This Week'
+        if (currentSunday === lastWeek) return 'Last Week'
+        return `${formatNavDate(weekData.start_date, { month: 'short', day: 'numeric' })} – ${formatNavDate(weekData.end_date, { month: 'short', day: 'numeric', year: 'numeric' })}`
     }
 
     if (loading) {
@@ -152,12 +180,15 @@ const WeekPage = () => {
             <div className="week-page">
                 {/* Header */}
                 <div className="week-header">
-                    <div className="week-nav">
-                        <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
-                        <span className="week-range">
-                            {formatNavDate(weekData.start_date, { month: 'short', day: 'numeric' })} - {formatNavDate(weekData.end_date, { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                        <button onClick={handleNextWeek} aria-label="Next week">→</button>
+                    <div className="week-nav-wrapper">
+                        <div className="week-nav">
+                            <button onClick={handlePrevWeek} aria-label="Previous week">←</button>
+                            <span className="week-range">{formatWeekLabel()}</span>
+                            <button onClick={handleNextWeek} aria-label="Next week">→</button>
+                        </div>
+                        {currentSunday !== getSundayOfWeek(new Date()) && (
+                            <button className="today-btn" onClick={() => setCurrentSunday(getSundayOfWeek(new Date()))}>This Week</button>
+                        )}
                     </div>
                     <div className="header-actions">
                         <button className={`compact-toggle ${compact ? 'active' : ''}`} onClick={() => setCompact(v => { localStorage.setItem('taskCompact', String(!v)); return !v })} title={compact ? 'Expand' : 'Compact'}>
@@ -201,7 +232,12 @@ const WeekPage = () => {
                 {/* 7 Day Columns */}
                 <div className="week-grid-wrapper">
                     <div className="week-grid">
-                        {weekData.daily_breakdown.map((day) => (
+                        {weekData.daily_breakdown.map((day) => {
+                            const dayStats = getDayStats(day)
+                            const accentColor = dayStats?.color
+                                ?? weekData.summary.arenas.find(a => a.arena_id === selectedArenaId)?.arena_color
+                                ?? 'var(--color-primary)'
+                            return (
                             <div
                                 key={day.date}
                                 className={`day-column ${day.date === new Date().toLocaleDateString('en-CA') ? 'day-column-today' : ''}`}
@@ -209,21 +245,25 @@ const WeekPage = () => {
                                 {/* Day Header */}
                                 <div className="day-header" onClick={() => navigate(`/dashboard?date=${day.date}`)}>
                                     <div className="day-header-top">
-                                        <span className="day-name">{getDayName(day.date)}</span>
+                                        <span className="day-name">{getDayName(day.date, true)}</span>
                                         <span className="day-number">{getDayNumber(day.date)}</span>
                                     </div>
                                     <div className="day-stats-mini">
-                                        <span className="day-completion">{day.completion_percentage}%</span>
-                                        <span className="day-count">{day.completed_tasks}/{day.total_tasks}</span>
+                                        <span className="day-completion" style={{ color: accentColor }}>
+                                            {Math.round(dayStats?.completion_percentage ?? 0)}%
+                                        </span>
+                                        {dayStats && <span className="day-count">{dayStats.completed_tasks}/{dayStats.total_tasks}</span>}
                                     </div>
                                 </div>
 
                                 {/* Progress bar */}
                                 <div className="day-progress-bar">
-                                    <div
-                                        className="day-progress-fill"
-                                        style={{ width: `${day.completion_percentage}%` }}
-                                    />
+                                    {dayStats && (
+                                        <div
+                                            className="day-progress-fill"
+                                            style={{ width: `${dayStats.completion_percentage}%`, backgroundColor: accentColor }}
+                                        />
+                                    )}
                                 </div>
 
                                 {/* Tasks */}
@@ -293,7 +333,7 @@ const WeekPage = () => {
                                     )}
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </div>
                 <div className='week-stats-section'>
@@ -390,6 +430,7 @@ const WeekPage = () => {
                                     </div>
                                 )
                             })()}
+
 
                             {/* Avg Tasks/Day */}
                             <div className="summary-card">

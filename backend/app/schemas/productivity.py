@@ -61,6 +61,7 @@ class WeeklySummary(BaseModel):
     completed_tasks: int
     completion_percentage: float
     total_duration_hours: float
+    active_hours: float = 0.0
     average_tasks_per_day: float
     average_duration_per_day: float
     days_with_tasks: int

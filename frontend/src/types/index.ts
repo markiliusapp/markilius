@@ -99,6 +99,7 @@ export interface WeeklySummary {
     completed_tasks: number;
     completion_percentage: number;
     total_duration_hours: number;
+    active_hours: number;
     average_tasks_per_day: number;
     average_duration_per_day: number;
     days_with_tasks: number;
