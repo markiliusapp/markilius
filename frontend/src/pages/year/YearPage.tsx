@@ -641,13 +641,12 @@ const YearPage = () => {
                             <div className="overview-card overview-card-large">
                                 <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="9 12 11 14 15 10" />
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{displayStats.completion_percentage}%</span>
-                                    <span className="overview-card-label">Year Completion Rate</span>
+                                    <span className="overview-card-label">Completion Rate</span>
                                 </div>
                             </div>
 
@@ -658,7 +657,6 @@ const YearPage = () => {
                                         <line x1="16" y1="2" x2="16" y2="6" />
                                         <line x1="8" y1="2" x2="8" y2="6" />
                                         <line x1="3" y1="10" x2="21" y2="10" />
-                                        <polyline points="9 15 11 17 15 13" />
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
@@ -689,7 +687,7 @@ const YearPage = () => {
                                 </div>
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{displayStats.total_hours.toFixed(1)}h</span>
-                                    <span className="overview-card-label">Total Hours Spent</span>
+                                    <span className="overview-card-label">Total Time</span>
                                 </div>
                             </div>
 
@@ -711,14 +709,13 @@ const YearPage = () => {
                             <div className="overview-card">
                                 <div className="overview-card-icon" style={{ color: accentColor }}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <line x1="18" y1="20" x2="18" y2="10" />
-                                        <line x1="12" y1="20" x2="12" y2="4" />
-                                        <line x1="6" y1="20" x2="6" y2="14" />
+                                        <line x1="12" y1="1" x2="12" y2="23" />
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                     </svg>
                                 </div>
                                 <div className="overview-card-content">
                                     <span className="overview-card-value">{displayStats.avg_tasks_per_active_day.toFixed(1)}</span>
-                                    <span className="overview-card-label">Avg Tasks / Active Day</span>
+                                    <span className="overview-card-label">Avg Tasks/Day</span>
                                 </div>
                             </div>
 
@@ -735,7 +732,8 @@ const YearPage = () => {
                                     </div>
                                     <div className="overview-card-content">
                                         <span className="overview-card-value">{getMonthName(displayStats.best_month.month)}</span>
-                                        <span className="overview-card-label">Best Month · {displayStats.best_month.completion_percentage}% · {displayStats.best_month.subtitle}</span>
+                                        <span className="overview-card-label">Best Month</span>
+                                        <span className="summary-card-sub">{displayStats.best_month.completion_percentage}% · {displayStats.best_month.subtitle}</span>
                                     </div>
                                 </div>
                             )}
@@ -748,7 +746,9 @@ const YearPage = () => {
                                 >
                                     <div className="overview-card-icon" style={{ color: accentColor }}>
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                            <circle cx="12" cy="12" r="10" />
+                                            <circle cx="12" cy="12" r="6" />
+                                            <circle cx="12" cy="12" r="2" />
                                         </svg>
                                     </div>
                                     <div className="overview-card-content">
@@ -758,7 +758,8 @@ const YearPage = () => {
                                                 return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                             })()}
                                         </span>
-                                        <span className="overview-card-label">Best Day · {displayStats.best_day.completion_percentage}% · {displayStats.best_day.total_hours.toFixed(1)}h</span>
+                                        <span className="overview-card-label">Best Day</span>
+                                        <span className="summary-card-sub">{displayStats.best_day.completion_percentage}% · {displayStats.best_day.total_hours.toFixed(1)}h</span>
                                     </div>
                                 </div>
                             )}

@@ -455,8 +455,9 @@ const MonthPage = () => {
                             <div className="summary-card">
                                 <div className="summary-card-icon" style={{ color: accentColor }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
+                                        <path d="M5 22h14" /><path d="M5 2h14" />
+                                        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                                        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
                                     </svg>
                                 </div>
                                 <div className="summary-card-content">
