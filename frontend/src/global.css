@@ -137,8 +137,8 @@ input {
 
   .compact-toggle {
     height: 36px;
-    padding: 0 10px;
-    font-size: 13px;
+    width: 36px;
+    padding: 0;
   }
 }
 

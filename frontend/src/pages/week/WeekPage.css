@@ -326,12 +326,6 @@
         font-size: 12px;
     }
 
-    .week-header .compact-toggle {
-        height: 36px;
-        width: 36px;
-        padding: 0;
-        justify-content: center;
-    }
 
     .week-grid {
         grid-template-columns: repeat(7, minmax(300px, 1fr));
