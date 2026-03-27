@@ -288,6 +288,21 @@ input {
   gap: 8px;
 }
 
+.summary-card-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.summary-card-clickable {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.summary-card-clickable:hover {
+  opacity: 0.8;
+}
+
 .summary-delta {
   font-size: 11px;
   font-weight: 600;
