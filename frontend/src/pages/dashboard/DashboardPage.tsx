@@ -9,8 +9,6 @@ import type { DailyProductivityResponse } from '@/types';
 import { useSearchParams } from 'react-router-dom'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
-import type { StreakResponse } from '@/types';
-import Streaks from '@/components/streaks/Streaks'
 import ArenaFilter from '@/components/arenaFilter/ArenaFilter'
 
 const formatHours = (hours: number): string => {
@@ -41,7 +39,6 @@ const DashboardPage = () => {
     const [showTaskInput, setShowTaskInput] = useState(false)
     const [productivity, setProductivity] = useState<DailyProductivityResponse | null>(null)
     const [loading, setLoading] = useState(true)
-    const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [selectedArenaId, setSelectedArenaId] = useState<number | null>(null)
     const [compact, setCompact] = useState(() => localStorage.getItem('taskCompact') === 'true')
     const dateInputRef = useRef<HTMLInputElement>(null)
@@ -50,10 +47,6 @@ const DashboardPage = () => {
     useEffect(() => {
         fetchProductivity();
     }, [selectedDate, refreshKey]);
-
-    useEffect(() => {
-        fetchStreaks();
-    }, [refreshKey]);
 
     const fetchProductivity = async () => {
         setLoading(true)
@@ -64,15 +57,6 @@ const DashboardPage = () => {
             console.error('Failed to fetch productivity:', err);
         } finally {
             setLoading(false)
-        }
-    };
-
-    const fetchStreaks = async () => {
-        try {
-            const data = await productivityAPI.getStreaks();
-            setStreaks(data);
-        } catch (err) {
-            console.error('Failed to fetch streaks:', err);
         }
     };
 
@@ -243,8 +227,6 @@ const DashboardPage = () => {
                     </div>
                 ) : (
                     <div className='streaks-and-stats'>
-                        {/* Streaks */}
-                        {streaks && <Streaks streaks={streaks} />}
                         {productivity && (
                             <div className="stats-section">
                                 <h2>Arena Breakdown</h2>
