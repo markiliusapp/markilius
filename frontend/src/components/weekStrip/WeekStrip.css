@@ -55,7 +55,7 @@
     color: var(--color-primary);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .week-strip-compact-icon {
         display: flex;
         width: auto;

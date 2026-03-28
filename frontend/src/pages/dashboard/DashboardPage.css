@@ -5,15 +5,19 @@
 /* Header */
 .dashboard-header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    position: relative;
     margin-bottom: 24px;
 }
 
+.dashboard-header .week-strip-wrapper {
+    margin: 0 auto;
+}
+
 .dashboard-header .header-actions {
-    position: absolute;
-    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 /* Date navigation */
@@ -304,15 +308,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .dashboard-header {
-        justify-content: center;
-    }
-
-    .dashboard-header .header-actions {
-        position: static;
-    }
-
+@media (max-width: 900px) {
     .dashboard-header .header-actions .add-task-btn {
         display: none;
     }
