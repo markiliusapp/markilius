@@ -94,7 +94,39 @@ def upgrade_to_lifetime(
         raise HTTPException(status_code=500, detail="Lifetime plan not configured")
 
     try:
-        session = stripe.checkout.Session.create(
+        # Calculate prorated credit for the unused portion of the current subscription period.
+        # We create a one-time Stripe coupon and apply it to the checkout session so the user
+        # is only charged the difference, not the full lifetime price.
+        discounts = []
+        coupon_id = ""
+        if current_user.stripe_subscription_id:
+            sub = stripe.Subscription.retrieve(
+                current_user.stripe_subscription_id,
+                expand=["latest_invoice"],
+            )
+            if sub.get("status") in ("active", "past_due") and not sub.get("cancel_at_period_end"):
+                item = sub["items"]["data"][0]
+                period_start = item.get("current_period_start") or sub.get("current_period_start")
+                period_end = item.get("current_period_end") or sub.get("current_period_end")
+                if not period_start or not period_end:
+                    raise HTTPException(status_code=500, detail="Could not determine subscription period")
+                now_ts = datetime.now(tz=timezone.utc).timestamp()
+                remaining_ratio = max(0.0, (period_end - now_ts) / (period_end - period_start))
+                latest_invoice = sub.get("latest_invoice") or {}
+                amount_paid = latest_invoice.get("amount_paid", 0) if isinstance(latest_invoice, dict) else 0
+                credit_cents = int(amount_paid * remaining_ratio)
+                if credit_cents > 0:
+                    coupon = stripe.Coupon.create(
+                        amount_off=credit_cents,
+                        currency="usd",
+                        duration="once",
+                        max_redemptions=1,
+                        name="Proration credit",
+                    )
+                    coupon_id = coupon.id
+                    discounts = [{"coupon": coupon_id}]
+
+        session_params = dict(
             customer=current_user.stripe_customer_id,
             payment_method_types=["card"],
             line_items=[{"price": price_id, "quantity": 1}],
@@ -102,7 +134,12 @@ def upgrade_to_lifetime(
             client_reference_id=str(current_user.id),
             success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&upgrade=1",
             cancel_url=f"{get_frontend_url()}/dashboard/profile",
+            metadata={"coupon_id": coupon_id},
         )
+        if discounts:
+            session_params["discounts"] = discounts
+
+        session = stripe.checkout.Session.create(**session_params)
     except InvalidRequestError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -262,29 +299,27 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             User.stripe_subscription_id == subscription["id"]
         ).first()
         if user:
-            # past_due means all retries failed — keep data accessible in read-only
-            user.subscription_status = "read_only" if user.subscription_status == "past_due" else "inactive"
-            user.subscription_tier = None
+            # Always clear the stale subscription reference.
             user.stripe_subscription_id = None
             user.subscription_cancel_at = None
+            # Do not downgrade a lifetime user — this fires when their old yearly
+            # subscription expires after upgrading to lifetime.
+            if user.subscription_status != "lifetime":
+                # past_due means all retries failed — keep data accessible in read-only
+                user.subscription_status = "read_only" if user.subscription_status == "past_due" else "inactive"
+                user.subscription_tier = None
             db.commit()
 
     elif event["type"] == "checkout.session.expired":
-        # If a lifetime upgrade checkout expires, the subscription was NOT yet marked for
-        # cancellation (we defer that to checkout.session.completed), so no reversal needed.
-        # This handler is a safety net: if for any reason cancel_at_period_end was set
-        # before payment, reverse it so the user's subscription is restored cleanly.
         session = event["data"]["object"]
-        client_ref = session.get("client_reference_id")
-        if client_ref and session.get("mode") == "payment":
-            user = db.query(User).filter(User.id == int(client_ref)).first()
-            if user and user.stripe_subscription_id and user.subscription_status in ("active", "past_due"):
-                sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
-                if sub.get("cancel_at_period_end"):
-                    stripe.Subscription.modify(
-                        user.stripe_subscription_id,
-                        cancel_at_period_end=False,
-                    )
+        if session.get("mode") == "payment":
+            # Delete the unused proration coupon so it can't be redeemed later.
+            coupon_id = (session.get("metadata") or {}).get("coupon_id", "")
+            if coupon_id:
+                try:
+                    stripe.Coupon.delete(coupon_id)
+                except InvalidRequestError:
+                    pass  # already deleted or never created — safe to ignore
 
     return {"status": "ok"}
 

@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 import os
 import time
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
