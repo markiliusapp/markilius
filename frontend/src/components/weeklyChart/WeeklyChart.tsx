@@ -274,7 +274,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration, selectedArenaId }: Weekl
     const visibleMax = selectedArenaId
         ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
         : layout === 'grouped'
-            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)), averageDuration)
+            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)))
             : Math.max(...baseChartData.map(d => d.total), averageDuration)
 
     const ticks = Array.from({ length: Math.ceil(visibleMax) + 1 }, (_, i) => i)
@@ -365,7 +365,7 @@ const WeeklyChart = ({ dailyBreakdown, averageDuration, selectedArenaId }: Weekl
                             content={(props) => <CustomTooltip {...props} visibleArenas={visibleArenas} />}
                             cursor={false}
                         />
-                        {displayAverage > 0 && (
+                        {displayAverage > 0 && (layout === 'stacked' || !!selectedArenaId) && (
                             <ReferenceLine
                                 y={displayAverage}
                                 stroke="var(--color-text-muted)"

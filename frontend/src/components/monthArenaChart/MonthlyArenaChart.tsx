@@ -266,7 +266,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
     const visibleMax = selectedArenaId
         ? Math.max(...baseChartData.map(d => d[`arena_${selectedArenaId}`] || 0), displayAverage)
         : layout === 'grouped'
-            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)), displayAverage)
+            ? Math.max(...baseChartData.flatMap(d => allArenas.map(a => d[`arena_${a.arena_id}`] || 0)))
             : Math.max(...baseChartData.map(d => d.total), displayAverage)
 
     const tickCount = 3
@@ -377,7 +377,7 @@ const MonthlyArenaChart = ({ dailyBreakdown, year, month, selectedArenaId }: Mon
                             content={(props) => <CustomTooltip {...props} visibleArenas={visibleArenas} />}
                             cursor={false}
                         />
-                        {displayAverage > 0 && (
+                        {displayAverage > 0 && (layout === 'stacked' || !!selectedArenaId) && (
                             <ReferenceLine
                                 y={displayAverage}
                                 stroke="var(--color-text-muted)"
