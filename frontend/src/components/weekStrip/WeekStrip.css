@@ -58,6 +58,14 @@
 @media (max-width: 768px) {
     .week-strip-compact-icon {
         display: flex;
+        width: auto;
+        height: auto;
+    }
+
+    .week-strip-compact-icon svg,
+    .week-strip-today-icon svg {
+        width: 18px;
+        height: 18px;
     }
 }
 
