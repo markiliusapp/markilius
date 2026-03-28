@@ -189,7 +189,10 @@ async def upgrade_subscription(
     db.commit()
     db.refresh(current_user)
 
-    await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", plan)
+    try:
+        await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", plan)
+    except Exception as e:
+        logger.error("Failed to send plan switched email", extra={"email": current_user.email, "error": str(e)})
 
     return {"status": "ok", "tier": plan}
 
@@ -238,12 +241,15 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
         db.commit()
 
-        if was_active and mode == "payment":
-            # Upgrade from existing subscription to lifetime
-            await send_plan_switched_email(user.email, user.first_name, old_tier or "monthly", "lifetime")
-        else:
-            # Fresh purchase
-            await send_subscription_welcome_email(user.email, user.first_name, user.subscription_tier)
+        try:
+            if was_active and mode == "payment":
+                # Upgrade from existing subscription to lifetime
+                await send_plan_switched_email(user.email, user.first_name, old_tier or "monthly", "lifetime")
+            else:
+                # Fresh purchase
+                await send_subscription_welcome_email(user.email, user.first_name, user.subscription_tier)
+        except Exception as e:
+            logger.error("Failed to send post-checkout email", extra={"email": user.email, "error": str(e)})
 
     elif event["type"] == "invoice.paid":
         # Payment succeeded (covers both initial and retry after past_due)
@@ -266,7 +272,10 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                 datetime.fromtimestamp(next_attempt_ts, tz=timezone.utc).strftime("%B %d, %Y")
                 if next_attempt_ts else None
             )
-            await send_payment_failed_email(user.email, user.first_name, next_retry)
+            try:
+                await send_payment_failed_email(user.email, user.first_name, next_retry)
+            except Exception as e:
+                logger.error("Failed to send payment failed email", extra={"email": user.email, "error": str(e)})
 
     elif event["type"] == "customer.subscription.updated":
         subscription = event["data"]["object"]
@@ -280,9 +289,12 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             elif price_id == PRICE_IDS["monthly"]:
                 user.subscription_tier = "monthly"
             # Track scheduled cancellation (set or cleared by portal or upgrade flow).
-            # Note: newer Stripe API versions set cancel_at directly without setting
-            # cancel_at_period_end=True, so we check cancel_at alone.
+            # Prefer cancel_at (newer API); fall back to current_period_end when
+            # cancel_at_period_end is True but cancel_at is null (older API behaviour).
             cancel_at_ts = subscription.get("cancel_at")
+            if not cancel_at_ts and subscription.get("cancel_at_period_end"):
+                item = subscription["items"]["data"][0]
+                cancel_at_ts = item.get("current_period_end") or subscription.get("current_period_end")
             was_cancellation_new = cancel_at_ts and not user.subscription_cancel_at
             user.subscription_cancel_at = (
                 datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc) if cancel_at_ts else None
@@ -291,7 +303,10 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
             if was_cancellation_new:
                 access_ends = datetime.fromtimestamp(cancel_at_ts, tz=timezone.utc).strftime("%B %d, %Y")
-                await send_subscription_cancelled_email(user.email, user.first_name, access_ends)
+                try:
+                    await send_subscription_cancelled_email(user.email, user.first_name, access_ends)
+                except Exception as e:
+                    logger.error("Failed to send subscription cancelled email", extra={"email": user.email, "error": str(e)})
 
     elif event["type"] == "customer.subscription.deleted":
         subscription = event["data"]["object"]
@@ -320,6 +335,22 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                     stripe.Coupon.delete(coupon_id)
                 except InvalidRequestError:
                     pass  # already deleted or never created — safe to ignore
+
+            # If the user abandoned the upgrade checkout, reverse any cancel_at_period_end
+            # that may have been set on their existing subscription.
+            user_id = session.get("client_reference_id")
+            if user_id:
+                user = db.query(User).filter(User.id == int(user_id)).first()
+                if user and user.stripe_subscription_id:
+                    try:
+                        sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
+                        if sub.get("cancel_at_period_end"):
+                            stripe.Subscription.modify(
+                                user.stripe_subscription_id,
+                                cancel_at_period_end=False,
+                            )
+                    except InvalidRequestError:
+                        pass  # subscription no longer exists — nothing to reverse
 
     return {"status": "ok"}
 
@@ -361,10 +392,13 @@ async def verify_session(
     db.commit()
     db.refresh(current_user)
 
-    if was_active and mode == "payment":
-        await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", "lifetime")
-    elif was_inactive:
-        await send_subscription_welcome_email(current_user.email, current_user.first_name, current_user.subscription_tier)
+    try:
+        if was_active and mode == "payment":
+            await send_plan_switched_email(current_user.email, current_user.first_name, old_tier or "monthly", "lifetime")
+        elif was_inactive:
+            await send_subscription_welcome_email(current_user.email, current_user.first_name, current_user.subscription_tier)
+    except Exception as e:
+        logger.error("Failed to send post-verification email", extra={"email": current_user.email, "error": str(e)})
 
     return {"status": "ok"}
 
