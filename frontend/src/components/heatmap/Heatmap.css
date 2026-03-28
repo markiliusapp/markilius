@@ -25,6 +25,38 @@
     justify-self: start;
 }
 
+.heatmap-longest-streak {
+    position: relative;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--hover-border-color, var(--color-primary));
+    justify-self: end;
+    cursor: default;
+}
+
+.heatmap-longest-streak::after {
+    content: 'Longest streak this month';
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    background: var(--hover-border-color, var(--color-primary));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+    z-index: 20;
+}
+
+.heatmap-longest-streak:hover::after {
+    opacity: 1;
+}
+
 .heatmap-grid {
     display: flex;
     flex-direction: column;
@@ -52,6 +84,7 @@
 }
 
 .heatmap-cell {
+    position: relative;
     aspect-ratio: 1;
     border-radius: 5px;
     display: flex;
@@ -149,6 +182,95 @@
     color: #ffffff;
 }
 
+/* ================================
+   STREAK STYLING
+================================ */
+
+/* Checkmark shape */
+.heatmap-cell-slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 9px;
+    border-right: 2.5px solid;
+    border-bottom: 2.5px solid;
+    border-radius: 0;
+    transform: translate(-50%, -65%) rotate(45deg);
+    pointer-events: none;
+    transition: width 0.18s ease, height 0.18s ease, opacity 0.18s ease;
+}
+
+/* Streak day (100% complete) — white checkmark contrasts against any colored cell */
+.heatmap-cell-slash-streak {
+    border-color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="light"] .heatmap-cell-slash-streak {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Hide the date number inside streak cells */
+.heatmap-cell-in-streak .heatmap-cell-day {
+    opacity: 0;
+}
+
+/* Streak cells: all cells smoothly transition for hover */
+.heatmap-cell {
+    transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+}
+
+/* Tooltip: appears on hover of any streak cell */
+.heatmap-streak-tooltip {
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--hover-border-color, var(--color-primary));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+    z-index: 20;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.heatmap-cell-in-streak:hover .heatmap-streak-tooltip {
+    opacity: 1;
+}
+
+.heatmap-cell-in-streak:hover {
+    z-index: 5;
+}
+
+/* On hover: fade everything that isn't in the active streak */
+.heatmap-streak-hover-active .heatmap-cell:not(.heatmap-cell-streak-highlighted) {
+    opacity: 0.1;
+    filter: saturate(0.1) blur(0.3px);
+}
+
+/* Highlighted streak group: scale up, full vivid */
+.heatmap-streak-hover-active .heatmap-cell-streak-highlighted {
+    opacity: 1;
+    filter: none;
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+/* Checkmark on highlighted cells grows with the cell */
+.heatmap-streak-hover-active .heatmap-cell-streak-highlighted .heatmap-cell-slash-streak {
+    width: 7px;
+    height: 12px;
+    border-width: 3px;
+}
+
 /* Heatmap Legend */
 .heatmap-legend {
     display: flex;
@@ -243,5 +365,21 @@
     [data-theme="dark"] .heatmap-cell-has-tasks .heatmap-cell-percentage {
         color: #ffffff;
         text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Streak cells: keep day number hidden even when has-tasks would reveal it */
+    .heatmap-cell-in-streak .heatmap-cell-day {
+        opacity: 0 !important;
+        display: none;
+    }
+
+    /* Longest streak description tooltip — not useful on touch */
+    .heatmap-longest-streak::after {
+        display: none;
+    }
+
+    /* Streak count tooltip — show on tap via :active */
+    .heatmap-cell-in-streak:active .heatmap-streak-tooltip {
+        opacity: 1;
     }
 }

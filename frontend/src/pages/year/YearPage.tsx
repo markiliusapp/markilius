@@ -8,6 +8,7 @@ import './YearPage.css';
 import { useNavigate } from 'react-router-dom';
 import { HeatmapLegend } from '@/components/heatmapLegend/HeatmapLegend';
 import { hexToRgb } from '@/services/colorIntensity';
+import { getPrevStreakRunLength, getNextStreakRunLength } from '@/services/streakUtils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import AddTaskButton from '@/components/addTaskButton/AddTaskButton';
 import FloatingAddButton from '@/components/floatingAddButton/FloatingAddButton';
@@ -177,6 +178,8 @@ const YearPage = () => {
     const [compactView, setCompactView] = useState(false)
     const [showDates, setShowDates] = useState(true)
     const [showPercentage, setShowPercentage] = useState(false)
+    const [showStreaks, setShowStreaks] = useState(false)
+    const [hoveredStreakId, setHoveredStreakId] = useState<string | null>(null)
     const [streaks, setStreaks] = useState<StreakResponse | null>(null)
     const [chartLayout, setChartLayout] = useState<ChartLayout>('grouped')
     const [chartSortOrder, setChartSortOrder] = useState<ChartSortOrder>(null)
@@ -274,6 +277,33 @@ const YearPage = () => {
         const arena = monthSummary.arenas.find(a => a.arena_id === selectedArenaId);
         return arena?.completion_percentage ?? 0;
     };
+
+    const prevStreakRuns = useMemo(() => {
+        if (!yearData) return {} as Record<number, number>;
+        const runs: Record<number, number> = {};
+        for (let month = 1; month <= 12; month++) {
+            runs[month] = getPrevStreakRunLength(
+                yearData.daily_breakdown,
+                new Date(currentYear, month - 1, 1),
+                selectedArenaId,
+            );
+        }
+        return runs;
+    }, [yearData, selectedArenaId, currentYear]);
+
+    const nextStreakRuns = useMemo(() => {
+        if (!yearData) return {} as Record<number, number>;
+        const runs: Record<number, number> = {};
+        for (let month = 1; month <= 12; month++) {
+            const lastDay = new Date(currentYear, month, 0); // last day of month
+            runs[month] = getNextStreakRunLength(
+                yearData.daily_breakdown,
+                lastDay,
+                selectedArenaId,
+            );
+        }
+        return runs;
+    }, [yearData, selectedArenaId, currentYear]);
 
     const getArenas = (): ArenaBreakdownType[] => {
         if (!yearData) return []
@@ -470,13 +500,17 @@ const YearPage = () => {
                             </button>
                             {viewOpen && (
                                 <div className="share-dropdown view-dropdown">
-                                    <button className={`view-dropdown-row${compactView ? ' view-dropdown-row--disabled' : ''}`} onClick={() => !compactView && setShowDates(v => !v)}>
+                                    <button className={`view-dropdown-row${compactView || showPercentage ? ' view-dropdown-row--disabled' : ''}`} onClick={() => { if (!compactView && !showPercentage) setShowDates(v => !v); }}>
                                         <span>Day numbers</span>
-                                        {showDates && !compactView && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                                        {showDates && !compactView && !showPercentage && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                                     </button>
-                                    <button className={`view-dropdown-row${compactView ? ' view-dropdown-row--disabled' : ''}`} onClick={() => !compactView && setShowPercentage(v => !v)}>
+                                    <button className={`view-dropdown-row${compactView || showStreaks || showDates ? ' view-dropdown-row--disabled' : ''}`} onClick={() => { if (!compactView && !showStreaks && !showDates) setShowPercentage(v => !v); }}>
                                         <span>Completion %</span>
-                                        {showPercentage && !compactView && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                                        {showPercentage && !compactView && !showStreaks && !showDates && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                                    </button>
+                                    <button className={`view-dropdown-row${compactView ? ' view-dropdown-row--disabled' : ''}`} onClick={() => { if (!compactView) { setShowStreaks(v => !v); setShowPercentage(false); } }}>
+                                        <span>Streaks</span>
+                                        {showStreaks && !compactView && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                                     </button>
                                     <button className="view-dropdown-row" onClick={() => setCompactView(v => !v)}>
                                         <span>Compact view</span>
@@ -522,6 +556,11 @@ const YearPage = () => {
                                                 onDayClick={handleDayClick}
                                                 showDates={showDates}
                                                 showPercentage={showPercentage}
+                                                showStreaks={showStreaks}
+                                                prevStreakRunLength={showStreaks ? prevStreakRuns[month] : 0}
+                                                nextStreakRunLength={showStreaks ? nextStreakRuns[month] : 0}
+                                                activeStreakId={showStreaks ? hoveredStreakId : undefined}
+                                                onStreakHover={showStreaks ? setHoveredStreakId : undefined}
                                             />
                                         </div>
                                     ))}
