@@ -175,50 +175,46 @@ const DashboardPage = () => {
                         <div className="spinner-large" />
                         <p>Loading</p>
                     </div>
-                ) : (
-                    <div className='streaks-and-stats'>
-                        {productivity && (
-                            <div className="stats-section">
-                                <h2>Arena Breakdown</h2>
-                                <div className="stats-list">
-                                    {/* Overall row */}
-                                    <div className="stats-row">
-                                        <span className="stats-label">Overall</span>
-                                        <div className="stats-track">
-                                            <div
-                                                className="stats-fill"
-                                                style={{ width: `${productivity.completion_percentage}%`, backgroundColor: 'var(--color-text-muted)' }}
-                                            >
-                                                <span className="stats-fill-pct">{productivity.completion_percentage}%</span>
-                                            </div>
-                                        </div>
-                                        <div className="stats-meta">
-                                            <span className="stats-count">{productivity.completed_tasks}/{productivity.total_tasks}</span>
-                                            <span className="stats-hours">{productivity.total_hours.toFixed(1)}h</span>
-                                        </div>
+                ) : productivity && (
+                    <div className="stats-section">
+                        <h2>Arena Breakdown</h2>
+                        <div className="stats-list">
+                            {/* Overall row */}
+                            <div className="stats-row">
+                                <span className="stats-label">Overall</span>
+                                <div className="stats-track">
+                                    <div
+                                        className="stats-fill"
+                                        style={{ width: `${productivity.completion_percentage}%`, backgroundColor: 'var(--color-text-muted)' }}
+                                    >
+                                        <span className="stats-fill-pct">{productivity.completion_percentage}%</span>
                                     </div>
-
-                                    {/* Arena rows */}
-                                    {productivity.arenas.map(arena => (
-                                        <div key={arena.arena_id} className="stats-row">
-                                            <span className="stats-label">{arena.arena_name}</span>
-                                            <div className="stats-track">
-                                                <div
-                                                    className="stats-fill"
-                                                    style={{ width: `${arena.completion_percentage}%`, backgroundColor: arena.arena_color }}
-                                                >
-                                                    <span className="stats-fill-pct">{arena.completion_percentage}%</span>
-                                                </div>
-                                            </div>
-                                            <div className="stats-meta">
-                                                <span className="stats-count">{arena.completed_tasks}/{arena.total_tasks}</span>
-                                                <span className="stats-hours">{arena.total_hours.toFixed(1)}h</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                </div>
+                                <div className="stats-meta">
+                                    <span className="stats-count">{productivity.completed_tasks}/{productivity.total_tasks}</span>
+                                    <span className="stats-hours">{productivity.total_hours.toFixed(1)}h</span>
                                 </div>
                             </div>
-                        )}
+
+                            {/* Arena rows */}
+                            {productivity.arenas.map(arena => (
+                                <div key={arena.arena_id} className="stats-row">
+                                    <span className="stats-label">{arena.arena_name}</span>
+                                    <div className="stats-track">
+                                        <div
+                                            className="stats-fill"
+                                            style={{ width: `${arena.completion_percentage}%`, backgroundColor: arena.arena_color }}
+                                        >
+                                            <span className="stats-fill-pct">{arena.completion_percentage}%</span>
+                                        </div>
+                                    </div>
+                                    <div className="stats-meta">
+                                        <span className="stats-count">{arena.completed_tasks}/{arena.total_tasks}</span>
+                                        <span className="stats-hours">{arena.total_hours.toFixed(1)}h</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

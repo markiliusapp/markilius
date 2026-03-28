@@ -200,19 +200,6 @@
     background-color: rgba(249, 115, 22, 0.1);
 }
 
-/* Streaks + Stats row */
-.streaks-and-stats {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-}
-
-.streaks-wrapper,
-.stats-section {
-    flex: 1;
-    min-width: 0;
-}
-
 .stats-section h2 {
     font-size: 14px;
     font-weight: 600;
@@ -317,18 +304,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-    .streaks-and-stats {
-        flex-direction: column;
-    }
-}
-
 @media (max-width: 768px) {
-    .streaks-wrapper,
-    .stats-section {
-        width: 100%;
-    }
-
     .dashboard-header {
         justify-content: center;
     }
