@@ -256,8 +256,20 @@
 
 .year-heatmaps {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: .5rem;
+}
+
+@media (min-width: 1600px) {
+    .year-heatmaps {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .year-heatmaps {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
