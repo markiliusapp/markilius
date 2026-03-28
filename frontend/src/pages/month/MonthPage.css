@@ -19,6 +19,7 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    margin-left: 12px;
 }
 
 .month-nav-wrapper {
