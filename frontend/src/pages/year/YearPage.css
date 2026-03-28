@@ -5,15 +5,19 @@
 /* Header */
 .year-header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    position: relative;
     margin-bottom: 24px;
 }
 
+.year-header .year-nav {
+    margin: 0 auto;
+}
+
 .year-header .header-actions {
-    position: absolute;
-    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .view-toggle {
@@ -257,14 +261,6 @@
 }
 
 @media (max-width: 768px) {
-    .year-header {
-        justify-content: space-between;
-    }
-
-    .year-header .header-actions {
-        position: static;
-    }
-
     .year-heatmaps-scroll {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;

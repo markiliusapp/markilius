@@ -5,15 +5,19 @@
 /* Header */
 .week-header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    position: relative;
     margin-bottom: 24px;
 }
 
+.week-header .week-nav-strip-wrapper {
+    margin: 0 auto;
+}
+
 .week-header .header-actions {
-    position: absolute;
-    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .week-nav-wrapper {
@@ -295,15 +299,7 @@
     }
 }
 
-@media (max-width: 768px) {
-    .week-header {
-        justify-content: center;
-    }
-
-    .week-header .header-actions {
-        position: static;
-    }
-
+@media (max-width: 900px) {
     .week-header .header-actions .add-task-btn {
         display: none;
     }
