@@ -17,7 +17,7 @@ export interface LoginUser {
 export interface CreateTask {
     title: string;
     description?: string;
-    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
+    frequency?: 'once' | 'daily' | 'weekdays' | 'weekly_monday' | 'weekly_tuesday' | 'weekly_wednesday' | 'weekly_thursday' | 'weekly_friday' | 'weekly_saturday' | 'weekly_sunday' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     duration?: number;
     due_date: string;
     arena_id: number;
@@ -26,7 +26,7 @@ export interface CreateTask {
 export interface UpdateTask {
     title?: string;
     description?: string | null;
-    frequency?: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
+    frequency?: 'once' | 'daily' | 'weekdays' | 'weekly_monday' | 'weekly_tuesday' | 'weekly_wednesday' | 'weekly_thursday' | 'weekly_friday' | 'weekly_saturday' | 'weekly_sunday' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     duration?: number | null;
     due_date?: string;
     arena_id?: number;
@@ -73,7 +73,7 @@ export interface TaskResponse {
     user_id: number;
     title: string;
     description: string | null;
-    frequency: 'once' | 'daily' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
+    frequency: 'once' | 'daily' | 'weekdays' | 'weekly_monday' | 'weekly_tuesday' | 'weekly_wednesday' | 'weekly_thursday' | 'weekly_friday' | 'weekly_saturday' | 'weekly_sunday' | 'saturday' | 'sunday' | 'weekends' | 'monthly' | null;
     duration: number | null;
     created_at: string;
     due_date: string;
