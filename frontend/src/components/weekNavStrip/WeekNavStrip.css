@@ -28,6 +28,24 @@
     font-weight: 600;
     color: var(--color-text-secondary);
     white-space: nowrap;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+.week-nav-strip-month:hover {
+    color: var(--color-text);
+}
+
+.week-nav-strip-date-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .week-nav-strip-compact-icon {

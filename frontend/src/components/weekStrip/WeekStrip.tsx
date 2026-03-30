@@ -1,6 +1,6 @@
 // src/components/weekStrip/WeekStrip.tsx
 import './WeekStrip.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { productivityAPI } from '@/services/api'
 import { getIntensityColor, hexToRgb } from '@/services/colorIntensity'
 import type { WeeklyProductivityResponse } from '@/types'
@@ -32,6 +32,7 @@ const addDays = (dateStr: string, n: number): string => {
 
 const WeekStrip = ({ selectedDate, onSelectDate, selectedArenaId, refreshKey, compact, onToggleCompact }: WeekStripProps) => {
     const [weekData, setWeekData] = useState<WeeklyProductivityResponse | null>(null)
+    const dateInputRef = useRef<HTMLInputElement>(null)
 
     const today = new Date().toLocaleDateString('en-CA')
     const weekStart = getSundayOfWeek(selectedDate)
@@ -64,7 +65,20 @@ const WeekStrip = ({ selectedDate, onSelectDate, selectedArenaId, refreshKey, co
                             </svg>
                         </button>
                     )}
-                    <span className="week-strip-month">{weekLabel}</span>
+                    <button
+                        className="week-strip-month"
+                        onClick={() => dateInputRef.current?.showPicker()}
+                        title="Jump to date"
+                    >
+                        {weekLabel}
+                    </button>
+                    <input
+                        ref={dateInputRef}
+                        type="date"
+                        className="week-strip-date-input"
+                        value={selectedDate}
+                        onChange={e => e.target.value && onSelectDate(e.target.value)}
+                    />
                     {!isToday && (
                         <button
                             className="week-strip-today-icon"

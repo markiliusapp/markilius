@@ -1,6 +1,6 @@
 // src/components/weekNavStrip/WeekNavStrip.tsx
 import './WeekNavStrip.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { productivityAPI } from '@/services/api'
 import { getIntensityColor, hexToRgb } from '@/services/colorIntensity'
 import type { DailyProductivityResponse } from '@/types'
@@ -44,6 +44,7 @@ const getWeeksOfMonth = (year: number, month: number): string[] => {
 
 const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey, compact, onToggleCompact }: WeekNavStripProps) => {
     const [allDayData, setAllDayData] = useState<DailyProductivityResponse[]>([])
+    const dateInputRef = useRef<HTMLInputElement>(null)
 
     const [y, m] = currentSunday.split('-').map(Number)
     const thisWeekSunday = getSundayOfWeek(new Date().toLocaleDateString('en-CA'))
@@ -109,7 +110,20 @@ const WeekNavStrip = ({ currentSunday, onSelectWeek, selectedArenaId, refreshKey
                             </svg>
                         </button>
                     )}
-                    <span className="week-nav-strip-month">{monthLabel}</span>
+                    <button
+                        className="week-nav-strip-month"
+                        onClick={() => dateInputRef.current?.showPicker()}
+                        title="Jump to week"
+                    >
+                        {monthLabel}
+                    </button>
+                    <input
+                        ref={dateInputRef}
+                        type="date"
+                        className="week-nav-strip-date-input"
+                        value={currentSunday}
+                        onChange={e => e.target.value && onSelectWeek(getSundayOfWeek(e.target.value))}
+                    />
                     {currentSunday !== thisWeekSunday && (
                         <button
                             className="week-nav-strip-today-icon"
