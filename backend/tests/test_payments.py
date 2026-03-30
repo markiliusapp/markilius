@@ -226,6 +226,7 @@ def test_upgrade_cancels_existing_subscription(client, active_user, active_heade
     # cancel_at_period_end is now set in the webhook (checkout.session.completed),
     # not in the endpoint. The endpoint just creates a checkout session.
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
     mock_session_create = mocker.patch(
         "stripe.checkout.Session.create",
         return_value=MagicMock(url="https://checkout.stripe.com/upgrade"),
@@ -257,6 +258,7 @@ def test_upgrade_no_subscription_id_skips_cancel(client, db, active_user, active
 
 def test_upgrade_returns_checkout_url(client, active_headers, mocker):
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
     mocker.patch("stripe.Subscription.modify")
     mocker.patch(
         "stripe.checkout.Session.create",
@@ -278,6 +280,7 @@ def test_upgrade_to_lifetime_stripe_session_error(client, active_headers, mocker
     from stripe import InvalidRequestError
 
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
     mocker.patch(
         "stripe.checkout.Session.create",
         side_effect=InvalidRequestError("No such customer", "customer"),
