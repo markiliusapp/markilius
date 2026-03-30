@@ -12,6 +12,16 @@ interface TaskInputProps {
     onArenaChange?: () => void;
 }
 
+const WEEKLY_DAY_MAP: Record<string, string> = {
+    weekly_monday: "monday",
+    weekly_tuesday: "tuesday",
+    weekly_wednesday: "wednesday",
+    weekly_thursday: "thursday",
+    weekly_friday: "friday",
+    weekly_saturday: "saturday",
+    weekly_sunday: "sunday",
+}
+
 const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputProps) => {
     const editMode = !!task
     const [formData, setFormData] = useState<CreateTask>({
@@ -27,6 +37,9 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
 
     useDismissOnClick(() => setError(""), !!error)
 
+    const currentFreq = formData.frequency ?? "once"
+    const isWeekly = currentFreq.startsWith("weekly_")
+    const weeklyDay = isWeekly ? WEEKLY_DAY_MAP[currentFreq] ?? "monday" : "monday"
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -35,6 +48,21 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
         setFormData(prev => ({
             ...prev,
             [name]: value === "" ? undefined : type === "number" ? Number(value) : value,
+        }))
+    }
+
+    const handleFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value
+        setFormData(prev => ({
+            ...prev,
+            frequency: val === "weekly" ? "weekly_monday" : val as CreateTask["frequency"],
+        }))
+    }
+
+    const handleWeeklyDayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFormData(prev => ({
+            ...prev,
+            frequency: `weekly_${e.target.value}` as CreateTask["frequency"],
         }))
     }
 
@@ -120,12 +148,14 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
                             <select
                                 id="frequency"
                                 name="frequency"
-                                value={formData.frequency ?? "once"}
-                                onChange={handleChange}
+                                value={isWeekly ? "weekly" : currentFreq}
+                                onChange={handleFrequencyChange}
                                 disabled={editMode}
                             >
                                 <option value="once">Once</option>
                                 <option value="daily">Daily</option>
+                                <option value="weekdays">Weekdays</option>
+                                <option value="weekly">Weekly</option>
                                 <option value="saturday">Every Saturday</option>
                                 <option value="sunday">Every Sunday</option>
                                 <option value="weekends">Weekends</option>
@@ -137,6 +167,32 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
                                 </div>
                             )}
                         </div>
+                        {isWeekly && !editMode && (
+                            <div className="select-wrapper">
+                                <select value={weeklyDay} onChange={handleWeeklyDayChange}>
+                                    <option value="monday">Monday</option>
+                                    <option value="tuesday">Tuesday</option>
+                                    <option value="wednesday">Wednesday</option>
+                                    <option value="thursday">Thursday</option>
+                                    <option value="friday">Friday</option>
+                                    <option value="saturday">Saturday</option>
+                                    <option value="sunday">Sunday</option>
+                                </select>
+                            </div>
+                        )}
+                        {isWeekly && editMode && (
+                            <div className="select-wrapper select-wrapper-disabled">
+                                <select value={weeklyDay} disabled>
+                                    <option value="monday">Monday</option>
+                                    <option value="tuesday">Tuesday</option>
+                                    <option value="wednesday">Wednesday</option>
+                                    <option value="thursday">Thursday</option>
+                                    <option value="friday">Friday</option>
+                                    <option value="saturday">Saturday</option>
+                                    <option value="sunday">Sunday</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
 
                     <div className="form-group">

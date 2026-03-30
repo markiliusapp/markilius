@@ -15,6 +15,30 @@ def generate_due_dates(start_date: date, frequency: str) -> list[date]:
             dates.append(current)
             current += timedelta(days=1)
 
+    elif frequency == "weekdays":
+        while current <= end_date:
+            if current.weekday() < 5:  # Monday=0 through Friday=4
+                dates.append(current)
+            current += timedelta(days=1)
+
+    elif frequency.startswith("weekly_"):
+        day_map = {
+            "weekly_monday": 0,
+            "weekly_tuesday": 1,
+            "weekly_wednesday": 2,
+            "weekly_thursday": 3,
+            "weekly_friday": 4,
+            "weekly_saturday": 5,
+            "weekly_sunday": 6,
+        }
+        target_weekday = day_map.get(frequency)
+        if target_weekday is not None:
+            while current.weekday() != target_weekday:
+                current += timedelta(days=1)
+            while current <= end_date:
+                dates.append(current)
+                current += timedelta(weeks=1)
+
     elif frequency == "saturday":
         # Advance to first Saturday
         while current.weekday() != 5:
