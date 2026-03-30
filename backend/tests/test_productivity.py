@@ -300,6 +300,48 @@ def test_monthly_requires_auth(client):
     assert response.status_code == 403
 
 
+def test_monthly_invalid_month_too_high(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": 2026, "month": 13}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_monthly_invalid_month_zero(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": 2026, "month": 0}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_monthly_invalid_month_negative(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": 2026, "month": -1}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_monthly_invalid_year_too_low(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": 1999, "month": 1}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_monthly_invalid_year_too_high(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": 2101, "month": 1}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_monthly_invalid_year_negative(client, auth_headers):
+    response = client.get(
+        "/productivity/month", params={"year": -1, "month": 1}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
 # ---------------------------------------------------------------------------
 # GET /productivity/year
 # ---------------------------------------------------------------------------
@@ -371,6 +413,27 @@ def test_yearly_excludes_other_years(client, db, test_user, test_arena, auth_hea
 def test_yearly_requires_auth(client):
     response = client.get("/productivity/year", params={"year": 2025})
     assert response.status_code == 403
+
+
+def test_yearly_invalid_year_too_low(client, auth_headers):
+    response = client.get(
+        "/productivity/year", params={"year": 1999}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_yearly_invalid_year_too_high(client, auth_headers):
+    response = client.get(
+        "/productivity/year", params={"year": 2101}, headers=auth_headers
+    )
+    assert response.status_code == 422
+
+
+def test_yearly_invalid_year_negative(client, auth_headers):
+    response = client.get(
+        "/productivity/year", params={"year": -1}, headers=auth_headers
+    )
+    assert response.status_code == 422
 
 
 # ---------------------------------------------------------------------------

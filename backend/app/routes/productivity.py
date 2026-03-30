@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Annotated
 from app.schemas.productivity import (
     DailyProductivityResponse,
     MonthlyProductivityResponse,
@@ -24,7 +25,6 @@ from sqlalchemy import func
 from calendar import monthrange
 from app.services.locking_tasks import lock_overdue_tasks
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
-from fastapi import HTTPException, status
 
 
 router = APIRouter(prefix="/productivity", tags=["Productivity"])
@@ -298,8 +298,8 @@ def get_weekly_productivity(
 
 @router.get("/month", response_model=MonthlyProductivityResponse)
 def get_monthly_productivity(
-    year: int,
-    month: int,
+    year: Annotated[int, Query(ge=2000, le=2100)],
+    month: Annotated[int, Query(ge=1, le=12)],
     current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):
@@ -487,7 +487,7 @@ def get_monthly_productivity(
 
 @router.get("/year", response_model=YearlyProductivityResponse)
 def get_yearly_productivity(
-    year: int,
+    year: Annotated[int, Query(ge=2000, le=2100)],
     current_user: User = Depends(require_subscription),
     db: Session = Depends(get_db),
 ):

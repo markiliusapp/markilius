@@ -1,5 +1,5 @@
 from app.models.task import Task
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from enum import Enum
 from datetime import date, datetime
@@ -27,7 +27,7 @@ class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
     frequency: FrequencyType
-    duration: Optional[int] = None
+    duration: Optional[int] = Field(default=None, ge=0)
     due_date: date
     arena_id: int
 
@@ -61,7 +61,7 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     frequency: Optional[FrequencyType] = None
-    duration: Optional[int] = None
+    duration: Optional[int] = Field(default=None, ge=0)
     due_date: Optional[date] = None
     arena_id: Optional[int] = None
 

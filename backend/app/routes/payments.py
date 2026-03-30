@@ -71,6 +71,7 @@ def create_checkout_session(
         payment_method_types=["card"],
         line_items=[{"price": price_id, "quantity": 1}],
         mode=mode,
+        allow_promotion_codes=True,
         client_reference_id=str(current_user.id),
         success_url=f"{get_frontend_url()}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{get_frontend_url()}/pricing",
@@ -104,8 +105,9 @@ def upgrade_to_lifetime(
                 current_user.stripe_subscription_id,
                 expand=["latest_invoice"],
             )
-            if sub.get("status") in ("active", "past_due") and not sub.get("cancel_at_period_end"):
-                item = sub["items"]["data"][0]
+            items_data = sub.get("items", {}).get("data") or []
+            if sub.get("status") in ("active", "past_due") and not sub.get("cancel_at_period_end") and items_data:
+                item = items_data[0]
                 period_start = item.get("current_period_start") or sub.get("current_period_start")
                 period_end = item.get("current_period_end") or sub.get("current_period_end")
                 if not period_start or not period_end:
@@ -173,7 +175,10 @@ async def upgrade_subscription(
     except InvalidRequestError:
         raise HTTPException(status_code=400, detail="Subscription not found in Stripe")
 
-    item_id = sub["items"]["data"][0]["id"]
+    items_data = sub.get("items", {}).get("data") or []
+    if not items_data:
+        raise HTTPException(status_code=400, detail="Subscription has no items")
+    item_id = items_data[0]["id"]
 
     try:
         stripe.Subscription.modify(
@@ -233,11 +238,13 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             user.stripe_subscription_id = subscription_id
             if subscription_id:
                 sub = stripe.Subscription.retrieve(subscription_id)
-                price_id = sub["items"]["data"][0]["price"]["id"]
-                if price_id == PRICE_IDS["yearly"]:
-                    user.subscription_tier = "yearly"
-                else:
-                    user.subscription_tier = "monthly"
+                sub_items = sub.get("items", {}).get("data") or []
+                if sub_items:
+                    price_id = sub_items[0]["price"]["id"]
+                    if price_id == PRICE_IDS["yearly"]:
+                        user.subscription_tier = "yearly"
+                    else:
+                        user.subscription_tier = "monthly"
 
         db.commit()
 
@@ -245,8 +252,10 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             if was_active and mode == "payment":
                 # Upgrade from existing subscription to lifetime
                 await send_plan_switched_email(user.email, user.first_name, old_tier or "monthly", "lifetime")
-            else:
-                # Fresh purchase
+            elif not was_active:
+                # Fresh purchase — only send if verify-session hasn't already activated
+                # and sent the email (guards against duplicate emails in the race where
+                # the browser's verify-session call beats the webhook delivery).
                 await send_subscription_welcome_email(user.email, user.first_name, user.subscription_tier)
         except Exception as e:
             logger.error("Failed to send post-checkout email", extra={"email": user.email, "error": str(e)})
@@ -283,17 +292,19 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             User.stripe_subscription_id == subscription["id"]
         ).first()
         if user and user.subscription_status != "lifetime":
-            price_id = subscription["items"]["data"][0]["price"]["id"]
-            if price_id == PRICE_IDS["yearly"]:
-                user.subscription_tier = "yearly"
-            elif price_id == PRICE_IDS["monthly"]:
-                user.subscription_tier = "monthly"
+            sub_items = subscription.get("items", {}).get("data") or []
+            if sub_items:
+                price_id = sub_items[0]["price"]["id"]
+                if price_id == PRICE_IDS["yearly"]:
+                    user.subscription_tier = "yearly"
+                elif price_id == PRICE_IDS["monthly"]:
+                    user.subscription_tier = "monthly"
             # Track scheduled cancellation (set or cleared by portal or upgrade flow).
             # Prefer cancel_at (newer API); fall back to current_period_end when
             # cancel_at_period_end is True but cancel_at is null (older API behaviour).
             cancel_at_ts = subscription.get("cancel_at")
             if not cancel_at_ts and subscription.get("cancel_at_period_end"):
-                item = subscription["items"]["data"][0]
+                item = sub_items[0] if sub_items else {}
                 cancel_at_ts = item.get("current_period_end") or subscription.get("current_period_end")
             was_cancellation_new = cancel_at_ts and not user.subscription_cancel_at
             user.subscription_cancel_at = (
@@ -386,8 +397,10 @@ async def verify_session(
         current_user.stripe_subscription_id = subscription_id
         if subscription_id:
             sub = stripe.Subscription.retrieve(subscription_id)
-            price_id = sub["items"]["data"][0]["price"]["id"]
-            current_user.subscription_tier = "yearly" if price_id == PRICE_IDS["yearly"] else "monthly"
+            sub_items = sub.get("items", {}).get("data") or []
+            if sub_items:
+                price_id = sub_items[0]["price"]["id"]
+                current_user.subscription_tier = "yearly" if price_id == PRICE_IDS["yearly"] else "monthly"
 
     db.commit()
     db.refresh(current_user)

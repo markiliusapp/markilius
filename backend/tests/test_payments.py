@@ -226,7 +226,10 @@ def test_upgrade_cancels_existing_subscription(client, active_user, active_heade
     # cancel_at_period_end is now set in the webhook (checkout.session.completed),
     # not in the endpoint. The endpoint just creates a checkout session.
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
-    mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"status": "active", "cancel_at_period_end": True, "items": {"data": [{"id": "si_x"}]}},
+    )
     mock_session_create = mocker.patch(
         "stripe.checkout.Session.create",
         return_value=MagicMock(url="https://checkout.stripe.com/upgrade"),
@@ -258,7 +261,10 @@ def test_upgrade_no_subscription_id_skips_cancel(client, db, active_user, active
 
 def test_upgrade_returns_checkout_url(client, active_headers, mocker):
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
-    mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"status": "active", "cancel_at_period_end": True, "items": {"data": [{"id": "si_x"}]}},
+    )
     mocker.patch("stripe.Subscription.modify")
     mocker.patch(
         "stripe.checkout.Session.create",
@@ -281,6 +287,10 @@ def test_upgrade_to_lifetime_stripe_session_error(client, active_headers, mocker
 
     mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
     mocker.patch("stripe.Subscription.retrieve", return_value=MagicMock())
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"status": "active", "cancel_at_period_end": True, "items": {"data": [{"id": "si_x"}]}},
+    )
     mocker.patch(
         "stripe.checkout.Session.create",
         side_effect=InvalidRequestError("No such customer", "customer"),
@@ -993,3 +1003,331 @@ def test_upgrade_subscription_plan_not_configured(
     response = client.post(f"{UPGRADE_SUB_URL}?plan=yearly", headers=active_headers)
     assert response.status_code == 500
     assert "not configured" in response.json()["detail"]
+
+
+# ---------------------------------------------------------------------------
+# Webhook / verify-session race condition tests
+# ---------------------------------------------------------------------------
+
+
+def test_webhook_after_verify_session_no_duplicate_welcome_email(
+    client, db, active_user, mocker
+):
+    """
+    Race: verify-session already activated the subscription before the webhook
+    arrives. The webhook must NOT send a second welcome email.
+    """
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    # Simulate: verify-session already ran — user is now active with a subscription
+    active_user.subscription_status = "active"
+    active_user.subscription_tier = "monthly"
+    db.commit()
+
+    mock_welcome = mocker.patch("app.routes.payments.send_subscription_welcome_email")
+    mock_plan_switched = mocker.patch("app.routes.payments.send_plan_switched_email")
+
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"price": {"id": MOCK_PRICE_IDS["monthly"]}}]}},
+    )
+    event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {
+            "client_reference_id": str(active_user.id),
+            "mode": "subscription",
+            "subscription": active_user.stripe_subscription_id,
+        }},
+    }
+    response = _webhook(client, event, mocker)
+
+    assert response.status_code == 200
+    mock_welcome.assert_not_called()
+    mock_plan_switched.assert_not_called()
+
+
+def test_verify_session_after_webhook_no_duplicate_welcome_email(
+    client, db, free_user, free_headers, mocker
+):
+    """
+    Race: webhook already activated the subscription before verify-session is
+    called. verify-session must NOT send a second welcome email.
+    """
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    # Simulate: webhook already ran — user is now active
+    free_user.subscription_status = "active"
+    free_user.subscription_tier = "monthly"
+    free_user.stripe_subscription_id = "sub_already_set"
+    db.commit()
+
+    mock_welcome = mocker.patch("app.routes.payments.send_subscription_welcome_email")
+
+    mocker.patch(
+        "stripe.checkout.Session.retrieve",
+        return_value={
+            "client_reference_id": str(free_user.id),
+            "payment_status": "paid",
+            "mode": "subscription",
+            "subscription": "sub_already_set",
+        },
+    )
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"price": {"id": MOCK_PRICE_IDS["monthly"]}}]}},
+    )
+
+    response = client.post(f"{VERIFY_URL}?session_id=cs_test_race", headers=free_headers)
+
+    assert response.status_code == 200
+    mock_welcome.assert_not_called()
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"
+
+
+def test_webhook_first_activates_sends_welcome_email(client, db, free_user, mocker):
+    """
+    Normal path: webhook is first and user was inactive — welcome email must fire.
+    """
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mock_welcome = mocker.patch("app.routes.payments.send_subscription_welcome_email")
+
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"price": {"id": MOCK_PRICE_IDS["monthly"]}}]}},
+    )
+    event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {
+            "client_reference_id": str(free_user.id),
+            "mode": "subscription",
+            "subscription": "sub_new",
+        }},
+    }
+    response = _webhook(client, event, mocker)
+
+    assert response.status_code == 200
+    mock_welcome.assert_called_once()
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"
+
+
+# ---------------------------------------------------------------------------
+# Email delivery failures — subscription state must survive
+# ---------------------------------------------------------------------------
+
+
+def test_upgrade_subscription_email_failure_still_returns_200(
+    client, db, active_user, active_headers, mocker
+):
+    """Resend failure must not roll back a successful subscription upgrade."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"id": "si_item123"}]}},
+    )
+    mocker.patch("stripe.Subscription.modify")
+    mocker.patch(
+        "app.routes.payments.send_plan_switched_email",
+        side_effect=Exception("Resend down"),
+    )
+
+    response = client.post(f"{UPGRADE_SUB_URL}?plan=yearly", headers=active_headers)
+
+    assert response.status_code == 200
+    db.refresh(active_user)
+    assert active_user.subscription_tier == "yearly"
+
+
+def test_webhook_checkout_email_failure_still_returns_200(
+    client, db, free_user, mocker
+):
+    """Resend failure in webhook must not return 500 (would cause Stripe to retry)."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "app.routes.payments.send_subscription_welcome_email",
+        side_effect=Exception("Resend down"),
+    )
+    event = {
+        "type": "checkout.session.completed",
+        "data": {"object": {
+            "client_reference_id": str(free_user.id),
+            "mode": "subscription",
+            "subscription": "sub_new123",
+        }},
+    }
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"price": {"id": MOCK_PRICE_IDS["monthly"]}}]}},
+    )
+
+    response = _webhook(client, event, mocker)
+
+    assert response.status_code == 200
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"
+
+
+def test_webhook_payment_failed_email_failure_still_returns_200(
+    client, db, active_user, mocker
+):
+    """Resend failure on payment failed email must not return 500."""
+    mocker.patch(
+        "app.routes.payments.send_payment_failed_email",
+        side_effect=Exception("Resend down"),
+    )
+    event = {
+        "type": "invoice.payment_failed",
+        "data": {"object": {
+            "customer": active_user.stripe_customer_id,
+            "next_payment_attempt": None,
+        }},
+    }
+
+    response = _webhook(client, event, mocker)
+
+    assert response.status_code == 200
+    db.refresh(active_user)
+    assert active_user.subscription_status == "past_due"
+
+
+def test_verify_session_email_failure_still_returns_200(
+    client, db, free_user, free_headers, mocker
+):
+    """Resend failure in verify-session must not undo an already-committed subscription."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.checkout.Session.retrieve",
+        return_value={
+            "client_reference_id": str(free_user.id),
+            "payment_status": "paid",
+            "mode": "subscription",
+            "subscription": "sub_abc",
+        },
+    )
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": [{"price": {"id": MOCK_PRICE_IDS["monthly"]}}]}},
+    )
+    mocker.patch(
+        "app.routes.payments.send_subscription_welcome_email",
+        side_effect=Exception("Resend down"),
+    )
+
+    response = client.post(f"{VERIFY_URL}?session_id=cs_test_123", headers=free_headers)
+
+    assert response.status_code == 200
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"
+
+
+# ---------------------------------------------------------------------------
+# Empty subscription items guard tests
+# ---------------------------------------------------------------------------
+
+
+def test_webhook_subscription_updated_empty_items_does_not_crash(
+    client, db, active_user, mocker
+):
+    """customer.subscription.updated with empty items array must not raise IndexError."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.Webhook.construct_event",
+        return_value={
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": active_user.stripe_subscription_id,
+                    "items": {"data": []},
+                    "cancel_at": None,
+                    "cancel_at_period_end": False,
+                }
+            },
+        },
+    )
+
+    response = client.post(
+        WEBHOOK_URL,
+        content=b"{}",
+        headers={"stripe-signature": "sig"},
+    )
+
+    assert response.status_code == 200
+
+
+def test_webhook_checkout_completed_empty_items_does_not_crash(
+    client, db, free_user, mocker
+):
+    """checkout.session.completed subscription with empty items must not crash."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.Webhook.construct_event",
+        return_value={
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "client_reference_id": str(free_user.id),
+                    "mode": "subscription",
+                    "subscription": "sub_empty",
+                }
+            },
+        },
+    )
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": []}},
+    )
+    mocker.patch("app.routes.payments.send_subscription_welcome_email")
+
+    response = client.post(
+        WEBHOOK_URL,
+        content=b"{}",
+        headers={"stripe-signature": "sig"},
+    )
+
+    assert response.status_code == 200
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"
+
+
+def test_upgrade_subscription_empty_items_returns_400(
+    client, db, active_user, active_headers, mocker
+):
+    """upgrade-subscription must return 400 if Stripe returns subscription with no items."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": []}},
+    )
+
+    response = client.post(
+        "/payments/upgrade-subscription?plan=yearly", headers=active_headers
+    )
+
+    assert response.status_code == 400
+    assert "no items" in response.json()["detail"].lower()
+
+
+def test_verify_session_empty_items_does_not_crash(
+    client, db, free_user, free_headers, mocker
+):
+    """verify-session with empty subscription items must not raise IndexError."""
+    mocker.patch.dict("app.routes.payments.PRICE_IDS", MOCK_PRICE_IDS)
+    mocker.patch(
+        "stripe.checkout.Session.retrieve",
+        return_value={
+            "client_reference_id": str(free_user.id),
+            "payment_status": "paid",
+            "mode": "subscription",
+            "subscription": "sub_empty",
+        },
+    )
+    mocker.patch(
+        "stripe.Subscription.retrieve",
+        return_value={"items": {"data": []}},
+    )
+    mocker.patch("app.routes.payments.send_subscription_welcome_email")
+
+    response = client.post(f"{VERIFY_URL}?session_id=cs_test_empty", headers=free_headers)
+
+    assert response.status_code == 200
+    db.refresh(free_user)
+    assert free_user.subscription_status == "active"

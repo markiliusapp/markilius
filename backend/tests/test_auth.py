@@ -727,3 +727,64 @@ def test_delete_account_stripe_error_proceeds_with_deletion(
     # Should still delete the account despite Stripe error
     assert response.status_code == 204
     assert db.query(User).filter(User.id == test_user.id).first() is None
+
+
+# ---------------------------------------------------------------------------
+# Email delivery failures — rollback behaviour
+# ---------------------------------------------------------------------------
+
+
+def test_register_email_failure_returns_503_and_no_user_created(client, db, mocker):
+    mocker.patch(
+        "app.routes.auth.send_verification_email",
+        side_effect=Exception("Resend down"),
+    )
+    response = client.post(REGISTER_URL, json=VALID_USER)
+    assert response.status_code == 503
+
+    from app.models.user import User
+    user = db.query(User).filter(User.email == VALID_USER["email"]).first()
+    assert user is None
+
+
+def test_forgot_password_email_failure_returns_503_and_no_token_stored(
+    client, db, test_user, mocker
+):
+    mocker.patch(
+        "app.routes.auth.send_password_reset_email",
+        side_effect=Exception("Resend down"),
+    )
+    response = client.post(FORGOT_PASSWORD_URL, json={"email": test_user.email})
+    assert response.status_code == 503
+
+    db.refresh(test_user)
+    assert test_user.reset_token is None
+
+
+def test_resend_verification_email_failure_returns_503_and_old_token_preserved(
+    client, db, mocker
+):
+    from app.models.user import User
+    from app.utils.auth import hash_password
+
+    unverified = User(
+        first_name="Un",
+        last_name="Verified",
+        email="resend_fail@example.com",
+        hashed_password=hash_password("pass"),
+        is_verified=False,
+        verification_token="oldtoken",
+        verification_token_expires=datetime(2026, 3, 18, 0, 0, 0),
+    )
+    db.add(unverified)
+    db.commit()
+
+    mocker.patch(
+        "app.routes.auth.send_verification_email",
+        side_effect=Exception("Resend down"),
+    )
+    response = client.post(RESEND_VERIFICATION_URL, json={"email": "resend_fail@example.com"})
+    assert response.status_code == 503
+
+    db.refresh(unverified)
+    assert unverified.verification_token == "oldtoken"
