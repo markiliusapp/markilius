@@ -4,7 +4,9 @@ import calendar
 
 def generate_due_dates(start_date: date, frequency: str) -> list[date]:
     dates = []
-    end_date = date(start_date.year + 1, start_date.month, start_date.day)
+    end_year = start_date.year + 1
+    end_max_day = calendar.monthrange(end_year, start_date.month)[1]
+    end_date = date(end_year, start_date.month, min(start_date.day, end_max_day))
     current = start_date
 
     if frequency == "once":

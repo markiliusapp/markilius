@@ -1,11 +1,14 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
+import pytz
 
 from app.models.arena import Arena
 from app.models.task import Task
 from app.models.user import User
 from app.utils.auth import hash_password, create_access_token
+from app.services.frequency_management import generate_due_dates
+from app.services.locking_tasks import lock_overdue_tasks
 
 TASKS_URL = "/tasks/"
 
@@ -41,6 +44,155 @@ def make_task(db, user_id: int, arena_id: int, **kwargs) -> Task:
     db.commit()
     db.refresh(task)
     return task
+
+
+# ---------------------------------------------------------------------------
+# generate_due_dates unit tests
+# ---------------------------------------------------------------------------
+
+
+def test_generate_due_dates_monthly_end_of_month_anchor():
+    """Jan 31 should produce Jan 31, Feb 28, Mar 31 — not Mar 28."""
+    dates = generate_due_dates(date(2026, 1, 31), "monthly")
+    assert dates[0] == date(2026, 1, 31)
+    assert dates[1] == date(2026, 2, 28)
+    assert dates[2] == date(2026, 3, 31)
+    assert dates[3] == date(2026, 4, 30)
+
+
+def test_generate_due_dates_leap_year_no_crash():
+    """Feb 29 (leap year) start must not raise ValueError for end_date."""
+    dates = generate_due_dates(date(2024, 2, 29), "monthly")
+    assert dates[0] == date(2024, 2, 29)
+    assert len(dates) > 0
+
+
+def test_generate_due_dates_leap_year_daily_no_crash():
+    """Feb 29 (leap year) daily must not raise ValueError for end_date."""
+    dates = generate_due_dates(date(2024, 2, 29), "daily")
+    assert dates[0] == date(2024, 2, 29)
+    assert dates[-1] == date(2025, 2, 28)
+
+
+# ---------------------------------------------------------------------------
+# lock_overdue_tasks timezone unit tests
+# ---------------------------------------------------------------------------
+
+
+def _make_unlocked_task(db, due_date: date) -> Task:
+    """Create a minimal unlocked task directly in the DB (no user/arena needed)."""
+    task = Task(
+        user_id=0,
+        arena_id=0,
+        title="tz test task",
+        frequency="once",
+        due_date=due_date,
+        is_completed=False,
+        is_locked=False,
+    )
+    db.add(task)
+    db.flush()  # get an id without committing
+    return task
+
+
+def _mock_now(fixed_utc: datetime):
+    """
+    Return a side_effect function for patching datetime.now that converts the
+    fixed UTC instant into whatever timezone is passed, matching production
+    behaviour of datetime.now(tz).
+    """
+    def _now(tz=None):
+        if tz is not None:
+            return fixed_utc.astimezone(tz)
+        return fixed_utc
+    return _now
+
+
+def test_lock_task_due_yesterday_is_locked(db, mocker):
+    """A task due yesterday (in any timezone) must be locked."""
+    # Fix "now" to 2026-03-15 12:00 UTC — unambiguous in every timezone
+    fixed_utc = datetime(2026, 3, 15, 12, 0, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    task = _make_unlocked_task(db, date(2026, 3, 14))
+    lock_overdue_tasks([task], db, "UTC")
+
+    assert task.is_locked is True
+
+
+def test_lock_task_due_today_is_not_locked(db, mocker):
+    """A task due today (same date as 'now') must never be locked."""
+    fixed_utc = datetime(2026, 3, 15, 12, 0, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    task = _make_unlocked_task(db, date(2026, 3, 15))
+    lock_overdue_tasks([task], db, "UTC")
+
+    assert task.is_locked is False
+
+
+def test_lock_uses_local_date_not_utc_for_western_timezone(db, mocker):
+    """
+    UTC has crossed midnight into March 15, but it is still March 14 in
+    America/Los_Angeles (UTC-7 in winter). A task due March 14 must NOT be
+    locked yet — locking on UTC date would be wrong.
+    """
+    # 2026-03-15 03:00 UTC = 2026-03-14 20:00 America/Los_Angeles (UTC-7, pre-DST)
+    fixed_utc = datetime(2026, 3, 15, 3, 0, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    task = _make_unlocked_task(db, date(2026, 3, 14))
+    lock_overdue_tasks([task], db, "America/Los_Angeles")
+
+    assert task.is_locked is False
+
+
+def test_lock_uses_local_date_for_eastern_timezone(db, mocker):
+    """
+    UTC is still March 14, but it is already March 15 in Asia/Tokyo (UTC+9).
+    A task due March 14 MUST be locked.
+    """
+    # 2026-03-14 16:00 UTC = 2026-03-15 01:00 Asia/Tokyo
+    fixed_utc = datetime(2026, 3, 14, 16, 0, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    task = _make_unlocked_task(db, date(2026, 3, 14))
+    lock_overdue_tasks([task], db, "Asia/Tokyo")
+
+    assert task.is_locked is True
+
+
+def test_lock_dst_spring_forward_boundary(db, mocker):
+    """
+    DST spring-forward in America/New_York: 2026-03-08 02:00 → 03:00 (UTC-5 → UTC-4).
+    At UTC 2026-03-09 04:30, NYC local time is 2026-03-09 00:30 (UTC-4).
+    A task due 2026-03-08 must be locked; a task due 2026-03-09 must not be.
+    """
+    # 2026-03-09 04:30 UTC = 2026-03-09 00:30 EDT (UTC-4, after DST)
+    fixed_utc = datetime(2026, 3, 9, 4, 30, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    overdue = _make_unlocked_task(db, date(2026, 3, 8))
+    due_today = _make_unlocked_task(db, date(2026, 3, 9))
+    lock_overdue_tasks([overdue, due_today], db, "America/New_York")
+
+    assert overdue.is_locked is True
+    assert due_today.is_locked is False
+
+
+def test_lock_invalid_timezone_falls_back_to_utc(db, mocker):
+    """
+    An unrecognised timezone string must fall back to UTC without crashing,
+    and locking must still work correctly using UTC as the reference date.
+    """
+    # 2026-03-15 12:00 UTC — task due yesterday should be locked
+    fixed_utc = datetime(2026, 3, 15, 12, 0, 0, tzinfo=timezone.utc)
+    mocker.patch("app.services.locking_tasks.datetime").now.side_effect = _mock_now(fixed_utc)
+
+    task = _make_unlocked_task(db, date(2026, 3, 14))
+    lock_overdue_tasks([task], db, "Not/A_Timezone")
+
+    assert task.is_locked is True
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +278,42 @@ def test_create_task_archived_arena_rejected(
         headers=auth_headers,
     )
     assert response.status_code == 409
+
+
+def test_create_task_negative_duration_rejected(client, test_user, test_arena, auth_headers):
+    response = client.post(
+        TASKS_URL,
+        json={
+            "title": "Bad duration",
+            "frequency": "once",
+            "due_date": str(TOMORROW),
+            "arena_id": test_arena.id,
+            "duration": -30,
+        },
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
+
+
+def test_update_task_negative_duration_rejected(client, db, test_user, test_arena, auth_headers):
+    task = client.post(
+        TASKS_URL,
+        json={
+            "title": "Valid task",
+            "frequency": "once",
+            "due_date": str(TOMORROW),
+            "arena_id": test_arena.id,
+            "duration": 30,
+        },
+        headers=auth_headers,
+    ).json()
+
+    response = client.put(
+        f"{TASKS_URL}{task['id']}",
+        json={"duration": -10},
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
 
 
 def test_create_task_requires_auth(client, test_arena):

@@ -32,8 +32,9 @@ async def send_weekly_summaries():
 
             now_local = datetime.now(tz)
 
-            # Only fire on Sunday (weekday=6) between 8:00 and 8:59 AM local time
-            if now_local.weekday() != 6 or now_local.hour != 8:
+            # Only fire on Sunday — any hour. The last_weekly_email_sent guard below
+            # prevents double-sending if the scheduler runs more than once on the same day.
+            if now_local.weekday() != 6:
                 continue
 
             # Skip if we already sent an email today
@@ -137,8 +138,9 @@ async def send_monthly_summaries():
 
             now_local = datetime.now(tz)
 
-            # Only fire on the 1st of the month between 8:00 and 8:59 AM local time
-            if now_local.day != 1 or now_local.hour != 8:
+            # Only fire on the 1st of the month — any hour. The last_monthly_email_sent
+            # guard below prevents double-sending within the same calendar month.
+            if now_local.day != 1:
                 continue
 
             # Skip if we already sent an email this month

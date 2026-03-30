@@ -75,6 +75,17 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
 
     verification_token = secrets.token_urlsafe(32)
 
+    # Send email before writing to DB — if delivery fails, nothing is persisted
+    # and the user can retry registration cleanly.
+    try:
+        await send_verification_email(user_input.email, verification_token)
+    except Exception as e:
+        logger.error("Failed to send verification email", extra={"email": user_input.email, "error": str(e)})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to send verification email. Please try again.",
+        )
+
     new_user = User(
         first_name=user_input.first_name,
         last_name=user_input.last_name,
@@ -98,11 +109,6 @@ async def register(user_input: UserCreate, db: Session = Depends(get_db)):
             )
         )
     db.commit()
-
-    try:
-        await send_verification_email(new_user.email, verification_token)
-    except Exception as e:
-        logger.error("Failed to send verification email", extra={"email": new_user.email, "error": str(e)})
 
     return {
         "message": "Account created. Please check your email to verify your account."
@@ -284,17 +290,22 @@ async def forgot_password(
     # Generate reset token (32 random bytes)
     reset_token = secrets.token_urlsafe(32)
 
+    # Send email before writing to DB — if delivery fails, no stale token is stored.
+    try:
+        await send_password_reset_email(user.email, reset_token)
+    except Exception as e:
+        logger.error("Failed to send password reset email", extra={"email": user.email, "error": str(e)})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to send reset email. Please try again.",
+        )
+
     # Token expires in 5 minutes
     user.reset_token = reset_token
     user.reset_token_expires = datetime.now(timezone.utc) + timedelta(
         minutes=5
     )
-
     db.commit()
-    try:
-        await send_password_reset_email(user.email, reset_token)
-    except Exception as e:
-        logger.error("Failed to send password reset email", extra={"email": user.email, "error": str(e)})
 
     return {"message": "If that email exists, a reset link has been sent"}
 
@@ -388,16 +399,22 @@ async def resend_verification(
         }
 
     verification_token = secrets.token_urlsafe(32)
+
+    # Send email before updating DB — if delivery fails, the old token remains valid.
+    try:
+        await send_verification_email(user.email, verification_token)
+    except Exception as e:
+        logger.error("Failed to resend verification email", extra={"email": user.email, "error": str(e)})
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to send verification email. Please try again.",
+        )
+
     user.verification_token = verification_token
     user.verification_token_expires = datetime.now(timezone.utc) + timedelta(
         hours=24
     )
     db.commit()
-
-    try:
-        await send_verification_email(user.email, verification_token)
-    except Exception as e:
-        logger.error("Failed to resend verification email", extra={"email": user.email, "error": str(e)})
 
     return {
         "message": "If that email exists and is unverified, a new link has been sent"
