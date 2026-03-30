@@ -160,6 +160,7 @@ const TaskInput = ({ onTaskCreated, onCancel, task, onArenaChange }: TaskInputPr
                                 value={[15, 30, 45, 60, 90, 120].includes(formData.duration ?? 0) ? "" : (formData.duration ?? "")}
                                 onChange={handleChange}
                                 min="1"
+                                max="1440"
                                 className="duration-custom-input"
                             />
                         </div>

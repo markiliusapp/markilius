@@ -1,5 +1,5 @@
 from app.models.task import Task
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from enum import Enum
 from datetime import date, datetime
@@ -22,6 +22,13 @@ class TaskCreate(BaseModel):
     duration: Optional[int] = None
     due_date: date
     arena_id: int
+
+    @field_validator("duration")
+    @classmethod
+    def duration_max_24h(cls, v):
+        if v is not None and v > 1440:
+            raise ValueError("Duration cannot exceed 24 hours (1440 minutes)")
+        return v
 
 
 class TaskResponse(BaseModel):
@@ -49,3 +56,10 @@ class TaskUpdate(BaseModel):
     duration: Optional[int] = None
     due_date: Optional[date] = None
     arena_id: Optional[int] = None
+
+    @field_validator("duration")
+    @classmethod
+    def duration_max_24h(cls, v):
+        if v is not None and v > 1440:
+            raise ValueError("Duration cannot exceed 24 hours (1440 minutes)")
+        return v
